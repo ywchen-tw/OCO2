@@ -1,0 +1,31 @@
+descriptor,Susan,,,,,,
+,,,,,,,
+date,20190621,,,,,,
+juld,172,,,,,,# Julian Day
+,,,,,,,
+data files,,,,,,,
+pathdat,../dat/,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"
+l2,oco2_L2StdND_26430a_190621_B10004r_200603195509.h5,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.8r/2015/173/
+lt,,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r/2015/
+l1b,oco2_L1bScND_26430a_190621_B10003r_200429012841.h5,,,,,,# L1B file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L1B_Science.8r/2015/173/
+dia,,,,,,,# diagnostic file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Diagnostic.8r/2015/173/
+met,oco2_L2MetND_26430a_190621_B10003r_200429012840.h5,,,,,,# MET file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Met.8r/2015/173/
+sol,solar.txt,,,,,,# Location of solar file
+,,,,,,,
+simulator information,,,,,,,
+#pathsim,/Users/schmidt/rtm/ocosim/dat/new/,,,,,,
+pathsim,/Users/schmidt/rtm/er3toco/oco/,,,,,,
+o2,data_all_20190621_o2a_1596_1671.h5,,,,,,
+wco2,data_all_20190621_wco2_1596_1671.h5,,,,,,
+sco2,data_all_20190621_sco2_1596_1671.h5,,,,,,
+,,,,,,,
+full physics retrieval information,,,,,,,
+python,/data/hong/soft/python3/anaconda/envs/oco/bin/python,,,,,,# python that is used for retrieval sub-process
+,,,,,,,
+domain info,,,,,,,
+png,20190621.png,,,,,,# PNG file
+pngwesn,126.7204,127.5863,-24.2919,-23.0828,,,# PNG file extent
+subdomain,126.7204,127.5863,-24.2919,-23.0828,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+location,-60.0217,-3.119,Manaus,,,,# special location to plot with label
+,,,,,,,
+ref_threshold,0.005,,,,,,

@@ -1,0 +1,40 @@
+descriptor,Central_Asia,,,,,,
+,,,,,,,
+date,20181018,,,,,,
+juld,291,,,,,,# Julian Day
+,,,,,,,
+data files,,,,,,,# all V10r data
+pathdat,../dat/,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"
+l2,oco2_L2StdND_22850a_181018_B10004r_200520201845.h5,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.10r
+lt,oco2_LtCO2_181018_B10206Ar_200730042453s.nc4,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r
+l1b,oco2_L1bScND_22850a_181018_B10003r_200409205805.h5,,,,,,# L1B file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L1B_Science.10r
+dia,oco2_L2DiaND_22850a_181018_B10004r_200520194946.h5,,,,,,# diagnostic file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Diagnostic.10r
+met,oco2_L2MetND_22850a_181018_B10003r_200409205805.h5,,,,,,# MET file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Met.10r
+imap,oco2_L2IDPND_22850a_181018_B10003r_200412061944.h5,,,,,,
+co2prior,oco2_L2CPrND_22850a_181018_B10003r_200410025041.h5,,,,,,
+sol,solar.txt,,,,,,# Location of solar file
+,,,,,,,
+absorption information,,,,,,,
+nx,10,,,,,,# number of transmittance interval
+Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
+abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
+,,,,,,,
+,,,,,,,
+simulator information,,,,,,,
+#pathsim,/Users/schmidt/rtm/ocosim/dat/new/,,,,,,
+pathsim,/Users/schmidt/rtm/er3toco/oco/,,,,,,
+o2,,,,,,,
+wco2,,,,,,,
+sco2,,,,,,,
+,,,,,,,
+full physics retrieval information,,,,,,,
+python,/data/hong/soft/python3/anaconda/envs/oco/bin/python,,,,,,# python that is used for retrieval sub-process
+,,,,,,,
+domain info,,,,,,,
+png,20181004.png,,,,,,# PNG file
+pngwesn,55.15,55.45,33.85,34.3,,,# PNG file extent
+subdomain,55.15,55.45,33.85,34.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+location,-60.0217,-3.119,Manaus,,,,# special location to plot with label
+,,,,,,,
+,,,,,,,
+ref_threshold,0.05,,,,,,
