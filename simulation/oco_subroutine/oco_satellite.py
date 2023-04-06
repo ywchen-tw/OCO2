@@ -1,52 +1,20 @@
 
 
-from genericpath import isfile
 import os
 import sys
-import glob
 import pickle
-import h5py
-from pyhdf.SD import SD, SDC
 import numpy as np
-import pandas as pd
 import datetime
-import time
-from scipy.io import readsav
-from scipy import interpolate
-from scipy import stats
-from scipy.optimize import curve_fit
-from scipy.interpolate import interp1d
-from scipy import stats as st
-import matplotlib as mpl
-#mpl.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FixedLocator
-from matplotlib import rcParams
-import matplotlib.gridspec as gridspec
-import matplotlib.patches as mpatches
-
-from er3t.pre.atm import atm_atmmod
-from er3t.pre.abs import abs_16g, abs_oco_idl, abs_oco_h5
-from er3t.pre.cld import cld_sat, cld_les
-from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
-from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_09a1, modis_43a3, download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.oco2 import oco2_std, download_oco2_https
-from er3t.util import cal_r_twostream, grid_by_extent, grid_by_lonlat, cal_ext
-
-from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
-from er3t.rtm.mca import mcarats_ng
-from er3t.rtm.mca import mca_out_ng
-from er3t.rtm.mca import mca_sca # newly added for phase function
-
-import timeit
-import argparse
-import matplotlib.image as mpl_img
+from er3t.util.modis import download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
+from er3t.util.oco2 import download_oco2_https
 
 
 
 class satellite_download:
-
+    """
+    This class is used to download satellite data from MODIS and OCO-2
+    """
     def __init__(
             self,
             date=None,

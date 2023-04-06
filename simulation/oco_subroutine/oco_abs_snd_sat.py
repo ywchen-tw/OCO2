@@ -34,16 +34,15 @@ plt.rcParams["font.family"] = "Arial"
 #         v8 : Converted to Python-based, change the ILS function
 #
 # TODOs:
-#  - implement H2O broadening
-#  - bi/trilinear interpolation in {T,p,(h)} - can re-use Odele's code
+#  
 #  
 #  Done:
 #  - generalize to SCO2 & WCO2 for water vapor/methane inclusion & consolidate sub-routines
 #  - get accurate wavelengths from recent cal & accurate OCO line shape (but just from csv file for now)
 #  - Remove getdatah5, getdatah5a by just use h5py module
+#  - implement H2O broadening
+#  - bi/trilinear interpolation in {T,p,(h)} - can re-use Odele's code
 #---------------------------------------------------------------------------
-
-#@abs/read_sonde.pro             # read in atmosphere
 from oco_subroutine.abs.read_atm import read_oco_zpt
 from oco_subroutine.abs.rho_air import rho_air  # density of air
 from oco_subroutine.abs.rdabs_gas import rdabs_species

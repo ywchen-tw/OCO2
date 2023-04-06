@@ -50,7 +50,7 @@ from oco_subroutine.abs.rdabs_gas import rdabs_species
 from oco_subroutine.abs.findi1i2_v7 import findi1i2 # get wavenumber indices.initialize()import abs/getiijj_v7.pro  # find levels in absco files that are closest to the atmosphere
 from oco_subroutine.abs.getiijj_v7 import getiijj  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
 from oco_subroutine.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
-from oco_subroutine.abs.calc2_v7 import calc2   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
+from oco_subroutine.abs.calc2_v8 import calc2   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
 from oco_subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
 from oco_subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 from oco_subroutine.abs.solar import solar   # read solar file
@@ -165,7 +165,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # ********
         # Have nadir geometry (zolzen=0.0, don't change this value)
         # Specify the solar zenith angle & satellite view angle
-        solzen = 0.0        # in degree
+        solzen = 30.0        # in degree
 
         # Ignore obszen
         obszen = 0.0        # in degree        
@@ -185,6 +185,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             wavel1=xr[0]
             wavel2=xr[1]
             jbroado2=1
+            refl=0.35
             
 
         # Weak CO2 band
@@ -216,10 +217,10 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # Calculate the 1/cos factors for solzen & obszen geometry
         pi = np.pi
         convr = pi/180.0
-        a1 = solzen*convr
-        musolzen = 1.0/(np.cos(a1))
-        a2 = obszen*convr
-        muobszen = 1.0/(np.cos(a2))
+        sza_rad = solzen*convr
+        musolzen = 1.0/(np.cos(sza_rad ))
+        vza_rad = obszen*convr
+        muobszen = 1.0/(np.cos(vza_rad))
 
         # *********
         # Read in O2 absco atmosphere information
@@ -281,8 +282,11 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # *********
         # Initialize
         # Optical depths on interfaces & absorption coefficients on layers
-        ext = np.empty((nwav,nlay))
-        tau = np.zeros(nwav)
+        ext_in = np.empty((nwav,nlay))
+        tau_in = np.zeros(nwav)
+        ext_out = np.empty((nwav,nlay))
+        tau_out = np.zeros(nwav)
+
         trns = np.zeros(nwav) 
 
         # *********
@@ -293,10 +297,14 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             tkobs = tprf[iz]
             pobs  = pprf[iz]
 
-            ext0  = np.zeros(nwav) # absorption coef for O2 or CO2
-            ext1  = np.zeros(nwav) # absorption coef for H2O
-            ext0[...] = np.nan
-            ext1[...] = np.nan
+            ext0_in  = np.zeros(nwav) # absorption coef for O2 or CO2
+            ext1_in  = np.zeros(nwav) # absorption coef for H2O
+            ext0_in[...] = np.nan
+            ext1_in[...] = np.nan
+            ext0_out  = np.zeros(nwav) # absorption coef for O2 or CO2
+            ext1_out  = np.zeros(nwav) # absorption coef for H2O
+            ext0_out[...] = np.nan
+            ext1_out[...] = np.nan
             # *********
             # First find the indices ii & jj (ii pressure, jj temperature)
             # that are closest to tkobs & pobs (with pobs ij hPa)
@@ -392,7 +400,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
 
             # For O2
             if iband == 0:
-                ext0 = calc2(dzf,pprf,tprf,
+                ext0_in, ext0_out = calc2(dzf,pprf,tprf,
                              o2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
@@ -401,7 +409,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
 
             # For CO2
             if ((iband == 1) | (iband == 2)) :
-                ext0 = calc2(dzf,pprf,tprf,
+                ext0_in, ext0_out = calc2(dzf,pprf,tprf,
                              co2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
@@ -409,7 +417,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                              iout=True)
 
             # For H2O
-            ext1 = calc2(dzf,pprf,tprf,
+            ext1_in, ext1_out = calc2(dzf,pprf,tprf,
                             h2oden,
                             iz,solzen,musolzen,
                             nwavh2o,wcmdath2o,wavedath2o,
@@ -417,15 +425,18 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                             iout=True)   
 
             # Store the results in ext
-            ext[:,iz] = ext0 + ext1 # ext0: O2/CO2, ext1: H2O
+            ext_in[:,iz] = ext0_in + ext1_in # ext0: O2/CO2, ext1: H2O
+            ext_out[:,iz] = ext0_out + ext1_out # ext0: O2/CO2, ext1: H2O
             # tau did not change in calc2 function for now!!!
-            tau += ext[:,iz] *dzf[iz]
+            tau_in += ext_in[:,iz] *dzf[iz]
+            tau_out += ext_out[:,iz] *dzf[iz]
 
 
             # End of loop down to the surface        
         
-        trns=np.exp(-tau)
-        
+        trns_in=np.exp(-tau_in)
+        trns_out=np.exp(-tau_in)
+
         # *********
         # Get OCO wavelengths & slit function
         # ---------------------------------------------
@@ -444,9 +455,13 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # (3) convolute tau & trns across entire wavelength range -- & how about kval
         ils = yy/np.max(yy) >= ils0	
         nils0 = ils.nonzero()[0]
-        trnsc = np.empty(nlo)
-        tauc  = np.empty(nlo)
-        trnsc0 = np.empty(nlo) 
+        trnsc_in = np.empty(nlo)
+        tauc_in  = np.empty(nlo)
+        trnsc0_in = np.empty(nlo) 
+
+        trnsc_out = np.empty(nlo)
+        tauc_out  = np.empty(nlo)
+        trnsc0_out = np.empty(nlo) 
         indlr = np.empty((nlo,3), dtype=int) # left & right index for cropped ILS (in ABSCO gridding) + total #
 
         for l in range(nlo):
@@ -473,63 +488,21 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             # actual convolution ---
             ilg = np.interp(wavedat[ir:il], xx+wloco[l], yy)                # full slit function in absco gridding
             ilg0 = np.interp(wavedat[ir0:il0], xx[ils]+wloco[l], yy[ils])   # partial slit function within valid range
-            trnsc[l] = np.sum(trns[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
-            trnsc0[l] = np.sum(trns[ir0:il0]*ilg0)/np.sum(ilg0)
-            tauc[l] = np.sum(tau[ir:il]*ilg)/np.sum(ilg)
+            trnsc_in[l] = np.sum(trns_in[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
+            trnsc0_in[l] = np.sum(trns_in[ir0:il0]*ilg0)/np.sum(ilg0)
+            tauc_in[l] = np.sum(tau_in[ir:il]*ilg)/np.sum(ilg)
 
+            trnsc_out[l] = np.sum(trns_out[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
+            trnsc0_out[l] = np.sum(trns_out[ir0:il0]*ilg0)/np.sum(ilg0)
+            tauc_out[l] = np.sum(tau_out[ir:il]*ilg)/np.sum(ilg)
 
-
-        # (4) plots
-        if plot and pl_ils:
-            fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
-            fig.tight_layout(pad=5.0)
-            title_size = 18
-            label_size = 16
-            legend_size = 16
-            tick_size = 14
-
-            #x = np.arange(nfc)
-            #y = trnsx[sx]
-            ax.plot(wloco[100]+xx,yy, color='k')
-            ax.vlines([wloco[100]+xx[ils[0]], wloco[100]+xx[ils[-1]]], ils0, 1, 'r')
-            #ax.plot(1000*np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
-
-            #norm = np.max(absgl[z,l,0:absgn[l]-1])
-            #ax.plot(1000*absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red')
-
-            #ax.set_xticks(range(0, 160, 20))
-            ax.tick_params(axis='both', labelsize=tick_size)
-
-            ymin, ymax = ax.get_ylim()
-            xmin, xmax = ax.get_xlim()
-            #ymin, ymax = -1., 1.
-            #xmin, xmax = 0., 10.
-            #ax.set_ylim(ymin, ymax)
-            #ax.set_xlim(xmin, xmax)
-            ax.set_xlabel('Wavelength (micron)', fontsize=label_size)
-            ax.set_ylabel('response', fontsize=label_size)
-            ax.set_title('# ILS terms', fontsize=title_size)
-            fig.savefig(f'{pathout}/band{iband}_4-test.png', dpi=150, bbox_inches='tight')
 
         # read solar file
         wlsol0, fsol0 = solar(sol) # obtain irradiance [W m-2 nm-1]
         fsol = np.interp(wavedat, wlsol0, fsol0)
 
-        # *** Save file contains abs data for pre-selected wavelength range & specified atmosphere
-        # *** along with
-        # *** ---1) ILS/ILS_index(ILS resolution),
-        # *** ---2) wloco (OCO-2 band resulution),
-        # *** ---3) solar file (interpolated to absorption data base resolution)
-        # *** When changing atmosphere | wavelength range, need to re-read (run with flag /r)
-        savpkl = filnm+'.pkl'
-        print('Save absorption data to pickle save file: ' + savpkl)
-        with open(savpkl, 'wb') as f:  # Python 3: open(..., 'wb')
-            pickle.dump([wcmdat,tprf,pprf,trnsc,tauc,ext,tau,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf], f)
-
     else: # if no previous IDL save file exists of this band
-        print('Restore absorption data from IDL save file: '+savpkl)
-        with open(savpkl, 'rb') as f:
-            wcmdat,tprf,pprf,trnsc,tauc,ext,tau,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf = pickle.load(f)
+        None
     # End: Extract information from oco_subroutine.absCOF file (native resolution)
 
 
@@ -539,8 +512,11 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         wl = 10000./np.float64(wcmdat) 
         nl = len(wl)
         wlc = wloco.copy()
-        tauex = tauc.copy() # column-integrated absorption optical thickness
-        tauex0 = tauex.copy()
+        tauex_in = tauc_in.copy() # column-integrated absorption optical thickness
+        tauex0_in = tauex_in.copy()
+
+        tauex_out = tauc_in.copy() # column-integrated absorption optical thickness
+        tauex0_out = tauex_out.copy()
         # ** define spectral sub-range within band
         # ** & extract k values at two altitudes (surface & higher) 
         flt = np.logical_and(wl  >= wr[0], wl  < wr[1]).nonzero()[0]
@@ -550,8 +526,8 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         wlf = wlc[flc]
         ###k1=kval[flt,ai1]   # at altitude
         ###k0=kval[flt,ai0]   # surface 
-        tauex = tauex[flc]   # extract spectral sub-range OD
-        trnsx = trnsc[flc]   # extract spectral sub-range transmittance
+        tauex = tauex_in[flc]   # extract spectral sub-range OD
+        trnsx = trnsc_in[flc]   # extract spectral sub-range transmittance
         tlf = trnsx
         sx = np.argsort(trnsx)     # can also use tauex, but now trying trnsx (for linearity# range)
         # *********
