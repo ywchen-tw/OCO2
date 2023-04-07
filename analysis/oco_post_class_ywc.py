@@ -48,6 +48,8 @@ class OCOSIM:
             self.rad_clrs = h1['rad_mca_ipa0_domain_std'][...]
             self.rad_c1ds = h1['rad_mca_ipa_domain_std'][...]
             self.rad_c3ds = h1['rad_mca_3d_domain_std'][...]
+            self.cld_position = h1['rad_mca_ipa0_domain'][...]
+            self.cld_position[...] = np.nan
             clr_all=self.rad_clr.copy()
             flt_all=np.where(clr_all==0)
             clr_all[flt_all[0],flt_all[1],flt_all[2]]=100000000000

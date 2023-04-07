@@ -801,7 +801,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
-    #"""
+    """
     # run calculations for each wavelength
     # ===============================================================
     for wavelength in wvls:
@@ -814,7 +814,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # ===============================================================
     #"""
 
-    #"""
+    """
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
     return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza)
@@ -834,7 +834,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -842,7 +842,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    #""""
+    """"
     time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()
