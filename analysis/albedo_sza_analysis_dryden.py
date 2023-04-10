@@ -430,7 +430,7 @@ def main(cfg_name='20190209_dryden_470cloud.csv'):
     if not os.path.isfile(f'o2a_para_{compare_num}_dryden.csv'):
         if not os.path.isfile(f'20190209_dryden_470cloud_o2a.pkl'):
 
-            filename = '../simulation/data_all_20151219_{}_{}.h5'
+            filename = '../simulation/data_all_20190209_{}_{}.h5'
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
             o2a_file  = filename.format('o2a', id_num)
