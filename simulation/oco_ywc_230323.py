@@ -791,14 +791,16 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     #"""
 
     
-    """
+    #"""
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=False, case_name_tag=name_tag, photons=1e8)
+    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=True, case_name_tag=name_tag, photons=1e8)
     modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
+    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
+    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
     """
@@ -831,7 +833,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         save_h5_info(cfg, 'o2', o2_h5)
         endtime = timeit.default_timer()
         print('O2A band duration:',(endtime-starttime)/3600.,' h')
-        time.sleep(120)
+        # time.sleep(120)
     #""" 
     
     """
@@ -854,10 +856,10 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    # cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
+    cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
-    cfg = 'cfg/20190209_dryden_470cloud.csv'
+    # cfg = 'cfg/20190209_dryden_470cloud.csv'
     print(cfg)
     run_simulation(cfg) #done
     # run_simulation(cfg, sfc_alb=0.3, sza=45) #done

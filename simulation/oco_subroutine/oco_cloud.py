@@ -586,7 +586,8 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         f_h_v = interp1d(zpt_h_lay, zpt_v_lay)
         u_wd_correct[i] = f_h_u(cth_tmp)
         v_wd_correct[i] = f_h_v(cth_tmp)
-    lon_corr, lat_corr  = wind_corr(lon_cld, lat_cld, u_wd_correct, v_wd_correct, delta_t)
+    # lon_corr, lat_corr  = wind_corr(lon_cld, lat_cld, u_wd_correct, v_wd_correct, delta_t)
+    lon_corr, lat_corr  = wind_corr(lon_cld, lat_cld, np.nanmedian(u_10m), np.nanmedian(v_10m), delta_t)
     #\--------------------------------------------------------------/#
 
     # perform parallax correction on cot_ipa0, cer_ipa0, and cot_ipa0
