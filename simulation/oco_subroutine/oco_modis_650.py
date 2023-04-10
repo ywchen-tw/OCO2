@@ -330,8 +330,6 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         ax4.set_title('EaR$^3$T CTH')
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
-        if not os.path.exists('outut_img/'):
-            os.makedirs('outut_img/')
-        plt.savefig(f'data/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')
+        plt.savefig(f'{sat.fdir_out}/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')
         plt.show()
         # ==================================================================================================

@@ -785,7 +785,7 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
 
         xx = sfc_alb[sza==sza_plt]
         yy = inter_a_list[sza==sza_plt]
-        popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
+        popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-20, b_inter_a, 0], [20, b_inter_a*1.00001, 0.3]),
                             #p0=(0.1, 0.7),
                             maxfev=3000,
                             #sigma=value_std[val_mask], 
