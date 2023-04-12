@@ -799,8 +799,8 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
         os.makedirs(fdir_tmp_650)
     cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=True, case_name_tag=name_tag, photons=1e8)
     modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
-    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
+    # cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
+    # modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
     """

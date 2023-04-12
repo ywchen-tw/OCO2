@@ -76,9 +76,9 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
         if solver.lower() == 'ipa':
-            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa0'][...])
-            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa0'][...])
-            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f['mod/cld/cth_ipa0'][...])
+            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa0_650'][...])
+            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa0_650'][...])
+            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f['mod/cld/cth_ipa0_650'][...])
         elif solver.lower() == '3d':
             data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa'][...])
             data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa'][...])
@@ -114,19 +114,18 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
     # add homogeneous 1d mcarats "atmosphere", aerosol layer
-    f = h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r')
-    AOD_550_land_mean = f['mod/aod/AOD_550_land_mean'][...]
-    Angstrom_Exponent_land_mean = f['mod/aod/Angstrom_Exponent_land_mean'][...]
-    SSA_land_mean = f['mod/aod/SSA_660_land_mean'][...]
+    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+        AOD_550_land_mean = f['mod/aod/AOD_550_land_mean'][...]
+        Angstrom_Exponent_land_mean = f['mod/aod/Angstrom_Exponent_land_mean'][...]
+        SSA_land_mean = f['mod/aod/SSA_660_land_mean'][...]
 
-    aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
-    ssa = SSA_land_mean
-    cth_mode = st.mode(cth0[np.logical_and(cth0>0, cth0<4)])
-    print('Angstrom Exponent:', Angstrom_Exponent_land_mean)
-    print('aod 550nm mean:', AOD_550_land_mean)
-    print('aod 650nm mean:', aod)
-    print('ssa 650nm mean:', ssa)
-    f.close()
+        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
+        ssa = SSA_land_mean
+        cth_mode = st.mode(cth0[np.logical_and(cth0>0, cth0<4)])
+        print('Angstrom Exponent:', Angstrom_Exponent_land_mean)
+        print('aod 550nm mean:', AOD_550_land_mean)
+        print('aod 650nm mean:', aod)
+        print('ssa 650nm mean:', ssa)
     print('cth mode:', cth_mode.mode[0])
     #hist_result = plt.hist(cth0[cth0>0].flatten(), bins=25)
     #print(hist_result)
@@ -160,13 +159,12 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     
     # solar zenith/azimuth angles and sensor zenith/azimuth angles
     # =================================================================================
-    f = h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r')
-    sza = f['mod/geo/sza'][...].mean()
-    saa = f['mod/geo/saa'][...].mean()
-    vza = f['mod/geo/vza'][...].mean()
-    vaa = f['mod/geo/vaa'][...].mean()
-    print('vza', vza, '; vaa', vaa)
-    f.close()
+    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+        sza = f['mod/geo/sza'][...].mean()
+        saa = f['mod/geo/saa'][...].mean()
+        vza = f['mod/geo/vza'][...].mean()
+        vaa = f['mod/geo/vaa'][...].mean()
+        print('vza', vza, '; vaa', vaa)
     # =================================================================================
 
     # run mcarats
@@ -212,42 +210,39 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
 
     # read in MODIS measured radiance
     # ==================================================================================================
-    f = h5py.File('data/%s/pre-data.h5' % case_name_tag, 'r')
-    extent = f['extent'][...]
-    lon_mod = f['lon'][...]
-    lat_mod = f['lat'][...]
-    rad_mod = f['mod/rad/rad_650'][...]
-    cth_mod = f['mod/cld/cth_l2'][...]
-    if solver.lower() == 'ipa':
-        cth_mod = f['mod/cld/cth_ipa0'][...]
-    elif solver.lower() == '3d':
-        cth_mod = f['mod/cld/cth_ipa'][...]
-    f.close()
+    with h5py.File('data/%s/pre-data.h5' % case_name_tag, 'r') as f:
+        extent = f['extent'][...]
+        lon_mod = f['lon'][...]
+        lat_mod = f['lat'][...]
+        rad_mod = f['mod/rad/rad_650'][...]
+        cth_mod = f['mod/cld/cth_l2'][...]
+        if solver.lower() == 'ipa':
+            cth_mod = f['mod/cld/cth_ipa0_650'][...]
+        elif solver.lower() == '3d':
+            cth_mod = f['mod/cld/cth_ipa'][...]
     # ==================================================================================================
 
 
     # read in EaR3T simulations (3D)
     # ==================================================================================================
     fname = '%s/mca-out-rad-modis-%s_%.4fnm.h5' % (fdir, solver.lower(), 650)
-    f = h5py.File(fname, 'r')
-    rad_rtm_3d     = f['mean/rad'][...]
-    rad_rtm_3d_std = f['mean/rad_std'][...]
-    toa = f['mean/toa'][...]
-    f.close()
+    with h5py.File(fname, 'r') as f:
+        rad_rtm_3d     = f['mean/rad'][...]
+        rad_rtm_3d_std = f['mean/rad_std'][...]
+        toa = f['mean/toa'][...]
     # ==================================================================================================
 
 
     # save data
     # ==================================================================================================
-    f = h5py.File('data/%s/post-data.h5' % case_name_tag, 'w')
-    f['wvl'] = wvl
-    f['lon'] = lon_mod
-    f['lat'] = lat_mod
-    f['extent']         = extent
-    f['rad_obs']        = rad_mod
-    f['rad_sim_3d']     = rad_rtm_3d
-    f['rad_sim_3d_std'] = rad_rtm_3d_std
-    f.close()
+    with h5py.File('data/%s/post-data.h5' % case_name_tag, 'w') as f:
+        f['wvl'] = wvl
+        f['lon'] = lon_mod
+        f['lat'] = lat_mod
+        f['extent']         = extent
+        f['rad_obs']        = rad_mod
+        f['rad_sim_3d']     = rad_rtm_3d
+        f['rad_sim_3d_std'] = rad_rtm_3d_std
     # ==================================================================================================
 
     if plot:
@@ -258,13 +253,14 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         ax1.imshow(rad_mod.T, cmap='Greys_r', extent=extent, origin='lower', vmin=0.0, vmax=0.5)
         ax1.set_xlabel('Longititude [$^\circ$]')
         ax1.set_ylabel('Latitude [$^\circ$]')
-        ax1.set_xlim((extent_list[:2]))
-        ax1.set_ylim((extent_list[2:]))
         ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax1.set_title('MODIS Measured Radiance')
 
-        logic = (lon_mod>=extent_list[0]) & (lon_mod<=extent_list[1]) & (lat_mod>=extent_list[2]) & (lat_mod<=extent_list[3])
+        logic = (lon_mod>=extent_list[0]+0.15) &\
+                (lon_mod<=extent_list[1]-0.15) &\
+                (lat_mod>=extent_list[2]+0.15) &\
+                (lat_mod<=extent_list[3]-0.15)
 
         xedges = np.arange(-0.01, 0.61, 0.005)
         yedges = np.arange(-0.01, 0.61, 0.005)
@@ -280,8 +276,6 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         ax3.imshow(rad_rtm_3d.T, cmap='Greys_r', extent=extent, origin='lower', vmin=0.0, vmax=0.5)
         ax3.set_xlabel('Longititude [$^\circ$]')
         ax3.set_ylabel('Latitude [$^\circ$]')
-        ax3.set_xlim((extent_list[:2]))
-        ax3.set_ylim((extent_list[2:]))
         ax3.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax3.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax3.set_title(f'EaR$^3$T Simulated {solver} Radiance')
@@ -290,8 +284,6 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         diff = ax13.imshow((rad_rtm_3d-rad_mod).T, cmap='bwr', extent=extent, origin='lower', vmin=-0.15, vmax=0.15)
         ax13.set_xlabel('Longititude [$^\circ$]')
         ax13.set_ylabel('Latitude [$^\circ$]')
-        ax13.set_xlim((extent_list[:2]))
-        ax13.set_ylim((extent_list[2:]))
         ax13.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax13.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         cbar_13 = fig.colorbar(diff, ax=ax13)
@@ -312,8 +304,6 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         ax22.scatter(lon_mod, lat_mod, cth_mod, c='r')
         ax22.set_xlabel('Longititude [$^\circ$]')
         ax22.set_ylabel('Latitude [$^\circ$]')
-        ax22.set_xlim((extent_list[:2]))
-        ax22.set_ylim((extent_list[2:]))
         ax22.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax22.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax22.set_title(f'EaR$^3$T Cloud mask\n(ref threshold: {ref_threshold})')
@@ -323,11 +313,14 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         fig.colorbar(cth_img, ax=ax4)
         ax4.set_xlabel('Longititude [$^\circ$]')
         ax4.set_ylabel('Latitude [$^\circ$]')
-        ax4.set_xlim((extent_list[:2]))
-        ax4.set_ylim((extent_list[2:]))
         ax4.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax4.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax4.set_title('EaR$^3$T CTH')
+
+
+        for ax in [ax1, ax3, ax13, ax22, ax4]:
+            ax.set_xlim(extent_list[0]+0.15, extent_list[1]-0.15)
+            ax.set_ylim(extent_list[2]+0.15, extent_list[3]-0.15)
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         plt.savefig(f'{sat.fdir_out}/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')

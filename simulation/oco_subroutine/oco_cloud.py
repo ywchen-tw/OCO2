@@ -549,7 +549,9 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
     ref_cld_norm = ref_2d[indices_x, indices_y]/np.cos(np.deg2rad(sza.mean()))
 
     logic_thick = (cth_ipa0[indices_x, indices_y] > 4.0)
-    logic_thin  = (cth_ipa0[indices_x, indices_y] < 4.0)
+    logic_thin  = (cth_ipa0[indices_x, indices_y] <= 4.0)
+    # logic_thick = (cth_ipa0[indices_x, indices_y] > 12.0)
+    # logic_thin  = (cth_ipa0[indices_x, indices_y] <= 12.0)
 
     cot_ipa0 = np.zeros_like(ref_2d)
 
@@ -561,9 +563,15 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
     logic_high = logic_out & np.logical_not(logic_low)
     cot_ipa0[logic_low]  = cot_ipa[0]
     cot_ipa0[logic_high] = cot_ipa[-1]
+    
     #\--------------------------------------------------------------/#
     #\----------------------------------------------------------------------------/#
 
+    #/----------------------------------------------------------------------------\#
+    cot_ipa0_650 = cot_ipa0.copy()
+    cth_ipa0_650 = cth_ipa0.copy()
+    cer_ipa0_650 = cer_ipa0.copy()
+    #/----------------------------------------------------------------------------\#
 
     # for IPA calculation (only wind correction)
     #/----------------------------------------------------------------------------\#
@@ -687,6 +695,9 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
     #/----------------------------------------------------------------------------\#
     f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r+')
     try:
+        f0['mod/cld/cot_ipa0_650'] = cot_ipa0_650
+        f0['mod/cld/cer_ipa0_650'] = cer_ipa0_650
+        f0['mod/cld/cth_ipa0_650'] = cth_ipa0_650
         f0['mod/cld/cot_ipa'] = cot_ipa
         f0['mod/cld/cer_ipa'] = cer_ipa
         f0['mod/cld/cth_ipa'] = cth_ipa
@@ -696,6 +707,9 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         f0['mod/cld/logic_cld'] = (cld_msk==1)
         f0['mod/cld/logic_cld0'] = (cld_msk_==1)
     except:
+        del(f0['mod/cld/cot_ipa0_650'])
+        del(f0['mod/cld/cer_ipa0_650'])
+        del(f0['mod/cld/cth_ipa0_650'])
         del(f0['mod/cld/cot_ipa'])
         del(f0['mod/cld/cer_ipa'])
         del(f0['mod/cld/cth_ipa'])
@@ -704,6 +718,9 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         del(f0['mod/cld/cth_ipa0'])
         del(f0['mod/cld/logic_cld'])
         del(f0['mod/cld/logic_cld0'])
+        f0['mod/cld/cot_ipa0_650'] = cot_ipa0_650
+        f0['mod/cld/cer_ipa0_650'] = cer_ipa0_650
+        f0['mod/cld/cth_ipa0_650'] = cth_ipa0_650
         f0['mod/cld/cot_ipa'] = cot_ipa
         f0['mod/cld/cer_ipa'] = cer_ipa
         f0['mod/cld/cth_ipa'] = cth_ipa

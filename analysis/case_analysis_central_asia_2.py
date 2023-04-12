@@ -15,13 +15,15 @@ from matplotlib import cm
 from scipy.interpolate import interpn
 from scipy import stats
 from scipy.ndimage import uniform_filter
+from  scipy.optimize import curve_fit
 import geopy.distance
 import xarray as xr
 import seaborn as sns
 from tool_code import *
 import os, pickle 
-
 from matplotlib import font_manager
+from oco_satellite import satellite_download
+import matplotlib.image as mpl_img
 
 font_path = '/System/Library/Fonts/Supplemental/Arial.ttf'  # Your font path goes here
 font_manager.fontManager.addfont(font_path)
@@ -179,6 +181,7 @@ def near_rad_calc_all(OCO_class):
     rad_mca_ipa0_5[...] = np.nan
     rad_mca_ipa_5[...] = np.nan
     rad_mca_3d_5[...] = np.nan
+
     rad_mca_ipa0_5_std[...] = np.nan
     rad_mca_ipa_5_std[...] = np.nan
     rad_mca_3d_5_std[...] = np.nan
@@ -274,7 +277,7 @@ def coarsening_subfunction(rad_mca, cld_position, size):
     lams = rad_mca.shape[-1]
     tmp = np.zeros_like(rad_mca)
     rad_mca_mask_cld = rad_mca.copy()
-    rad_mca_mask_cld[cld_position][...] = -999999
+    rad_mca_mask_cld[cld_position] = -999999
     for i in range(lams):
         tmp[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp[tmp<0] = np.nan
@@ -389,7 +392,12 @@ def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line 
             OCO_class.slope_41avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_41avg[z,fp,:]=[inter,interstd]
 
-            
+class sat_tmp:
+
+    def __init__(self, data):
+
+        self.data = data
+         
 
 def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
@@ -404,159 +412,289 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
     subdomain = cfg_info['subdomain']
 
-
-    alb_list, sza_list = [], []
-    o2a_slope_a_list = []
-    o2a_slope_b_list = []
-    o2a_inter_a_list = []
-    o2a_inter_b_list = []
-    
-    wco2_slope_a_list = []
-    wco2_slope_b_list = []
-    wco2_inter_a_list = []
-    wco2_inter_b_list = []
-
-    sco2_slope_a_list = []
-    sco2_slope_b_list = []
-    sco2_inter_a_list = []
-    sco2_inter_b_list = []
-
-    compare_num = 9
+    compare_num = 5
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
-    if 1:#not os.path.isfile(f'o2a_para_{compare_num}.csv'):
-        for alb in [0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]:
-            for sza in [15, 30, 45, 60, 75]:
-                if not os.path.isfile(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_o2a.pkl'):
-                    print(f'alb: {alb:.3f}, sza: {sza:.1f}')
-                    filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_{:.3f}_sza_{:.1f}.h5'
-                    cld_lon, cld_lat, cld_location = cld_position(cfg_name)
+    if not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
+        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
 
-                    o2a_file  = filename.format('o2a', id_num, alb, sza)
-                    o1 = OCOSIM(o2a_file)
-                    o1.cld_location = cld_location
+            filename = '../simulation/data_all_20181018_{}_{}.h5'
+            cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
-                    wco2_file  = filename.format('wco2', id_num, alb, sza)
-                    o2 = OCOSIM(wco2_file)
-                    o2.cld_location = cld_location
+            o2a_file  = filename.format('o2a', id_num)
+            o1 = OCOSIM(o2a_file)
+            o1.cld_location = cld_location
 
-                    sco2_file  = filename.format('sco2', id_num, alb, sza)
-                    o3 = OCOSIM(sco2_file)
-                    o3.cld_location = cld_location
+            wco2_file  = filename.format('wco2', id_num)
+            o2 = OCOSIM(wco2_file)
+            o2.cld_location = cld_location
 
-                    
-                    for var in [o1, o2, o3]:#, ('o2', wco2_file), ('o3', sco2_file)]:
-                        # for j in range(8):
-                        #     var.slopes(j)
-                        # near_rad_calc(var)
-                        near_rad_calc_all(var)
-                        slopes_propagation(var)
+            sco2_file  = filename.format('sco2', id_num)
+            o3 = OCOSIM(sco2_file)
+            o3.cld_location = cld_location
 
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_o2a.pkl', 'wb') as file_o1:
-                        pickle.dump(o1, file_o1)
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_wco2.pkl', 'wb') as file_o2:
-                        pickle.dump(o2, file_o2)
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_sco2.pkl', 'wb') as file_o3:
-                        pickle.dump(o3, file_o3)
+            for var in [o1, o2, o3]:#, ('o2', wco2_file), ('o3', sco2_file)]:
+                # for j in range(8):
+                #     var.slopes(j)
+                # near_rad_calc(var)
+                near_rad_calc_all(var)
+                slopes_propagation(var)
 
-                else:
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_o2a.pkl', 'rb') as f:
-                        o1 = pickle.load(f)
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_wco2.pkl', 'rb') as f:
-                        o2 = pickle.load(f)
-                    with open(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_sco2.pkl', 'rb') as f:
-                        o3 = pickle.load(f)
+            file_o1 = open(f'20181018_central_asia_2_470cloud_test2_o2a.pkl', 'wb') 
+            pickle.dump(o1, file_o1)
 
-                if not os.path.isfile(f'{cfg_name[:-4]}_cld_distance.pkl'):
-                    cld_dist_calc(cfg_name, o2, slope_compare)
-                cld_data = pd.read_pickle(f'{cfg_name[:-4]}_cld_distance.pkl')
-                cld_dist = cld_data['cld_dis']
+            file_o2 = open(f'20181018_central_asia_2_470cloud_test2_wco2.pkl', 'wb')
+            pickle.dump(o2, file_o2)
 
-                # print(getattr(o1, rad_c3d_compare)[:,:, -1])
-                # plt.contourf(o1.lon2d, o1.lat2d, getattr(o1, rad_c3d_compare)[:,:, -1])
-                
-                # plt.show()
+            file_o3 = open(f'20181018_central_asia_2_470cloud_test2_sco2.pkl', 'wb') 
+            pickle.dump(o3, file_o3)
 
-                alb_list.append(alb)
-                sza_list.append(sza)
+            file_o1.close()
+            file_o2.close()
+            file_o3.close()
+        else:
+            with open(f'20181018_central_asia_2_470cloud_test2_o2a.pkl', 'rb') as f:
+                o1 = pickle.load(f)
+            with open(f'20181018_central_asia_2_470cloud_test2_wco2.pkl', 'rb') as f:
+                o2 = pickle.load(f)
+            with open(f'20181018_central_asia_2_470cloud_test2_sco2.pkl', 'rb') as f:
+                o3 = pickle.load(f)
 
-                o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b = fitting(cld_dist, getattr(o1, rad_c3d_compare)[:,:, -1].flatten(), getattr(o1, rad_clr_compare)[:,:, -1].flatten(), getattr(o1, slope_compare)[:,:,0].flatten(), getattr(o1, inter_compare)[:,:,0].flatten(),
-                                                                alb, sza)
-                
-                o2a_slope_a_list.append(o2_slope_a)
-                o2a_slope_b_list.append(o2_slope_b)
-                o2a_inter_a_list.append(o2_inter_a)
-                o2a_inter_b_list.append(o2_inter_b)
 
-                wco2_slope_a, wco2_slope_b, wco2_inter_a, wco2_inter_b = fitting(cld_dist, getattr(o2, rad_c3d_compare)[:,:, -1].flatten(), getattr(o2, rad_clr_compare)[:,:, -1].flatten(), getattr(o2, slope_compare)[:,:,0].flatten(), getattr(o2, inter_compare)[:,:,0].flatten(),
-                                                                alb, sza, plot=False)
-                wco2_slope_a_list.append(wco2_slope_a)
-                wco2_slope_b_list.append(wco2_slope_b)
-                wco2_inter_a_list.append(wco2_inter_a)
-                wco2_inter_b_list.append(wco2_inter_b)
+        if not os.path.isfile(f'{cfg_name[:-4]}_cld_distance.pkl'):
+            cld_dist_calc(cfg_name, o2, slope_compare)
+        cld_data = pd.read_pickle(f'{cfg_name[:-4]}_cld_distance.pkl')
+        cld_dist = cld_data['cld_dis']
 
-                sco2_slope_a, sco2_slope_b, sco2_inter_a, sco2_inter_b = fitting(cld_dist, getattr(o3, rad_c3d_compare)[:,:, -1].flatten(), getattr(o3, rad_clr_compare)[:,:, -1].flatten(), getattr(o3, slope_compare)[:,:,0].flatten(), getattr(o3, inter_compare)[:,:,0].flatten(),
-                                                                alb, sza, plot=False)
-                sco2_slope_a_list.append(sco2_slope_a)
-                sco2_slope_b_list.append(sco2_slope_b)
-                sco2_inter_a_list.append(sco2_inter_a)
-                sco2_inter_b_list.append(sco2_inter_b)
+        # print(getattr(o1, rad_c3d_compare)[:,:, -1])
+        # plt.contourf(o1.lon2d, o1.lat2d, getattr(o1, rad_c3d_compare)[:,:, -1])
+        
+        # plt.show()
 
-        # add mask of the interior region
+        """ 
         extent = [float(loc) for loc in cfg_info['subdomain']]
         mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
                               np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
-        out_o2a = pd.DataFrame(np.array([alb_list, sza_list, o2a_slope_a_list, o2a_slope_b_list, o2a_inter_a_list, o2a_inter_b_list]).T,
-                        columns=['albedo', 'sza', 'o2a_slope_a', 'o2a_slope_b', 'o2a_inter_a', 'o2a_inter_b'])
-        out_o2a.to_csv(f'o2a_para_{compare_num}.csv')
+        mask = mask.flatten()
+        fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
+        # o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b = fitting(cld_dist[mask], getattr(o1, rad_c3d_compare)[:,:, -1].flatten()[mask], getattr(o1, rad_clr_compare)[:,:, -1].flatten()[mask], getattr(o1, slope_compare)[:,:,0].flatten()[mask], getattr(o1, inter_compare)[:,:,0].flatten()[mask],
+        #                                                 band=f'O_2-A_{compare_num}',  plot=True)
+        
+        # o2a_slope_a_list.append(o2_slope_a)
+        # o2a_slope_b_list.append(o2_slope_b)
+        # o2a_inter_a_list.append(o2_inter_a)
+        # o2a_inter_b_list.append(o2_inter_b)
 
-        out_wco2 = pd.DataFrame(np.array([alb_list, sza_list, wco2_slope_a_list, wco2_slope_b_list, wco2_inter_a_list, wco2_inter_b_list]).T,
-                        columns=['albedo', 'sza', 'wco2_slope_a', 'wco2_slope_b', 'wco2_inter_a', 'wco2_inter_b'])
-        out_wco2.to_csv(f'wco2_para_{compare_num}.csv')
+        # wco2_slope_a, wco2_slope_b, wco2_inter_a, wco2_inter_b = fitting(cld_dist[mask], getattr(o2, rad_c3d_compare)[:,:, -1].flatten()[mask], getattr(o2, rad_clr_compare)[:,:, -1].flatten()[mask], getattr(o2, slope_compare)[:,:,0].flatten()[mask], getattr(o2, inter_compare)[:,:,0].flatten()[mask],
+        #                                                 band=f'WCO_2_{compare_num}', plot=True)
+        # wco2_slope_a_list.append(wco2_slope_a)
+        # wco2_slope_b_list.append(wco2_slope_b)
+        # wco2_inter_a_list.append(wco2_inter_a)
+        # wco2_inter_b_list.append(wco2_inter_b)
 
-        out_sco2 = pd.DataFrame(np.array([alb_list, sza_list, sco2_slope_a_list, sco2_slope_b_list, sco2_inter_a_list, sco2_inter_b_list]).T,
-                        columns=['albedo', 'sza', 'sco2_slope_a', 'sco2_slope_b', 'sco2_inter_a', 'sco2_inter_b'])
-        out_sco2.to_csv(f'sco2_para_{compare_num}.csv')
-        print(out_wco2)
-    else:
-        out_o2a = pd.read_csv(f'o2a_para_{compare_num}.csv')
-        out_wco2 = pd.read_csv(f'wco2_para_{compare_num}.csv')
-        out_sco2 = pd.read_csv(f'sco2_para_{compare_num}.csv')
+        # sco2_slope_a, sco2_slope_b, sco2_inter_a, sco2_inter_b = fitting(cld_dist[mask], getattr(o3, rad_c3d_compare)[:,:, -1].flatten()[mask], getattr(o3, rad_clr_compare)[:,:, -1].flatten()[mask], getattr(o3, slope_compare)[:,:,0].flatten()[mask], getattr(o3, inter_compare)[:,:,0].flatten()[mask],
+        #                                                 band=f'SCO_2_{compare_num}', plot=True)
 
-    for col in ['o2a_slope_a', 'o2a_slope_b', 'o2a_inter_a', 'o2a_inter_b']:
-        out_o2a[col][out_o2a[col]<1e-4] = np.nan
-    sfc_alb = out_o2a['albedo']
-    sza = out_o2a['sza']
-    inter_a_list = out_o2a['o2a_inter_a']
-    slope_a_list = out_o2a['o2a_slope_a']
-    inter_e_list = 1/out_o2a['o2a_inter_b']
-    slope_e_list = 1/out_o2a['o2a_slope_b']
-    plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'o2a', compare_num)
+        #"""
+        # sco2_slope_a_list.append(sco2_slope_a)
+        # sco2_slope_b_list.append(sco2_slope_b)
+        # sco2_inter_a_list.append(sco2_inter_a)
+        # sco2_inter_b_list.append(sco2_inter_b)
 
-    for col in ['wco2_slope_a', 'wco2_slope_b', 'wco2_inter_a', 'wco2_inter_b']:
-        out_wco2[col][out_wco2[col]<1e-4] = np.nan
-    sfc_alb = out_wco2['albedo']
-    sza = out_wco2['sza']
-    inter_a_list = out_wco2['wco2_inter_a']
-    slope_a_list = out_wco2['wco2_slope_a']
-    inter_e_list = 1/out_wco2['wco2_inter_b']
-    slope_e_list = 1/out_wco2['wco2_slope_b']
-    plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'wco2', compare_num)
-
-    for col in ['sco2_slope_a', 'sco2_slope_b', 'sco2_inter_a', 'sco2_inter_b']:
-        out_sco2[col][out_sco2[col]<1e-4] = np.nan
-    sfc_alb = out_sco2['albedo']
-    sza = out_sco2['sza']
-    inter_a_list = out_sco2['sco2_inter_a']
-    slope_a_list = out_sco2['sco2_slope_a']
-    inter_e_list = 1/out_sco2['sco2_inter_b']
-    slope_e_list = 1/out_sco2['sco2_slope_b']
     
-    plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'sco2', compare_num)
+        # out_o2a = pd.DataFrame(np.array([alb_list, sza_list, o2a_slope_a_list, o2a_slope_b_list, o2a_inter_a_list, o2a_inter_b_list]).T,
+        #                 columns=['albedo', 'sza', 'o2a_slope_a', 'o2a_slope_b', 'o2a_inter_a', 'o2a_inter_b'])
+        # out_o2a.to_csv(f'o2a_para_{compare_num}_dryden.csv')
 
-    plot_all_band_alb_sza_relationship(sfc_alb, sza, out_o2a['o2a_slope_a'], out_wco2['wco2_slope_a'], out_sco2['sco2_slope_a'], compare_num)
+        # out_wco2 = pd.DataFrame(np.array([alb_list, sza_list, wco2_slope_a_list, wco2_slope_b_list, wco2_inter_a_list, wco2_inter_b_list]).T,
+        #                 columns=['albedo', 'sza', 'wco2_slope_a', 'wco2_slope_b', 'wco2_inter_a', 'wco2_inter_b'])
+        # out_wco2.to_csv(f'wco2_para_{compare_num}_dryden.csv')
+
+        # out_sco2 = pd.DataFrame(np.array([alb_list, sza_list, sco2_slope_a_list, sco2_slope_b_list, sco2_inter_a_list, sco2_inter_b_list]).T,
+        #                 columns=['albedo', 'sza', 'sco2_slope_a', 'sco2_slope_b', 'sco2_inter_a', 'sco2_inter_b'])
+        # out_sco2.to_csv(f'sco2_para_{compare_num}_dryden.csv')
+        # print(out_wco2)
+    else:
+        None
+        # out_o2a = pd.read_csv(f'o2a_para_{compare_num}_dryden.csv')
+        # out_wco2 = pd.read_csv(f'wco2_para_{compare_num}_dryden.csv')
+        # out_sco2 = pd.read_csv(f'sco2_para_{compare_num}_dryden.csv')
+
+    cld_lon, cld_lat, cld_location = cld_position(cfg_name)
+    date   = datetime.datetime(int(cfg_info['date'][:4]),    # year
+                               int(cfg_info['date'][4:6]),   # month
+                               int(cfg_info['date'][6:])     # day
+                              )
+    
+
+    case_name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
+
+    data = {}
+    with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as f:
+        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
+        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
+        data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
+        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa'][...])
+        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa'][...])
+        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f['mod/cld/cth_ipa'][...])
+    
+    modl1b    =  sat_tmp(data)
+    cth0 = modl1b.data['cth_2d']['data']
+    lon_2d = modl1b.data['lon_2d']['data']
+    lat_2d = modl1b.data['lat_2d']['data']
+
+    title_size = 16
+    label_size = 14
+    legend_size = 14
+    tick_size = 12
+
+    f, ax=plt.subplots(figsize=(8, 8))
+    png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+             [55.00, 55.60, 33.70, 34.45]]
+    img = png[0]
+    wesn= png[1]
+    img = mpimg.imread(img)
+    ax.imshow(img, extent=wesn)
+    lon_dom = [wesn[0]+0.15, wesn[1]-0.15]
+    lat_dom = [wesn[2]+0.15, wesn[3]-0.15]
+    # ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    # ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    ax.vlines(lon_dom, ymin=wesn[2]+0.15, ymax=wesn[3]-0.15, color='k', linewidth=1)
+    ax.hlines(lat_dom, xmin=wesn[0]+0.15, xmax=wesn[1]-0.15, color='k', linewidth=1)
+    mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
+    print(mask.sum())
+    c = ax.scatter(o1.lon2d, o1.lat2d, 
+                   c=cld_dist, s=5,
+                   cmap='Reds', vmin=0, vmax=20)
+    ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='b')
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('Cloud distance (km)', fontsize=label_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    f.tight_layout()
+    f.savefig(f'central_asia_2_cloud_distance.png', dpi=300)
+    # plt.show()
+
+
+    f, ax=plt.subplots(figsize=(8, 8))
+    png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+             [55.00, 55.60, 33.70, 34.45]]
+    img = png[0]
+    wesn= png[1]
+    img = mpimg.imread(img)
+    ax.imshow(img, extent=wesn)
+    lon_dom = [wesn[0]+0.15, wesn[1]-0.15]
+    lat_dom = [wesn[2]+0.15, wesn[3]-0.15]
+    # ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    # ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    ax.vlines(lon_dom, ymin=wesn[2]+0.15, ymax=wesn[3]-0.15, color='k', linewidth=1)
+    ax.hlines(lat_dom, xmin=wesn[0]+0.15, xmax=wesn[1]-0.15, color='k', linewidth=1)
+    mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
+    print(mask.sum())
+    c = ax.scatter(o1.lon2d, o1.lat2d, 
+                   c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5,
+                   cmap='Reds')
+    ax.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+                   c='b', s=10,
+                   cmap='Reds')
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    f.tight_layout()
+    f.savefig(f'central_asia_2_o2a_conti_{rad_c3d_compare}.png', dpi=300)
+    # plt.show()
+
+
+    f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
+    png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+             [55.00, 55.60, 33.70, 34.45]]
+    img = png[0]
+    wesn= png[1]
+    img = mpimg.imread(img)
+    for ax in [ax1, ax2]:
+        ax.imshow(img, extent=wesn)
+        lon_dom = [wesn[0]+0.15, wesn[1]-0.15]
+        lat_dom = [wesn[2]+0.15, wesn[3]-0.15]
+        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    mask = ~(cth0>0)
+    c1 = ax1.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+                   c=getattr(o1, slope_compare)[:,:,0][mask], s=10,
+                   cmap='RdBu_r', vmin=-0.3, vmax=0.3)
+    cbar1 = f.colorbar(c1, ax=ax1, extend='both')
+    cbar1.set_label('$\mathrm{O_2-A}$ slope', fontsize=label_size)
+
+    c2 = ax2.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+                   c=getattr(o1, inter_compare)[:,:,0][mask], s=10,
+                   cmap='RdBu_r', vmin=-0.15, vmax=0.15)
+    cbar2 = f.colorbar(c2, ax=ax2, extend='both')
+    cbar2.set_label('$\mathrm{O_2-A}$ intercept', fontsize=label_size)
+    
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    
+    f.tight_layout()
+    f.savefig(f'central_asia_2_o2a_{slope_compare}.png', dpi=300)
+    plt.show()
+
+
+    # for col in ['o2a_slope_a', 'o2a_slope_b', 'o2a_inter_a', 'o2a_inter_b']:
+    #     out_o2a[col][out_o2a[col]<1e-4] = np.nan
+    # sfc_alb = out_o2a['albedo']
+    # sza = out_o2a['sza']
+    # inter_a_list = out_o2a['o2a_inter_a']
+    # slope_a_list = out_o2a['o2a_slope_a']
+    # inter_e_list = 1/out_o2a['o2a_inter_b']
+    # slope_e_list = 1/out_o2a['o2a_slope_b']
+    # plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'o2a', compare_num)
+
+    # for col in ['wco2_slope_a', 'wco2_slope_b', 'wco2_inter_a', 'wco2_inter_b']:
+    #     out_wco2[col][out_wco2[col]<1e-4] = np.nan
+    # sfc_alb = out_wco2['albedo']
+    # sza = out_wco2['sza']
+    # inter_a_list = out_wco2['wco2_inter_a']
+    # slope_a_list = out_wco2['wco2_slope_a']
+    # inter_e_list = 1/out_wco2['wco2_inter_b']
+    # slope_e_list = 1/out_wco2['wco2_slope_b']
+    # plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'wco2', compare_num)
+
+    # for col in ['sco2_slope_a', 'sco2_slope_b', 'sco2_inter_a', 'sco2_inter_b']:
+    #     out_sco2[col][out_sco2[col]<1e-4] = np.nan
+    # sfc_alb = out_sco2['albedo']
+    # sza = out_sco2['sza']
+    # inter_a_list = out_sco2['sco2_inter_a']
+    # slope_a_list = out_sco2['sco2_slope_a']
+    # inter_e_list = 1/out_sco2['sco2_inter_b']
+    # slope_e_list = 1/out_sco2['sco2_slope_b']
+    
+    # plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, 'sco2', compare_num)
+
+    # plot_all_band_alb_sza_relationship(sfc_alb, sza, out_o2a['o2a_slope_a'], out_wco2['wco2_slope_a'], out_sco2['sco2_slope_a'], compare_num)
 
 def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slope_a_list, sco2_slope_a_list, point_avg):
     fig, ax1 = plt.subplots(1, 1, figsize=(6, 5), sharex=False)
@@ -564,9 +702,9 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     label_size = 16
     tick_size = 12
 
-    o2a_slope_a = np.nanmean([o2a_slope_a_list[sza==15], o2a_slope_a_list[sza==30], o2a_slope_a_list[sza==45], o2a_slope_a_list[sza==60], o2a_slope_a_list[sza==75]], axis=0)
-    wco2_slope_a = np.nanmean([wco2_slope_a_list[sza==15], wco2_slope_a_list[sza==30], wco2_slope_a_list[sza==45], wco2_slope_a_list[sza==60], wco2_slope_a_list[sza==75]], axis=0)
-    sco2_slope_a = np.nanmean([sco2_slope_a_list[sza==15], sco2_slope_a_list[sza==30], sco2_slope_a_list[sza==45], sco2_slope_a_list[sza==60], sco2_slope_a_list[sza==75]], axis=0)
+    o2a_slope_a = np.array([o2a_slope_a_list[sza==30], o2a_slope_a_list[sza==45], o2a_slope_a_list[sza==60]]).mean(axis=0)
+    wco2_slope_a = np.array([wco2_slope_a_list[sza==30], wco2_slope_a_list[sza==45], wco2_slope_a_list[sza==60]]).mean(axis=0)
+    sco2_slope_a = np.array([sco2_slope_a_list[sza==30], sco2_slope_a_list[sza==45], sco2_slope_a_list[sza==60]]).mean(axis=0)
 
     ax1.scatter(sfc_alb[sza==30], o2a_slope_a_list[sza==45], s=50, label='o2a, sza=45', marker='X', alpha=0.65)
     ax1.scatter(sfc_alb[sza==45], wco2_slope_a_list[sza==45], s=50, label='wco2, sza=45', marker='p', alpha=0.65)
@@ -577,7 +715,7 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
     xx_o2a, yy_o2a = xx[mask], yy[mask]
     
-    popt, pcov = curve_fit(func_with_intercept, xx_o2a, yy_o2a, bounds=([-100, 0., 0], [100, 50, 0.3]),
+    popt, pcov = curve_fit(func_with_intercept, xx_o2a, yy_o2a, bounds=([-5, 0., 0], [5, 50, 0.3]),
                         #p0=(0.1, 0.7),
                         maxfev=3000,
                         #sigma=value_std[val_mask], 
@@ -588,7 +726,7 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     ss_tot = np.sum((yy_o2a-np.mean(yy_o2a))**2)
     r_squared = 1 - (ss_res / ss_tot)
 
-    plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
     ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:blue', 
               label='o2a\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     
@@ -607,7 +745,7 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     ss_tot = np.sum((yy_wco2-np.mean(yy_wco2))**2)
     r_squared = 1 - (ss_res / ss_tot)
 
-    plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
     ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:orange', 
               label='wco2\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     
@@ -626,7 +764,7 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     ss_tot = np.sum((yy_sco2-np.mean(yy_sco2))**2)
     r_squared = 1 - (ss_res / ss_tot)
 
-    plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
     ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:green', 
               label='sco2\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
 
@@ -697,18 +835,24 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     label_size = 16
     tick_size = 12
 
-    marker_list = ['o', 'v', '^', 'X', 'p', 'D']
-    color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
-    sza_list = [15, 30, 45, 60, 75]
 
-    for i in range(5):
-        sza_plt = sza_list[i]
-        plt_setting_dict = dict(s=50, label=f'sza={sza_plt}$^\circ$', color=color_list[i], marker=marker_list[i], alpha=0.65)
-        ax1.scatter(sfc_alb[sza==sza_plt], slope_a_list[sza==sza_plt], **plt_setting_dict)
-        ax2.scatter(sfc_alb[sza==sza_plt], inter_a_list[sza==sza_plt], **plt_setting_dict)
-        ax21.scatter(sfc_alb[sza==sza_plt], slope_e_list[sza==sza_plt], **plt_setting_dict)
-        ax22.scatter(sfc_alb[sza==sza_plt], inter_e_list[sza==sza_plt], **plt_setting_dict)
-    
+    ax1.scatter(sfc_alb[sza==30], slope_a_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
+    ax1.scatter(sfc_alb[sza==45], slope_a_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
+    ax1.scatter(sfc_alb[sza==60], slope_a_list[sza==60], s=50, label='sza=60', alpha=0.65)
+    #ax.hist2d(plot_x, plot_y, bins=150, norm=LogNorm(), cmap=light_jet)
+    ax2.scatter(sfc_alb[sza==30], inter_a_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
+    ax2.scatter(sfc_alb[sza==45], inter_a_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
+    ax2.scatter(sfc_alb[sza==60], inter_a_list[sza==60], s=50, label='sza=60', alpha=0.65)
+
+
+    ax21.scatter(sfc_alb[sza==30], slope_e_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
+    ax21.scatter(sfc_alb[sza==45], slope_e_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
+    ax21.scatter(sfc_alb[sza==60], slope_e_list[sza==60], s=50, label='sza=60', alpha=0.65)
+    #ax.hist2d(plot_x, plot_y, bins=150, norm=LogNorm(), cmap=light_jet)
+    ax22.scatter(sfc_alb[sza==30], inter_e_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
+    ax22.scatter(sfc_alb[sza==45], inter_e_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
+    ax22.scatter(sfc_alb[sza==60], inter_e_list[sza==60], s=50, label='sza=60', alpha=0.65)
+
     """val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     #print(value_avg[val_mask])
     #print(value_std[val_mask])
@@ -744,29 +888,11 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
 
     
     xx = sfc_alb[sza==30]
-    yy = np.nanmean(np.array([slope_a_list[sza==15], slope_a_list[sza==30], slope_a_list[sza==45], slope_a_list[sza==60], slope_a_list[sza==75]]), axis=0)
+    yy = np.nanmean(np.array([slope_a_list[sza==30], slope_a_list[sza==45], slope_a_list[sza==60]]), axis=0)
     mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
     xx, yy = xx[mask], yy[mask]
 
 
-    popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-50, 0., 0], [50, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=5000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy - func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-
-    plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
-    ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='r', 
-              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    
-    xx = sfc_alb[sza==30]
-    yy = np.array([inter_a_list[sza==15], inter_a_list[sza==30], inter_a_list[sza==45], inter_a_list[sza==60], inter_a_list[sza==75]]).mean(axis=0)
     popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, 0., 0], [5, 50, 0.3]),
                         #p0=(0.1, 0.7),
                         maxfev=3000,
@@ -777,43 +903,90 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     ss_res = np.sum(residuals**2)
     ss_tot = np.sum((yy-np.mean(yy))**2)
     r_squared = 1 - (ss_res / ss_tot)
-    plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
+
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
+    ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='r', 
+              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
+    
+    
+    xx = sfc_alb[sza==30]
+    yy = np.array([inter_a_list[sza==30], inter_a_list[sza==45], inter_a_list[sza==60]]).mean(axis=0)
+    popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, 0., 0], [5, 50, 0.3]),
+                        #p0=(0.1, 0.7),
+                        maxfev=3000,
+                        #sigma=value_std[val_mask], 
+                        #absolute_sigma=True,
+                        )
+    residuals = yy - func_with_intercept(xx, *popt)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((yy-np.mean(yy))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
     # ax2.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:blue', 
     #           label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     b_inter_a = popt[1]
     
-    for i in range(5):
-        sza_plt = sza_list[i]
-        plt_setting_dict = dict(s=50, label=f'sza={sza_plt}$^\circ$', color=color_list[i], marker=marker_list[i], alpha=0.65)
 
-        xx = sfc_alb[sza==sza_plt]
-        yy = inter_a_list[sza==sza_plt]
-        popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-20, b_inter_a, 0], [20, b_inter_a*1.00001, 0.3]),
-                            #p0=(0.1, 0.7),
-                            maxfev=3000,
-                            #sigma=value_std[val_mask], 
-                            #absolute_sigma=True,
-                            )
-        residuals = yy - func_with_intercept(xx, *popt)
-        ss_res = np.sum(residuals**2)
-        ss_tot = np.sum((yy-np.mean(yy))**2)
-        r_squared = 1 - (ss_res / ss_tot)
-        plot_xx = np.arange(0.025, xx.max()+0.05, 0.01)
-        ax2.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color=color_list[i], 
-                label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
+    xx = sfc_alb[sza==30]
+    yy = inter_a_list[sza==30]
+    popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
+                        #p0=(0.1, 0.7),
+                        maxfev=3000,
+                        #sigma=value_std[val_mask], 
+                        #absolute_sigma=True,
+                        )
+    residuals = yy - func_with_intercept(xx, *popt)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((yy-np.mean(yy))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
+    ax2.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:blue', 
+              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     
+    yy = inter_a_list[sza==45]
+    popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
+                        #p0=(0.1, 0.7),
+                        maxfev=3000,
+                        #sigma=value_std[val_mask], 
+                        #absolute_sigma=True,
+                        )
+    residuals = yy - func_with_intercept(xx, *popt)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((yy-np.mean(yy))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
+    ax2.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:orange', 
+              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     
+    yy = inter_a_list[sza==60]
+    popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
+                        #p0=(0.1, 0.7),
+                        maxfev=3000,
+                        #sigma=value_std[val_mask], 
+                        #absolute_sigma=True,
+                        )
+    residuals = yy - func_with_intercept(xx, *popt)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((yy-np.mean(yy))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
+    ax2.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='tab:green', 
+              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
 
-    yy = np.array([slope_e_list[sza==15], slope_e_list[sza==30], slope_e_list[sza==45], slope_e_list[sza==60], slope_e_list[sza==75]])
+    yy = np.array([slope_e_list[sza==30], slope_e_list[sza==45], slope_e_list[sza==60]])
     yy = yy[yy<10].mean()
     ax21.hlines(yy, plot_xx[0], plot_xx[-1], 'r', alpha=0.5, label=f'{yy:.3f}')
 
-    for i in range(5):
-        sza_plt = sza_list[i]
-        yy = inter_e_list[sza==sza_plt]
-        yy = yy[yy<10].mean()
-        ax22.hlines(yy, plot_xx[0], plot_xx[-1], color_list[i], alpha=0.5, label=f'{yy:.3f}')
-        
+    yy = inter_e_list[sza==30]
+    yy = yy[yy<10].mean()
+    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:blue', alpha=0.5, label=f'{yy:.3f}')
+    yy = inter_e_list[sza==45]
+    yy = yy[yy<10].mean()
+    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:orange', alpha=0.5, label=f'{yy:.3f}')
+    yy = inter_e_list[sza==60]
+    yy = yy[yy<10].mean()
+    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:green', alpha=0.5, label=f'{yy:.3f}')
+    
     ax1.legend()
     ax2.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
     ax21.legend()
@@ -848,17 +1021,16 @@ class sat_tmp:
 
             self.data = data
 
+
 def cld_position(cfg_name):
     cldfile = f'../simulation/data/{cfg_name[:-4]}_{cfg_name[:8]}/pre-data.h5'
     data = {}
     with h5py.File(cldfile, 'r') as f:
-        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
-        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
-        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f[f'mod/cld/cth_ipa'][...])
-
-    modl1b    =  sat_tmp(data)
-    lon_cld, lat_cld = modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data']
-    cld_list = modl1b.data['cth_2d']['data']>0
+        
+        lon_cld = f['lon'][...]
+        lat_cld = f['lat'][...]
+        cth = f[f'mod/cld/cth_ipa'][...]
+        cld_list = cth>0
 
     return lon_cld, lat_cld, cld_list
 
@@ -868,14 +1040,17 @@ def cld_dist_calc(cfg_name, o1, slope_compare):
 
     cldfile = f'../simulation/data/{cfg_name[:-4]}_{cfg_name[:8]}/pre-data.h5'
     data = {}
-    with h5py.File(cldfile, 'r') as f:
-        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
-        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
-        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f[f'mod/cld/cot_ipa'][...])
-        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f[f'mod/cld/cer_ipa'][...])
-        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f[f'mod/cld/cth_ipa'][...])
+    f = h5py.File(cldfile, 'r')
+    data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
+    data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
+    data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f[f'mod/cld/cot_ipa'][...])
+    data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f[f'mod/cld/cer_ipa'][...])
+    data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f[f'mod/cld/cth_ipa'][...])
+    f.close()
+
 
     modl1b    =  sat_tmp(data)
+
     lon_2d, lat_2d = o1.lon2d, o1.lat2d
     lon_cld, lat_cld = modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data']
     cld_list = modl1b.data['cth_2d']['data']>0
@@ -964,7 +1139,7 @@ def heatmap_xy_3(x, y, ax):
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
-            popt, pcov = curve_fit(func, xx, yy, bounds=([-5, 0.], [5, 10,]),
+            popt, pcov = curve_fit(func, xx, yy, bounds=([-5, 1e-3], [5, 15,]),
                                 p0=(0.1, 0.7),
                                 maxfev=3000,
                                 #sigma=value_std[val_mask], 
@@ -992,7 +1167,7 @@ def heatmap_xy_3(x, y, ax):
 
 
 
-from  scipy.optimize import curve_fit
+
 
 def func(x, a, b):
      return a * np.exp(-b * x)
@@ -1001,7 +1176,7 @@ def func_with_intercept(x, a, b, c):
      return a * np.exp(-b * x) + c
 
 
-def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, alb, sza, plot=False):
+def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, band, plot=False):
     # fig, ((ax11, ax12), 
     #     (ax21, ax22),
     #     (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
@@ -1043,15 +1218,15 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, alb, sza, plot=False):
             _, xmax = ax.get_xlim()
             ax.hlines(0, 0, xmax, linestyle='--', color='white')
             
-        ax11.set_ylabel('$\mathrm{WCO_2}$ slope', fontsize=label_size)
-        ax12.set_ylabel('$\mathrm{WCO_2}$ intercept', fontsize=label_size)
+        ax11.set_ylabel('$\mathrm{band}$ slope', fontsize=label_size)
+        ax12.set_ylabel('$\mathrm{band}$ intercept', fontsize=label_size)
         # ax21.set_ylabel('$\mathrm{WCO_2}$ slope', fontsize=label_size)
         # ax22.set_ylabel('$\mathrm{WCO_2}$ intercept', fontsize=label_size)
         # ax31.set_ylabel('$\mathrm{SCO_2}$ slope', fontsize=label_size)
         # ax32.set_ylabel('$\mathrm{SCO_2}$ intercept', fontsize=label_size)
         cld_low, cld_max = 0, 15
-        limit_1 = 0.5
-        limit_2 = 0.2
+        limit_1 = 0.3
+        limit_2 = 0.15
         for ax in [ax11,]:# ax21, ax31]:
             ax.set_xlim(cld_low, cld_max)
             ax.set_ylim(-limit_1, limit_1)
@@ -1067,8 +1242,8 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, alb, sza, plot=False):
         #I0 = quad(intensity_fxn, 20e-9, 400e-9, args=(decay_const))[0]
 
         #ax.set_yscale('log')
-        fig.suptitle(f"sfc albedo={alb:.2f}, sza={sza:.1f}$^\circ$")
-        fig.savefig(f'sfc_{alb:.2f}_sza_{sza:.1f}.png', dpi=150, bbox_inches='tight')
+        # fig.suptitle(f"sfc albedo={alb:.2f}, sza={sza:.1f}$^\circ$")
+        fig.savefig(f'central_asia_test2_{band}.png', dpi=150, bbox_inches='tight')
         #plt.show()
     else:
         mask = np.logical_and(cloud_dist > 0, rad_3d>rad_clr)
@@ -1076,6 +1251,89 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, alb, sza, plot=False):
         o2_inter_a, o2_inter_b = fitting_without_plot(cloud_dist[mask], inter[mask])
 
     return o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b
+
+
+def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
+
+        
+    fig, ((ax11, ax12), 
+            (ax21, ax22),
+            (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
+    fig.tight_layout(pad=5.0)
+    label_size = 16
+    tick_size = 12
+
+    ax_list = [(ax11, ax12), 
+                (ax21, ax22),
+                (ax31, ax32)]
+    for i in range(3):
+        oco_band = [o1, o2, o3][i]
+        rad_3d = getattr(oco_band, rad_3d_compare)[:,:, -1].flatten()
+        rad_clr = getattr(oco_band, rad_clr_compare)[:,:, -1].flatten()
+        mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
+
+        slope = getattr(oco_band, slope_compare)[:,:,0].flatten()
+        inter = getattr(oco_band, inter_compare)[:,:,0].flatten()
+
+        ax1, ax2 = ax_list[i]
+        slope_a, slope_b = heatmap_xy_3(cloud_dist[mask], slope[mask], ax1)
+        inter_a, inter_b = heatmap_xy_3(cloud_dist[mask], inter[mask], ax2)
+
+
+
+
+    #popt, pcov = curve_fit(func, cloud_dist[mask], o1.slope_1km_all[:,:,0][mask])#, bounds=(0, [3., 1., 0.5]))
+
+    #ax11.plot(cloud_dist[mask], func(cloud_dist[mask], *popt), 'r--',
+    #          label='fit: a=%5.3f, b=%5.3ff' % tuple(popt))
+
+
+    """
+    ax11.scatter(cloud_dist[mask], o1.slope_1km_all[:,:,0][mask])
+    ax12.scatter(cloud_dist[mask], o1.inter_1km_all[:,:,0][mask])
+    ax21.scatter(cloud_dist[mask], o2.slope_1km_all[:,:,0][mask])
+    ax22.scatter(cloud_dist[mask], o2.inter_1km_all[:,:,0][mask])
+    ax31.scatter(cloud_dist[mask], o3.slope_1km_all[:,:,0][mask])
+    ax32.scatter(cloud_dist[mask], o3.inter_1km_all[:,:,0][mask])
+    #"""
+    for ax in [ax11, ax12, ax21, ax31, ax22, ax32]:
+        ax.set_xlabel('Cloud distance (km)', fontsize=label_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        _, xmax = ax.get_xlim()
+        ax.hlines(0, 0, xmax, linestyle='--', color='white')
+        
+    ax11.set_ylabel('$\mathrm{O_2-A}$ slope', fontsize=label_size)
+    ax12.set_ylabel('$\mathrm{O_2-A}$ intercept', fontsize=label_size)
+    ax21.set_ylabel('$\mathrm{WCO_2}$ slope', fontsize=label_size)
+    ax22.set_ylabel('$\mathrm{WCO_2}$ intercept', fontsize=label_size)
+    ax31.set_ylabel('$\mathrm{SCO_2}$ slope', fontsize=label_size)
+    ax32.set_ylabel('$\mathrm{SCO_2}$ intercept', fontsize=label_size)
+    cld_low, cld_max = 0, 20
+    limit_1 = 0.2
+    limit_2 = 0.08
+    for ax in [ax11, ax21, ax31]:
+        ax.set_xlim(cld_low, cld_max)
+        ax.set_ylim(-limit_1, limit_1)
+        
+    for ax in [ax12, ax22, ax32]:
+        ax.set_xlim(cld_low, cld_max)
+        ax.set_ylim(-limit_2, limit_2)
+    ax11.set_ylim(-0.3, 0.3)
+    ax12.set_ylim(-0.12, 0.12)
+    #ax.plot([20, 20], [0, 1.1], 'r')
+    #ax.plot([400, 400], [0, 1.1], 'r')
+    #ax.set_ylim(0, 1.1)
+    #ax.fill_between(t[2:41]*1e9, intensity[2:41], 0, color='lightgrey', interpolate=True)
+    #I0 = quad(intensity_fxn, 20e-9, 400e-9, args=(decay_const))[0]
+
+    #ax.set_yscale('log')
+    # fig.suptitle(f"sfc albedo={alb:.2f}, sza={sza:.1f}$^\circ$")
+    fig.savefig(f'central_asia_test2_all_band_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
+    #plt.show()
+
+
+    return None
+
 
 
 def fitting_without_plot(x, y):
@@ -1101,13 +1359,13 @@ def fitting_without_plot(x, y):
     #print(value_std[val_mask])
     
     temp_r2 = 0
-    for cld_min in [1, 1.25]:
-        for cld_max in np.arange(5, 15, 0.5):
+    for cld_min in [1, 1.25, 1.5]:
+        for cld_max in np.arange(3, 15, 0.5):
             cld_val = cld_list[val_mask]
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
-            popt, pcov = curve_fit(func, xx, yy, bounds=([-10, 0.], [10, 10,]),
+            popt, pcov = curve_fit(func, xx, yy, bounds=([-2, 0.], [2, 10,]),
                                 p0=(0.1, 0.7),
                                 maxfev=3000,
                                 #sigma=value_std[val_mask], 
