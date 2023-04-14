@@ -412,7 +412,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
     subdomain = cfg_info['subdomain']
 
-    compare_num = 5
+    compare_num = 13
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
@@ -535,6 +535,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as f:
         data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
+        data['sfh_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['mod/geo/sfh'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
         data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa'][...])
         data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa'][...])
@@ -544,11 +545,50 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     cth0 = modl1b.data['cth_2d']['data']
     lon_2d = modl1b.data['lon_2d']['data']
     lat_2d = modl1b.data['lat_2d']['data']
+    sfh_2d = modl1b.data['sfh_2d']['data']
 
     title_size = 16
     label_size = 14
     legend_size = 14
     tick_size = 12
+    extent = [float(loc) for loc in cfg_info['subdomain']]
+    mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
+                          np.logical_and(lat_2d >= extent[2], lat_2d <= extent[3]))
+    print(f'average sfh: {np.mean(sfh_2d[mask])}')
+
+
+    f, ax=plt.subplots(figsize=(8, 8))
+    png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+             [55.00, 55.60, 33.70, 34.45]]
+    img = png[0]
+    wesn= png[1]
+    img = mpimg.imread(img)
+    ax.imshow(img, extent=wesn)
+    lon_dom = [wesn[0]+0.15, wesn[1]-0.15]
+    lat_dom = [wesn[2]+0.15, wesn[3]-0.15]
+    # ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    # ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    ax.vlines(lon_dom, ymin=wesn[2]+0.15, ymax=wesn[3]-0.15, color='k', linewidth=1)
+    ax.hlines(lat_dom, xmin=wesn[0]+0.15, xmax=wesn[1]-0.15, color='k', linewidth=1)
+    mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
+    print(mask.sum())
+    c = ax.contourf(lon_2d,lat_2d, 
+                   sfh_2d*1000,
+                   cmap='terrain', levels=201, vmin=0, vmax=2000)
+    
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('Surface altitude (m)', fontsize=label_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    f.tight_layout()
+    f.savefig(f'central_asia_2_surface_altitude.png', dpi=300)
 
     f, ax=plt.subplots(figsize=(8, 8))
     png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
@@ -1133,8 +1173,8 @@ def heatmap_xy_3(x, y, ax):
     #print(value_avg[val_mask])
     #print(value_std[val_mask])
     temp_r2 = 0
-    for cld_min in [1, 1.25]:
-        for cld_max in np.arange(5, 15, 0.5):
+    for cld_min in [1, 1., 1.5, 1.75]:
+        for cld_max in np.arange(10, 18, 0.5):
             cld_val = cld_list[val_mask]
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
@@ -1255,7 +1295,7 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, band, plot=False):
 
 def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
 
-        
+    return_list = []
     fig, ((ax11, ax12), 
             (ax21, ax22),
             (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
@@ -1278,7 +1318,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
         ax1, ax2 = ax_list[i]
         slope_a, slope_b = heatmap_xy_3(cloud_dist[mask], slope[mask], ax1)
         inter_a, inter_b = heatmap_xy_3(cloud_dist[mask], inter[mask], ax2)
-
+        return_list.append((slope_a, slope_b, inter_a, inter_b))
 
 
 
@@ -1332,7 +1372,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
     #plt.show()
 
 
-    return None
+    return return_list
 
 
 
