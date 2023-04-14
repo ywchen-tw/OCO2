@@ -764,7 +764,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # ===============================================================
     zpt_file = f'{fdir_data}/zpt.h5'
     zpt_file = os.path.abspath(zpt_file)
-    if not os.path.isfile(zpt_file):
+    if 1:#not os.path.isfile(zpt_file):
         create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
     # ===============================================================
 
@@ -785,25 +785,25 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
         cdata_sat_raw(band_tag, sat0=sat０, overwrite=True, plot=True)
 
     # ===============================================================
-    #"""
+    """
     for solver in ['IPA', '3D']:
         cdata_cld_ipa(band_tag, sat０, fdir_tmp, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
     #"""
 
     
-    #"""
+    """
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=True, case_name_tag=name_tag, photons=1e8)
+    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=False, case_name_tag=name_tag, photons=1e8)
     modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
-    # cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
-    # modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
+    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
+    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
-    """
+    #"""
     # run calculations for each wavelength
     # ===============================================================
     for wavelength in wvls:
@@ -812,11 +812,11 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=True, photons=5e7)
+                                                      overwrite=True, photons=5e8)
     # ===============================================================
     #"""
 
-    """
+    #"""
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
     return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza)
@@ -836,7 +836,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -844,8 +844,8 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    """"
-    time.sleep(120)
+    #""""
+    #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()
         sco2_h5 = run_case('sco2', cfg_info, sfc_alb=sfc_alb, sza=sza)

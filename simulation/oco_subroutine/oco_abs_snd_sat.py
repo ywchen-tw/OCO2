@@ -285,9 +285,8 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # *********
         # Initialize
         # Optical depths on interfaces & absorption coefficients on layers
-        ext_in = np.empty((nwav,nlay))
+        ext = np.empty((nwav,nlay))
         tau_in = np.zeros(nwav)
-        ext_out = np.empty((nwav,nlay))
         tau_out = np.zeros(nwav)
         trns = np.zeros(nwav) 
 
@@ -299,14 +298,11 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             tkobs = tprf[iz]
             pobs  = pprf[iz]
 
-            ext0_in  = np.zeros(nwav) # absorption coef for O2 or CO2
-            ext1_in  = np.zeros(nwav) # absorption coef for H2O
-            ext0_in[...] = np.nan
-            ext1_in[...] = np.nan
-            ext0_out  = np.zeros(nwav) # absorption coef for O2 or CO2
-            ext1_out  = np.zeros(nwav) # absorption coef for H2O
-            ext0_out[...] = np.nan
-            ext1_out[...] = np.nan
+            ext0  = np.zeros(nwav) # absorption coef for O2 or CO2
+            ext1  = np.zeros(nwav) # absorption coef for H2O
+            ext0[...] = np.nan
+            ext1[...] = np.nan
+
             # *********
             # First find the indices ii & jj (ii pressure, jj temperature)
             # that are closest to tkobs & pobs (with pobs ij hPa)
@@ -403,7 +399,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             # For O2
              # For O2
             if iband == 0:
-                ext0_in, ext0_out = calc2(dzf,pprf,tprf,
+                ext0 = calc2(dzf,pprf,tprf,
                              o2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
@@ -412,7 +408,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
 
             # For CO2
             if ((iband == 1) | (iband == 2)) :
-                ext0_in, ext0_out = calc2(dzf,pprf,tprf,
+                ext0 = calc2(dzf,pprf,tprf,
                              co2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
@@ -420,7 +416,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                              iout=True)
 
             # For H2O
-            ext1_in, ext1_out = calc2(dzf,pprf,tprf,
+            ext1 = calc2(dzf,pprf,tprf,
                             h2oden,
                             iz,solzen,musolzen,
                             nwavh2o,wcmdath2o,wavedath2o,
@@ -428,16 +424,15 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                             iout=True)   
 
             # Store the results in ext
-            ext_in[:,iz] = ext0_in + ext1_in # ext0: O2/CO2, ext1: H2O
-            ext_out[:,iz] = ext0_out + ext1_out # ext0: O2/CO2, ext1: H2O
+            ext[:,iz] = ext0 + ext1 # ext0: O2/CO2, ext1: H2O
             # tau did not change in calc2 function for now!!!
-            tau_in += ext_in[:,iz] *dzf[iz]
-            tau_out += ext_out[:,iz] *dzf[iz]
+            tau_in += ext[:,iz] *dzf[iz]*musolzen
+            tau_out += ext[:,iz] *dzf[iz]*musolzen
 
 
             # End of loop down to the surface     
-        trns = np.exp(-(tau_in+tau_out))*refl
-
+        trns = np.exp(-(tau_in+tau_out))#*refl
+        #trns = np.exp(-(tau_out))
         
         # *********
         # Get OCO wavelengths & slit function
@@ -501,10 +496,10 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             legend_size = 16
             tick_size = 14
 
-            #x = np.arange(nfc)
+            x = xx*1000
             #y = trnsx[sx]
-            ax.plot(wloco[100]+xx,yy, color='k')
-            ax.vlines([wloco[100]+xx[ils[0]], wloco[100]+xx[ils[-1]]], ils0, 1, 'r')
+            ax.plot(x, yy, color='k')
+            ax.vlines([x[ils[0]], x[ils[-1]]], ils0, 1, 'r')
             #ax.plot(1000*np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
 
             #norm = np.max(absgl[z,l,0:absgn[l]-1])
@@ -519,7 +514,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             #xmin, xmax = 0., 10.
             #ax.set_ylim(ymin, ymax)
             #ax.set_xlim(xmin, xmax)
-            ax.set_xlabel('Wavelength (micron)', fontsize=label_size)
+            ax.set_xlabel('Wavelength (nm)', fontsize=label_size)
             ax.set_ylabel('response', fontsize=label_size)
             ax.set_title('# ILS terms', fontsize=title_size)
             fig.savefig(f'{pathout}/band{iband}_4-test.png', dpi=150, bbox_inches='tight')
@@ -537,12 +532,12 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         savpkl = filnm+'.pkl'
         print('Save absorption data to pickle save file: ' + savpkl)
         with open(savpkl, 'wb') as f:  # Python 3: open(..., 'wb')
-            pickle.dump([wcmdat,tprf,pprf,trnsc,tauc,ext_in,ext_out,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf], f)
+            pickle.dump([wcmdat,tprf,pprf,trnsc,tauc,ext,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf], f)
 
     else: # if no previous IDL save file exists of this band
         print('Restore absorption data from IDL save file: '+savpkl)
         with open(savpkl, 'rb') as f:
-            wcmdat,tprf,pprf,trnsc,tauc,ext_in,ext_out,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf = pickle.load(f)
+            wcmdat,tprf,pprf,trnsc,tauc,ext,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf = pickle.load(f)
     # End: Extract information from oco_subroutine.absCOF file (native resolution)
 
 
@@ -578,7 +573,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             legend_size = 16
             tick_size = 14
             x = np.arange(nfc)
-            y = trnsx[sx]
+            y = trnsx[sx]*refl
             ax.scatter(x, y, color='k', s=3)
             
             #ax.set_xticks(range(0, 160, 20))
@@ -611,24 +606,24 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         norm = colors.Normalize(vmin=0.0, vmax=255.0, clip=True)
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.rainbow)
         for i in range(0, nx):
-            ods[i] = m0*np.float64(i+1)+mn
-            wli0 = np.argmin(np.abs(ods[i]-trnsx))
+            ods[i] = (m0*np.float64(i+1)+mn)*refl
+            wli0 = np.argmin(np.abs(ods[i]-trnsx*refl))
             wli[i] = wli0
             if plot == 1 :
                 ax.plot([0,nfc],[ods[i],ods[i]],color='orange',linestyle='dotted')
-                ax.plot([wli0,nfc],[trnsx[wli0],trnsx[wli0]],linestyle='dashed',color='orange')
+                ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
                 cl = 30*(i+1)
                 if cl == 0: 
                     cl=255
                 ax.plot([wli0,wli0], [0,ods[i]], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)
                     
         ods[nx] = mn
-        wli0 = np.argmin(np.abs(ods[nx]-trnsx))
+        wli0 = np.argmin(np.abs(ods[nx]-trnsx*refl))
         wli[nx]=wli0
         if plot == 1 :
             cl = 30*nx
             ax.plot([wli0,wli0],[0,ods[nx]],linestyle='dashed',color=mapper.to_rgba(cl), linewidth=2)
-            ax.plot([wli0,nfc],[trnsx[wli0],trnsx[wli0]],linestyle='dashed',color='orange')
+            ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
             fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
             
         if plot == 1 :
@@ -640,7 +635,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             legend_size = 16
             tick_size = 14
             x = wlc
-            y = trnsc
+            y = trnsc*refl
 
             ax.plot(x, y, color='k')
             ax.tick_params(axis='both', labelsize=tick_size)
@@ -685,7 +680,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                 l0 = np.argmin(np.abs(wlc-wls[np.int(wli[i])]))
             wx[i] = wlc[l0]
             lx[i] = l0
-            tx[i] = trnsc[l0]   
+            tx[i] = trnsc[l0]*refl
             if plot == 1: 
                 ax.scatter(wlc[lx[i]], tx[i], facecolors='none', edgecolor='orange', marker='D')
             
@@ -725,7 +720,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             print(fsol[indlr[lx[l],1]:indlr[lx[l],0]+1],  file=sys.stderr)
             print(fsol[indlr[lx[l],1]:indlr[lx[l],0]+1].min(), fsol[indlr[lx[l],1]:indlr[lx[l],0]+1].max(), file=sys.stderr)
             for z in range(0, nlay):
-                absgl[z,l,0:indlr[lx[l],2]]=ext_out[indlr[lx[l],1]:indlr[lx[l],0]+1,z]
+                absgl[z,l,0:indlr[lx[l],2]]=ext[indlr[lx[l],1]:indlr[lx[l],0]+1,z]
                 if z == 0 and plot:
                     fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
                     fig.tight_layout(pad=5.0)

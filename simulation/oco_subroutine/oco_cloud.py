@@ -31,6 +31,8 @@ from er3t.rtm.mca import mca_sca # newly added for phase function
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+def cot_fitting_func(x, a, b, c):
+     return (b + (a * x))/(b+x) + c
 
 class func_cot_vs_rad:
     def __init__(self,
@@ -554,6 +556,12 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
     # logic_thin  = (cth_ipa0[indices_x, indices_y] <= 12.0)
 
     cot_ipa0 = np.zeros_like(ref_2d)
+
+    popt_thick, pcov_thick = curve_fit(cot_fitting_func, cot_ipa, f_mca_thick.ref)
+    popt_thin, pcov_thin = curve_fit(cot_fitting_func, cot_ipa, f_mca_thin.ref)
+
+    f_mca_thick.ref = cot_fitting_func(cot_ipa, *popt_thick)
+    f_mca_thin.ref = cot_fitting_func(cot_ipa, *popt_thin)
 
     cot_ipa0[indices_x[logic_thick], indices_y[logic_thick]] = f_mca_thick.get_cot_from_ref(ref_cld_norm[logic_thick])
     cot_ipa0[indices_x[logic_thin] , indices_y[logic_thin]]  = f_mca_thin.get_cot_from_ref(ref_cld_norm[logic_thin])

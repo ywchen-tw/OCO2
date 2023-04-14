@@ -24,8 +24,8 @@ def calc2(dzf,pprf,tprf,
     #   1.0e5 * absco (cm2/molecule) o2den (molecule/cm3) 
     # *********
 
-    conv_incoming = 1.0e5 * denf[iz]*zen
-    conv_outgoing = 1.0e5 * denf[iz]*muzen
+    conv = 1.0e5 * denf[iz]
+
     # ----- original -----
     """
     ext = np.zeros(nwav)
@@ -35,8 +35,8 @@ def calc2(dzf,pprf,tprf,
     # -----------
 
     # faster, but the values are very close but slightly different
-    ext_incoming = (conv_incoming*absco).flatten() 
-    ext_outgoing = (conv_outgoing*absco).flatten() 
+    ext = (conv*absco).flatten() 
+
  
     # *********
     #if iout:
@@ -49,4 +49,4 @@ def calc2(dzf,pprf,tprf,
     print('absco shape:', absco.shape, file=sys.stderr)
     print('absco:', absco, file=sys.stderr)
     print('absco min max:', absco.min(), absco.max(), file=sys.stderr)"""
-    return ext_incoming, ext_outgoing
+    return ext

@@ -134,11 +134,11 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     #aod    = 0.4 # aerosol optical depth
     #ssa    = 0.9 # aerosol single scattering albedo
     asy    = 0.6 # aerosol asymmetry parameter
-    z_bot  = 0 # altitude of layer bottom in km
+    z_bot  = levels.min() # altitude of layer bottom in km
     z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
     aer_ext = aod / (atm0.lay['thickness']['data'].sum()*1000.0)
 
-    #atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
+    atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
     # data can be accessed at
     #     atm1d0.nml[ig]['Atm_zgrd0']['data']
     #     atm1d0.nml[ig]['Atm_wkd0']['data']
@@ -287,7 +287,7 @@ def modis_650_simulation_plot(extent_list, case_name_tag='default', fdir='tmp', 
         ax13.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax13.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         cbar_13 = fig.colorbar(diff, ax=ax13)
-        cbar_13.set_label('3D Simulated - MODIS Radiance')
+        cbar_13.set_label('Simulated - MODIS Radiance')
         ax13.set_title(f'{solver} Simulated - MODIS Radiance')
         
         ax2 = fig.add_subplot(231)
