@@ -1,4 +1,13 @@
-
+#!/bin/env python
+#SBATCH --partition=amilan
+#SBATCH --nodes=1
+#SBATCH --ntasks=12
+#SBATCH --ntasks-per-node=12
+#SBATCH --time=08:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
+#SBATCH --output=sbatch-output_%x_%j.txt
+#SBATCH --job-name=OCO2_test
 
 from genericpath import isfile
 import os
@@ -785,13 +794,13 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
         cdata_sat_raw(band_tag, sat0=sat０, overwrite=True, plot=True)
 
     # ===============================================================
-    """
+    #"""
     for solver in ['IPA', '3D']:
         cdata_cld_ipa(band_tag, sat０, fdir_tmp, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
     #"""
 
     
-    """
+    #"""
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
@@ -799,11 +808,11 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
         os.makedirs(fdir_tmp_650)
     cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=False, case_name_tag=name_tag, photons=1e8)
     modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
-    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
+    # cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
+    # modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
-    #"""
+    """
     # run calculations for each wavelength
     # ===============================================================
     for wavelength in wvls:
@@ -816,7 +825,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # ===============================================================
     #"""
 
-    #"""
+    """
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
     return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza)
@@ -836,7 +845,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -844,7 +853,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    #""""
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()
