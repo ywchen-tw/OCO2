@@ -66,12 +66,10 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
     if not iband in [0, 1, 2]:
         print('iband should be either 0 (O2), 1 (weak CO2), or 2 (Strong CO2), set to the default 0.')
         iband   = 0
-    if platform.system() != 'Linux':
-        pathinp = './oco_subroutine/abs/'
-        if pathout == None:
-            pathout = './'
-    else:
-        sys.exit('Not implemented.')
+        
+    pathinp = './oco_subroutine/abs/'
+    if pathout == None:
+        pathout = './'
 
     save    = 1       # save final data? 
     pl_ils  = 1       # plot ils, else result of convolution
