@@ -603,9 +603,10 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # plot setting
         norm = colors.Normalize(vmin=0.0, vmax=255.0, clip=True)
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.rainbow)
-        for i in range(0, nx):
-            ods[i] = (m0*np.float64(i+1)+mn)*refl
+        for i in range(0, nx+1):
+            ods[i] = (m0*np.float64(i)+mn)*refl
             wli0 = np.argmin(np.abs(ods[i]-trnsx*refl))
+            print(i, wli0, ods[i], trnsx[wli0]*refl)
             wli[i] = wli0
             if plot == 1 :
                 ax.plot([0,nfc],[ods[i],ods[i]],color='orange',linestyle='dotted')
@@ -615,15 +616,17 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                     cl=255
                 ax.plot([wli0,wli0], [0,ods[i]], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)
                     
-        ods[nx] = mn
-        wli0 = np.argmin(np.abs(ods[nx]-trnsx*refl))
-        wli[nx]=wli0
-        if plot == 1 :
-            cl = 30*nx
-            ax.plot([wli0,wli0],[0,ods[nx]],linestyle='dashed',color=mapper.to_rgba(cl), linewidth=2)
-            ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
-            fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
-            
+        # ods[nx] = mn*refl
+        # wli0 = np.argmin(np.abs(ods[nx]-trnsx*refl))
+        # wli[nx]=wli0
+        # print(nx, wli0, ods[nx], trnsx[wli0]*refl)
+        # cl = 30*nx
+        # ax.plot([wli0,wli0],[0,ods[nx]],linestyle='dashed',color=mapper.to_rgba(cl), linewidth=2)
+        # ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
+        fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
+        
+        sys.exit()
+
         if plot == 1 :
             plt.clf()
             fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)

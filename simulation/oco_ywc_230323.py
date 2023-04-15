@@ -1,39 +1,25 @@
-
-
-from genericpath import isfile
 import os
 import sys
 import glob
-import pickle
 import h5py
-from pyhdf.SD import SD, SDC
 import numpy as np
 import pandas as pd
 import datetime
 import time
-from scipy.io import readsav
-from scipy import interpolate
-from scipy import stats
-from scipy.interpolate import interp1d
 from scipy import stats as st
 import matplotlib as mpl
 #mpl.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FixedLocator
-from matplotlib import rcParams, ticker
-import matplotlib.gridspec as gridspec
-import matplotlib.patches as mpatches
+from matplotlib import rcParams
 
-import er3t
 from er3t.pre.atm import atm_atmmod
-from er3t.pre.abs import abs_16g, abs_oco_idl, abs_oco_h5
+from er3t.pre.abs import abs_oco_h5
 from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
-from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
-from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_09a1, modis_43a3, download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.oco2 import oco2_std, download_oco2_https
-from er3t.util import cal_r_twostream, grid_by_extent, grid_by_lonlat, cal_ext
-
+from er3t.pre.pha import pha_mie_wc # newly added for phase function
+from er3t.util.modis import modis_l1b
+from er3t.util.oco2 import oco2_std
+from er3t.util import grid_by_extent
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
 from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
@@ -42,17 +28,13 @@ from er3t.rtm.mca import mca_sca # newly added for phase function
 from oco_subroutine.oco_subroutine import *
 from oco_subroutine.oco_create_atm import create_oco_atm
 from oco_subroutine.oco_satellite import satellite_download
-from oco_subroutine.oco_cloud import para_corr, wind_corr
-from oco_subroutine.oco_cfg import grab_cfg, save_h5_info, check_h5_info, save_subdomain_info
+from oco_subroutine.oco_cfg import grab_cfg, save_h5_info
 from oco_subroutine.oco_abs_snd_sat import oco_abs
-from oco_subroutine.oco_modis_time import cal_sat_delta_t
 from oco_subroutine.oco_raw_collect import cdata_sat_raw
-from oco_subroutine.oco_cloud import cdata_cld_ipa
-from oco_subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
 
 import timeit
 import argparse
-import matplotlib.image as mpl_img
+
 
 
 
@@ -113,7 +95,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
 
     # mca_sca object (newly added for phase function)
     # =================================================================================
-    pha0 = er3t.pre.pha.pha_mie_wc(wavelength=wavelength, overwrite=overwrite)
+    pha0 = pha_mie_wc(wavelength=wavelength, overwrite=overwrite)
     sca  = mca_sca(pha_obj=pha0, fname='%s/mca_sca.bin' % fdir, overwrite=overwrite)
     # =================================================================================
 
@@ -764,7 +746,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # ===============================================================
     zpt_file = f'{fdir_data}/zpt.h5'
     zpt_file = os.path.abspath(zpt_file)
-    if not os.path.isfile(zpt_file):
+    if 1:#not os.path.isfile(zpt_file):
         create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
     # ===============================================================
 
@@ -776,14 +758,15 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
     iband_dict = {'o2a':0, 'wco2':1, 'sco2':2,}
     Trn_min = float(cfg_info['Trn_min'])
-    if not os.path.isfile(fname_abs):
+    if 1:#not os.path.isfile(fname_abs):
         oco_abs(cfg, zpt_file=zpt_file, iband=iband_dict[band_tag], nx=nx, Trn_min=Trn_min, pathout=fdir_data, reextract=False, plot=True)
     f = h5py.File(fname_abs, 'r')
     wvls = f['lamx'][...]*1000.0
+    print(wvls)
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(band_tag, sat0=sat０, overwrite=True, plot=True)
-
+    sys.exit()
     # ===============================================================
     """
     for solver in ['IPA', '3D']:
@@ -836,7 +819,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -844,7 +827,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    #""""
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()

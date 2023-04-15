@@ -1,11 +1,8 @@
-
-
 import os
 import sys
 import pickle
 import numpy as np
 import datetime
-from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
 from er3t.util.modis import download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
 from er3t.util.oco2 import download_oco2_https
 
@@ -15,16 +12,17 @@ class satellite_download:
     """
     This class is used to download satellite data from MODIS and OCO-2
     """
-    def __init__(
-            self,
-            date=None,
-            extent=None,
-            fname=None,
-            fdir_out='data',
-            overwrite=False,
-            quiet=False,
-            verbose=False):
-
+    def __init__(self,
+                 date=None,
+                 extent=None,
+                 fname=None,
+                 fdir_out='data',
+                 overwrite=False,
+                 quiet=False,
+                 verbose=False):
+        """
+        Initialize the SatelliteDownload class.
+        """
         self.date     = date
         self.extent   = extent
         self.extent_simulation = extent
@@ -32,26 +30,22 @@ class satellite_download:
         self.quiet    = quiet
         self.verbose  = verbose
 
-        if ((fname is not None) and (os.path.exists(fname)) and (not overwrite)):
-
+        if (fname is not None) and os.path.exists(fname) and (not overwrite):
             self.load(fname)
-
-        elif (((date is not None) and (extent is not None)) and (fname is not None) and (os.path.exists(fname)) and (overwrite)) or \
-             (((date is not None) and (extent is not None)) and (fname is not None) and (not os.path.exists(fname))):
-
+        elif ((date is not None) and (extent is not None) and (fname is not None) and os.path.exists(fname) and overwrite) or \
+             ((date is not None) and (extent is not None) and (fname is not None) and not os.path.exists(fname)):
             self.run()
             self.dump(fname)
 
-        elif (((date is not None) and (extent is not None)) and (fname is None)):
-
+        elif date is not None and extent is not None and fname is None:
             self.run()
-
         else:
-
-            sys.exit('Error   [satellite_download]: Please check if \'%s\' exists or provide \'date\' and \'extent\' to proceed.' % fname)
+            raise FileNotFoundError('Error   [satellite_download]: Please check if \'%s\' exists or provide \'date\' and \'extent\' to proceed.' % fname)
 
     def load(self, fname):
-
+        """
+        Load the satellite data from the pickle file.
+        """
         with open(fname, 'rb') as f:
             obj = pickle.load(f)
             if hasattr(obj, 'fnames') and hasattr(obj, 'extent') and hasattr(obj, 'fdir_out') and hasattr(obj, 'date'):
@@ -65,7 +59,9 @@ class satellite_download:
                 sys.exit('Error   [satellite_download]: File \'%s\' is not the correct pickle file to load.' % fname)
 
     def run(self, run=True):
-
+        """
+        Run the satellite download process.
+        """
         lon = np.array(self.extent[:2])
         lat = np.array(self.extent[2:])
 
@@ -145,13 +141,14 @@ class satellite_download:
             self.fnames['oco_imap'] += fnames_imap
 
     def dump(self, fname):
-
+        """
+        Save the SatelliteDownload object into a pickle file
+        """
         self.fname = fname
         with open(fname, 'wb') as f:
             if self.verbose:
                 print('Message [satellite_download]: Saving object into %s ...' % fname)
             pickle.dump(self, f)
-
 
 if __name__ == '__main__':
     None
