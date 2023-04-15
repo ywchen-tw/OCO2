@@ -1,0 +1,134 @@
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "1" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "2" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "3" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "4" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "5" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/owslib/wmts.py:643: RuntimeWarning: TileMatrixLimits with tileMatrix "6" already exists
+  warnings.warn(msg, RuntimeWarning)
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/cartopy/crs.py:245: ShapelyDeprecationWarning: __len__ for multi-part geometries is deprecated and will be removed in Shapely 2.0. Check the length of the `geoms` property instead to get the  number of parts of a multi-part geometry.
+  if len(multi_line_string) > 1:
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/cartopy/crs.py:297: ShapelyDeprecationWarning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
+  for line in multi_line_string:
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/cartopy/crs.py:364: ShapelyDeprecationWarning: __len__ for multi-part geometries is deprecated and will be removed in Shapely 2.0. Check the length of the `geoms` property instead to get the  number of parts of a multi-part geometry.
+  if len(p_mline) > 0:
+/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/site-packages/cartopy/io/ogc_clients.py:181: ShapelyDeprecationWarning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
+  for poly in polys:
+** Resuming transfer from byte position 48777611
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0 46.5M    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+** Resuming transfer from byte position 150074618
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0  143M    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+** Resuming transfer from byte position 137645185
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0  131M    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+** Resuming transfer from byte position 162600719
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0  155M    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+** Resuming transfer from byte position 35236994
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0 33.6M    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+** Resuming transfer from byte position 4954434
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0 4838k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0 4838k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+** Resuming transfer from byte position 71096200
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0 67.8M    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+** Resuming transfer from byte position 112991273
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0  107M    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+** Resuming transfer from byte position 276934239
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   580    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   372    0   372    0     0    973      0 --:--:-- --:--:-- --:--:--   973
+  0   316    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   314    0   314    0     0    412      0 --:--:-- --:--:-- --:--:--   412
+** Resuming transfer from byte position 245566972
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1391      0 --:--:-- --:--:-- --:--:--  1395
+** Resuming transfer from byte position 1122978264
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1249      0 --:--:-- --:--:-- --:--:--  1246100   314    0   314    0     0   1248      0 --:--:-- --:--:-- --:--:--  1246
+** Resuming transfer from byte position 70984974
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1772      0 --:--:-- --:--:-- --:--:--  1784
+** Resuming transfer from byte position 57302330
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1410      0 --:--:-- --:--:-- --:--:--  1414
+** Resuming transfer from byte position 1302157402
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1420      0 --:--:-- --:--:-- --:--:--  1420
+** Resuming transfer from byte position 511018980
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   314    0   314    0     0   1211      0 --:--:-- --:--:-- --:--:--  1217
+cfg/20181018_central_asia_2_470cloud_test2.csv
+[55.0, 55.6, 33.7, 34.449999999999996]
+<_io.StringIO object at 0x14aad0c0c550>
+Message [download_modis_https]: Downloading data/modis/20181018/MYD06_L2.A2018291.0935.061.2018291213358.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD06_L2.A2018291.0935.061.2018291213358.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MYD021KM.A2018291.0935.061.2018291195301.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD021KM.A2018291.0935.061.2018291195301.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MYD02HKM.A2018291.0935.061.2018291195301.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD02HKM.A2018291.0935.061.2018291195301.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MYD02QKM.A2018291.0935.061.2018291195301.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD02QKM.A2018291.0935.061.2018291195301.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MYD03.A2018291.0935.061.2018291173658.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD03.A2018291.0935.061.2018291173658.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MYD04_L2.A2018291.0935.061.2018291212652.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MYD04_L2.A2018291.0935.061.2018291212652.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MOD09A1.A2018289.h22v05.061.2021350162419.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MOD09A1.A2018289.h22v05.061.2021350162419.hdf' has been downloaded.
+
+Message [download_modis_https]: Downloading data/modis/20181018/MCD43A3.A2018289.h22v05.061.2021344164644.hdf ...
+Message [download_modis_https]: 'data/modis/20181018/MCD43A3.A2018289.h22v05.061.2021344164644.hdf' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L2StdND_22850a_181018_B10004r_200520201845.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L2StdND_22850a_181018_B10004r_200520201845.h5' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L2MetND_22850a_181018_B10003r_200409205805.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L2MetND_22850a_181018_B10003r_200409205805.h5' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L1bScND_22850a_181018_B10003r_200409205805.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L1bScND_22850a_181018_B10003r_200409205805.h5' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_LtCO2_181018_B10206Ar_200730042453s.nc4 ...
+Warning [download_oco2_https]: Do not support check for 'nc4'. Do not know whether 'data/oco/oco2_LtCO2_181018_B10206Ar_200730042453s.nc4' has been successfully downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L2CPrND_22850a_181018_B10003r_200410025041.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L2CPrND_22850a_181018_B10003r_200410025041.h5' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L2DiaND_22850a_181018_B10004r_200520194946.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L2DiaND_22850a_181018_B10004r_200520194946.h5' has been downloaded.
+
+Message [download_oco2_https]: Downloading data/oco/oco2_L2IDPND_22850a_181018_B10003r_200412061944.h5 ...
+Message [download_oco2_https]: 'data/oco/oco2_L2IDPND_22850a_181018_B10003r_200412061944.h5' has been downloaded.
+
+/projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/o2a
+Saving to file /projects/yuch8913/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/zpt.h5
+Not implemented.
