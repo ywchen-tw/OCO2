@@ -66,7 +66,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
     if not iband in [0, 1, 2]:
         print('iband should be either 0 (O2), 1 (weak CO2), or 2 (Strong CO2), set to the default 0.')
         iband   = 0
-        
+
     pathinp = './oco_subroutine/abs/'
     if pathout == None:
         pathout = './'
@@ -625,7 +625,6 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
         fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
         
-        sys.exit()
 
         if plot == 1 :
             plt.clf()

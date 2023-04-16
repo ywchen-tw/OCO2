@@ -21,7 +21,7 @@ from er3t.pre.abs import abs_16g
 from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
-from er3t.util import cal_r_twostream, grid_by_extent, grid_by_lonlat, cal_ext
+from er3t.util import  cal_ext
 
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
 from er3t.rtm.mca import mcarats_ng

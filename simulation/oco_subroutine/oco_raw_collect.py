@@ -10,7 +10,6 @@ from matplotlib import rcParams
 import er3t
 from er3t.util.modis import modis_l1b, modis_04
 
-from oco_subroutine.oco_subroutine import *
 from oco_subroutine.oco_modis_time import cal_sat_delta_t
 from oco_subroutine.oco_sfc import cal_sfc_alb_2d
 import matplotlib.image as mpl_img

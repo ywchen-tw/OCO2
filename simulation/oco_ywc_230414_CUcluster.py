@@ -48,7 +48,6 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca # newly added for phase function
 
-from oco_subroutine.oco_subroutine import *
 from oco_subroutine.oco_create_atm import create_oco_atm
 from oco_subroutine.oco_satellite import satellite_download
 from oco_subroutine.oco_cloud import para_corr, wind_corr

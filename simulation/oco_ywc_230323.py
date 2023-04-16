@@ -25,12 +25,12 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca # newly added for phase function
 
-from oco_subroutine.oco_subroutine import *
 from oco_subroutine.oco_create_atm import create_oco_atm
 from oco_subroutine.oco_satellite import satellite_download
 from oco_subroutine.oco_cfg import grab_cfg, save_h5_info
 from oco_subroutine.oco_abs_snd_sat import oco_abs
 from oco_subroutine.oco_raw_collect import cdata_sat_raw
+from oco_subroutine.oco_cloud import cdata_cld_ipa
 
 import timeit
 import argparse
@@ -194,6 +194,11 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         photons = photons*2
 
     # run mcarats
+    if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False:
+        run = False
+    else: 
+        run = True
+    print(wavelength)
     mca0 = mcarats_ng(
             date=date,
             atm_1ds=atm_1ds,
@@ -213,8 +218,9 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
             solver=solver,
             Ncpu=8,
             mp_mode='py',
-            overwrite=overwrite
+            overwrite=run
             )
+    
 
     # mcarats output
     out0 = mca_out_ng(fname='%s/mca-out-rad-oco2-%s_%.4fnm.h5' % (fdir, solver.lower(), wavelength), mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
@@ -261,6 +267,10 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         atm_3ds = [atm3d0]
 
         # run mcarats
+        if os.path.isdir('%s/%.4fnm/oco2/rad_%s0' % (fdir, wavelength, solver.lower())) and overwrite==False:
+            run = False
+        else: 
+            run = True
         mca0 = mcarats_ng(
                 date=date,
                 atm_1ds=atm_1ds,
@@ -279,7 +289,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
                 solver=solver,
                 Ncpu=8,
                 mp_mode='py',
-                overwrite=overwrite
+                overwrite=run,
                 )
 
         # mcarats output
@@ -746,7 +756,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # ===============================================================
     zpt_file = f'{fdir_data}/zpt.h5'
     zpt_file = os.path.abspath(zpt_file)
-    if 1:#not os.path.isfile(zpt_file):
+    if not os.path.isfile(zpt_file):
         create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
     # ===============================================================
 
@@ -758,7 +768,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
     iband_dict = {'o2a':0, 'wco2':1, 'sco2':2,}
     Trn_min = float(cfg_info['Trn_min'])
-    if 1:#not os.path.isfile(fname_abs):
+    if not os.path.isfile(fname_abs):
         oco_abs(cfg, zpt_file=zpt_file, iband=iband_dict[band_tag], nx=nx, Trn_min=Trn_min, pathout=fdir_data, reextract=False, plot=True)
     f = h5py.File(fname_abs, 'r')
     wvls = f['lamx'][...]*1000.0
@@ -766,7 +776,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(band_tag, sat0=sat０, overwrite=True, plot=True)
-    sys.exit()
+
     # ===============================================================
     """
     for solver in ['IPA', '3D']:
@@ -795,7 +805,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=True, photons=5e8)
+                                                      overwrite=False, photons=5e8)
     # ===============================================================
     #"""
 
@@ -819,7 +829,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -827,7 +837,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    """"
+    #""""
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()
