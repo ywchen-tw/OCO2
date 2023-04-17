@@ -438,7 +438,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     print(wvls)
     # ===============================================================
 
-    #"""
+    """
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
@@ -458,7 +458,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=False, photons=1e9)
+                                                      overwrite=True, photons=1e9)
     # ===============================================================
     #"""
 
