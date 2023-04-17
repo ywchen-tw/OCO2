@@ -90,7 +90,11 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         # print('Average sfc albedo: ', avg_sfc_alb)
         simulated_sfc_alb = sfc_alb_abs #if sfc_alb_abs is not None else avg_sfc_alb
         data['alb_2d']['data'][...] = simulated_sfc_alb
-
+    else:
+        avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
+        print('Average sfc albedo: ', avg_sfc_alb)
+        simulated_sfc_alb = avg_sfc_alb
+        
     mod43     = sat_tmp(data)
     fname_sfc = '%s/sfc.pk' % fdir
     sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=overwrite)
