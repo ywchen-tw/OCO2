@@ -1,8 +1,8 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks=2
+#SBATCH --ntasks-per-node=2
 #SBATCH --time=16:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -53,7 +53,8 @@ class sat_tmp:
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=None, 
                      photons=1e6, scale_factor=1.0, 
                      fdir='tmp-data', solver='3D', 
-                     sfc_alb_abs=None, sza_abs=None, overwrite=True):
+                     sfc_alb_abs=None, sza_abs=None, aod_550=None,
+                     overwrite=True):
 
     """
     Calculate OCO2 radiance using cloud (MODIS level 1b) and surface properties (MOD09A1) from MODIS
@@ -130,6 +131,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         # aod object
         # =================================================================================
         AOD_550_land_mean = f_pre_data['mod/aod/AOD_550_land_mean'][...]
+        if aod_550 is not None:
+            AOD_550_land_mean = aod_550
         Angstrom_Exponent_land_mean = f_pre_data['mod/aod/Angstrom_Exponent_land_mean'][...]
         SSA_land_mean = f_pre_data['mod/aod/SSA_660_land_mean'][...]
         # =================================================================================
@@ -324,7 +327,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
             plt.savefig('%s/mca-out-rad-modis-%s0_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
         plt.close(fig)
         # ------------------------------------------------------------------------------------------------------
-    return simulated_sfc_alb, sza
+    return simulated_sfc_alb, sza, AOD_550_land_mean
 
 def preprocess(cfg_info, sfc_alb=None, sza=None):
     # define date and region to study
@@ -400,7 +403,7 @@ def preprocess(cfg_info, sfc_alb=None, sza=None):
 
 
 
-def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
+def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
 
     # define date and region to study
     # ===============================================================
@@ -426,7 +429,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent, fname=fname_sat, overwrite=False)
     
     if sfc_alb != None:
-        fdir_tmp = os.path.abspath('tmp-data/%s_alb_%.3f_saz_%.1f/%s' % (name_tag, sfc_alb, sza, band_tag))
+        fdir_tmp = os.path.abspath('tmp-data/%s_alb_%.3f_sza_%.1f_aod550_%.2f/%s' % (name_tag, sfc_alb, sza, aod_550, band_tag))
     else:
         fdir_tmp = os.path.abspath('tmp-data/%s/%s' % (name_tag, band_tag))
     print(fdir_tmp)
@@ -462,8 +465,8 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
             simulated_sfc_alb, sza = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
-                                                      sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=True, photons=1e9)
+                                                      sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
+                                                      overwrite=True, photons=2e8)
     # ===============================================================
     #"""
 
@@ -475,13 +478,13 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     #"""
 
 
-def run_simulation(cfg, sfc_alb=None, sza=None):
+def run_simulation(cfg, sfc_alb=None, sza=None, aod_550=None):
     cfg_info = grab_cfg(cfg)
     preprocess(cfg_info, sfc_alb=sfc_alb, sza=sza)
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'o2'):
         starttime = timeit.default_timer()
-        o2_h5 = run_case('o2a', cfg_info, sfc_alb=sfc_alb, sza=sza)
+        o2_h5 = run_case('o2a', cfg_info, sfc_alb=sfc_alb, sza=sza, aod_550=aod_550)
         save_h5_info(cfg, 'o2', o2_h5)
         endtime = timeit.default_timer()
         print('O2A band duration:',(endtime-starttime)/3600.,' h')
@@ -491,7 +494,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
-        wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
+        wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza, aod_550=aod_550)
         save_h5_info(cfg, 'wco2', wco2_h5)
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
@@ -500,7 +503,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()
-        sco2_h5 = run_case('sco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
+        sco2_h5 = run_case('sco2', cfg_info, sfc_alb=sfc_alb, sza=sza, aod_550=aod_550)
         save_h5_info(cfg, 'sco2', sco2_h5)
         endtime = timeit.default_timer()
         print('SCO2 band duration:',(endtime-starttime)/3600.,' h')
@@ -513,13 +516,17 @@ if __name__ == '__main__':
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     print(cfg)
-    run_simulation(cfg) #done
+    #run_simulation(cfg) #done
+
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.4, sza=45)
     # run_simulation(cfg, sfc_alb=0.3, sza=45) #done
-    # run_simulation(cfg, sfc_alb=0.5, sza=45)
+    # run_simulation(cfg, sfc_alb=0.25, sza=45)
     # run_simulation(cfg, sfc_alb=0.2, sza=45)
+    # run_simulation(cfg, sfc_alb=0.15, sza=45)
     # run_simulation(cfg, sfc_alb=0.1, sza=45)
     # run_simulation(cfg, sfc_alb=0.05, sza=45)
-
+    # run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     # run_simulation(cfg, sfc_alb=0.3, sza=30)
     # run_simulation(cfg, sfc_alb=0.5, sza=30)
@@ -538,15 +545,15 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.15, sza=60)
 
     # run_simulation(cfg, sfc_alb=0.25, sza=30)
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
+    
     # run_simulation(cfg, sfc_alb=0.25, sza=60)
 
     # run_simulation(cfg, sfc_alb=0.4, sza=30)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
+    
     # run_simulation(cfg, sfc_alb=0.4, sza=60)
 
     # run_simulation(cfg, sfc_alb=0.025, sza=30)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
+    
     # run_simulation(cfg, sfc_alb=0.025, sza=60)
 
     
