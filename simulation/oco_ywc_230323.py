@@ -381,8 +381,8 @@ def preprocess(cfg_info, sfc_alb=None, sza=None):
         cdata_sat_raw(sat0=sat０, overwrite=True, plot=True)
 
     # ===============================================================
-    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
-    
+    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
+
 
 def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
 

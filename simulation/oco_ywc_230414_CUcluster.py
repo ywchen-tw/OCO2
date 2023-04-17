@@ -390,7 +390,7 @@ def preprocess(cfg_info, sfc_alb=None, sza=None):
         cdata_sat_raw(sat0=sat０, overwrite=True, plot=True)
 
     # ===============================================================
-    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
+    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
     # ===============================================================
 
 
@@ -445,7 +445,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
     for solver in ['IPA', '3D']:
-        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver, overwrite=False, case_name_tag=name_tag, photons=1e8)
+        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver, overwrite=False, case_name_tag=name_tag, photons=1e9)
         modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
