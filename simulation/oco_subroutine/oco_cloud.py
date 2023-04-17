@@ -19,169 +19,18 @@ import er3t
 from er3t.pre.atm import atm_atmmod
 from er3t.pre.abs import abs_16g
 from er3t.pre.cld import cld_sat
-from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
 from er3t.util import  cal_ext
 
-from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
+from er3t.rtm.mca import mca_atm_1d, mca_atm_3d
 from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca # newly added for phase function
-
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def cot_fitting_func(x, a, b, c):
      return (b + (a * x))/(b+x) + c
-
-class func_cot_vs_rad:
-    def __init__(self,
-                sat,
-                modl1b,
-                fdir,
-                wavelength,
-                sfc_albedo=0,
-                cth=3, 
-                ctt=250, 
-                cot=np.concatenate((np.arange(0.0, 1.0, 0.1),
-                                    np.arange(1.0, 10.0, 1.0),
-                                    np.arange(10.0, 20.0, 2.0),
-                                    np.arange(20.0, 50.0, 5.0),
-                                    np.arange(50.0, 100.0, 10.0),
-                                    np.arange(100.0, 200.0, 20.0),
-                                    np.arange(200.0, 401.0, 50.0))),
-                run=False,
-                ):
-
-        if not os.path.exists(fdir):
-            os.makedirs(fdir)
-
-        self.fdir       = fdir
-        self.wavelength = wavelength
-        self.cot        = cot
-        self.rad        = np.array([])
-
-        if run:
-            self.run_all(sat, modl1b, sfc_albedo, cth, ctt)
-
-        for i in range(self.cot.size):
-            cot0 = self.cot[i]
-            fname = '%s/mca-out-rad-3d_cot-%.2f.h5' % (self.fdir, cot0)
-            out0  = mca_out_ng(fname=fname, mode='all', squeeze=True)
-            self.rad = np.append(self.rad, out0.data['rad']['data'].mean())
-
-    def run_all(self, sat, modl1b, sfc_albedo, cth, ctt):
-        f = h5py.File(sat.fnames['oco_l1b'][0], 'r')
-        lon_oco_l1b = f['SoundingGeometry/sounding_longitude'][...]
-        lat_oco_l1b = f['SoundingGeometry/sounding_latitude'][...]
-        logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
-        sza = f['SoundingGeometry/sounding_solar_zenith'][...][logic].mean()
-        saa = f['SoundingGeometry/sounding_solar_azimuth'][...][logic].mean()
-        vza = f['SoundingGeometry/sounding_zenith'][...][logic].mean()
-        vaa = f['SoundingGeometry/sounding_azimuth'][...][logic].mean()
-        f.close()
-
-        for cot0 in self.cot:
-            print(cot0)
-            self.run_mca_one(modl1b, cot0, sza, saa, vza, vaa, sfc_albedo, cth, ctt)
-
-    def run_mca_one(self, modl1b, cot, sza, saa, vza, vaa, sfc_albedo, cth, ctt):
-
-        
-
-        """
-        levels    = np.linspace(0.0, 20.0, 21)
-        fname_atm = '%s/atm.pk' % self.fdir
-        atm0      = atm_atmmod(levels=levels, fname=fname_atm, overwrite=False)
-
-        fname_abs = '%s/abs.pk' % self.fdir
-        abs0      = abs_16g(wavelength=self.wavelength, fname=fname_abs, atm_obj=atm0, overwrite=False)
-        """
-
-        # atm object
-        # =================================================================================
-        levels    = np.array([ 0. ,  0.5,  1. ,  1.5,  2. ,  2.5,  3. ,  3.5,  4. ,  4.5,  5. , 5.5,  6. ,  6.5,  7. ,  7.5,  8. ,  8.5,  9. ,  9.5, 10. , 11. , 12. , 13. , 14. , 20. , 25. , 30. , 35. , 40. ])
-        fname_atm = '%s/atm.pk' % self.fdir
-        atm0      = atm_atmmod(levels=levels, fname=fname_atm, overwrite=True)
-        # =================================================================================
-
-        # abs object, in the future, we will implement OCO2 MET file for this
-        # =================================================================================
-        fname_abs = '%s/abs.pk' % self.fdir
-        abs0      = abs_16g(wavelength=650, fname=fname_abs, atm_obj=atm0, overwrite=True)
-        # =================================================================================
-
-        cot_2d    = np.zeros((2, 2), dtype=np.float64); cot_2d[...] = cot
-        cer_2d    = np.zeros((2, 2), dtype=np.float64); cer_2d[...] = 12.0
-        ext_3d    = np.zeros((2, 2, 2), dtype=np.float64)
-
-        fname_cld  = '%s/cld.pk' % self.fdir
-        #cld0          = cld_les(fname_nc=fname_les, fname=fname_les_pk, coarsen=[1, 1, 1, 1], overwrite=False)
-        cld0      = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=modl1b.data['cth_2d']['data'], cgt=0.5, dz=np.unique(atm0.lay['thickness']['data'])[0], overwrite=False)
-
-        cld0.lev['altitude']['data']    = cld0.lay['altitude']['data'][2:5]
-
-        cld0.lay['x']['data']           = np.array([0, 1])
-        cld0.lay['y']['data']           = np.array([0, 1])
-        cld0.lay['nx']['data']          = 2
-        cld0.lay['ny']['data']          = 2
-        cth_hist, cth_edges = np.histogram(cth, density=False, bins=25)
-        cth_index = np.argmax(cth_hist)
-        cld0.lay['altitude']['data']    = cth_edges[cth_index:cth_index+2]
-        #cld0.lay['pressure']['data']    = cld0.lay['pressure']['data'][2:4]
-        ctt_hist, ctt_edges = np.histogram(ctt, density=False, bins=25)
-        ctt_index = np.argmax(ctt_hist)
-        cld0.lay['temperature']['data'] = np.zeros((2, 2, 2))
-        cld0.lay['temperature']['data'][:,:, 0] = ctt_edges[ctt_index]
-        cld0.lay['temperature']['data'][:,:, 1] = ctt_edges[ctt_index+1]
-        cld0.lay['cot']['data']         = cot_2d
-        cld0.lay['thickness']['data']   = cld0.lay['thickness']['data'][2:4]
-
-        ext_3d[:, :, 0]  = cal_ext(cot_2d, cer_2d)/(cld0.lay['thickness']['data'].sum()*1000.0)
-        ext_3d[:, :, 1]  = cal_ext(cot_2d, cer_2d)/(cld0.lay['thickness']['data'].sum()*1000.0)
-        cld0.lay['extinction']['data']  = ext_3d
-
-        atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
-
-        fname_atm3d = '%s/mca_atm_3d.bin' % self.fdir
-        atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, fname='%s/mca_atm_3d.bin' % self.fdir, overwrite=True)
-
-        atm_1ds   = [atm1d0]
-        atm_3ds   = [atm3d0]
-
-        mca0 = mcarats_ng(
-                date=datetime.datetime(2016, 8, 29),
-                atm_1ds=atm_1ds,
-                atm_3ds=atm_3ds,
-                Ng=abs0.Ng,
-                target='radiance',
-                surface_albedo=sfc_albedo,
-                solar_zenith_angle=sza,
-                solar_azimuth_angle=-saa,
-                sensor_zenith_angle=vza,
-                sensor_azimuth_angle=vaa,
-                fdir='%s/%.2f/les_rad_3d' % (self.fdir, cot),
-                Nrun=1,
-                photons=1e6,
-                solver='3D',
-                Ncpu=24,
-                mp_mode='py',
-                overwrite=True)
-
-        out0 = mca_out_ng(fname='%s/mca-out-rad-3d_cot-%.2f.h5' % (self.fdir, cot), mca_obj=mca0, abs_obj=abs0, mode='all', squeeze=True, verbose=True)
-
-    def interp_from_rad(self, rad, method='cubic'):
-
-        f = interp1d(self.rad, self.cot, kind=method, bounds_error=False)
-
-        return f(rad)
-
-    def interp_from_cot(self, cot, method='cubic'):
-
-        f = interp1d(self.cot, self.rad, kind=method, bounds_error=False)
-
-        return f(cot)
-
 
 def para_corr(lon0, lat0, vza, vaa, cld_h, sfc_h, R_earth=6378000.0, verbose=True):
 
@@ -349,56 +198,40 @@ def rgb2hsv(rgb):
     return hsv
 
 
-def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=True):
-
-    # process wavelength
-    #/----------------------------------------------------------------------------\#
-    if oco_band.lower() == 'o2a':
-        wvl = 650
-        index_wvl = 0      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 860
-        index_wvl_sfc = 1  # select MODIS 860 nm band surface albedo for scaling
-    elif oco_band.lower() == 'wco2':
-        wvl = 1640
-        index_wvl = 5      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 1640
-        index_wvl_sfc = 5  # select MODIS 860 nm band surface albedo for scaling
-    elif oco_band.lower() == 'sco2':
-        wvl = 2130
-        index_wvl = 6      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 2130
-        index_wvl_sfc = 6  # select MODIS 860 nm band surface albedo for scaling
-    else:
-        msg = '\nError [cdata_sat_raw]: Currently, only <oco_band=\'o2a\'> is supported.>'
-        sys.exit(msg)
-    #\----------------------------------------------------------------------------/#
+def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=True):
 
     # read in data
     #/----------------------------------------------------------------------------\#
-    f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r')
-    extent = f0['extent'][...]
-    ref_2d = f0['mod/rad/ref_650'][...]
-    rad_2d = f0['mod/rad/rad_650'][...]
-    ref_470_2d = f0['mod/rad/ref_470'][...]
-    ref_550_2d = f0['mod/rad/ref_555'][...]
-    rgb    = f0['mod/rgb'][...]
-    cot_l2 = f0['mod/cld/cot_l2'][...]
-    cer_l2 = f0['mod/cld/cer_l2'][...]
-    lon_2d = f0['lon'][...]
-    lat_2d = f0['lat'][...]
-    cth = f0['mod/cld/cth_l2'][...]
-    sfh = f0['mod/geo/sfh'][...]
-    sza = f0['mod/geo/sza'][...]
-    saa = f0['mod/geo/saa'][...]
-    vza = f0['mod/geo/vza'][...]
-    vaa = f0['mod/geo/vaa'][...]
-    alb = f0['mod/sfc/alb_43_%d' % wvl_sfc][...]
-    alb_470 = f0['mod/sfc/alb_43_470'][...]
-    alb_oco = f0['oco/sfc/alb_%s_2d' % oco_band.lower()][...]
-    u_10m = f0['oco/met/u_10m'][...]
-    v_10m = f0['oco/met/v_10m'][...]
-    delta_t = f0['oco/met/delta_t'][...]
-    f0.close()
+    # f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r')
+    # extent = f0['extent'][...]
+    # ref_2d = f0['mod/rad/ref_650'][...]
+    # rad_2d = f0['mod/rad/rad_650'][...]
+    # ref_470_2d = f0['mod/rad/ref_470'][...]
+    # ref_550_2d = f0['mod/rad/ref_555'][...]
+    # rgb    = f0['mod/rgb'][...]
+    # cot_l2 = f0['mod/cld/cot_l2'][...]
+    # cer_l2 = f0['mod/cld/cer_l2'][...]
+    # lon_2d = f0['lon'][...]
+    # lat_2d = f0['lat'][...]
+    # cth = f0['mod/cld/cth_l2'][...]
+    # sfh = f0['mod/geo/sfh'][...]
+    # sza = f0['mod/geo/sza'][...]
+    # saa = f0['mod/geo/saa'][...]
+    # vza = f0['mod/geo/vza'][...]
+    # vaa = f0['mod/geo/vaa'][...]
+    # alb = f0['mod/sfc/alb_43_%d' % wvl_sfc][...]
+    # alb_470 = f0['mod/sfc/alb_43_470'][...]
+    # alb_oco = f0['oco/sfc/alb_%s_2d' % oco_band.lower()][...]
+    # u_10m = f0['oco/met/u_10m'][...]
+    # v_10m = f0['oco/met/v_10m'][...]
+    # delta_t = f0['oco/met/delta_t'][...]
+    # f0.close()
+    with h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r') as f0:
+        extent, ref_2d, ref_470_2d, rgb, cot_l2, cer_l2, lon_2d, lat_2d, cth, sfh, sza, saa, vza, vaa, alb_650, alb_470, u_10m, v_10m, delta_t = \
+            [np.array(f0[k][...]) for k in ['extent', 'mod/rad/ref_650', 'mod/rad/ref_470', 'mod/rgb', 'mod/cld/cot_l2', 'mod/cld/cer_l2', 
+                                            'lon', 'lat', 'mod/cld/cth_l2', 'mod/geo/sfh', 'mod/geo/sza', 'mod/geo/saa', 'mod/geo/vza', 
+                                            'mod/geo/vaa', f"mod/sfc/alb_43_650", 'mod/sfc/alb_43_470', 
+                                            'oco/met/u_10m', 'oco/met/v_10m', 'oco/met/delta_t']]
     #\----------------------------------------------------------------------------/#
 
 
@@ -461,15 +294,18 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
     # product before assigning CTH to cloudy pixels we selected from reflectance
     # field, where the clouds have not yet been parallax corrected
     #/--------------------------------------------------------------\#
-    data0 = np.zeros(ref_2d.shape, dtype=np.int32)
+    data0 = np.zeros_like(ref_2d)
     data0[indices_x, indices_y] = 1
 
-    data = np.zeros(cth.shape, dtype=np.int32)
+    data = np.zeros_like(cth)
     data[cth>0.0] = 1
 
     offset_dx, offset_dy = er3t.util.move_correlate(data0, data)
-    dlon = (lon_2d[1, 0]-lon_2d[0, 0]) * offset_dx
-    dlat = (lat_2d[0, 1]-lat_2d[0, 0]) * offset_dy
+    # dlon = (lon_2d[1, 0]-lon_2d[0, 0]) * offset_dx
+    # dlat = (lat_2d[0, 1]-lat_2d[0, 0]) * offset_dy
+    dlon_lat = np.array([lon_2d[1, 0]-lon_2d[0, 0], lat_2d[0, 1]-lat_2d[0, 0]])
+    dlon_lat *= np.array([offset_dx, offset_dy])#[:, np.newaxis, np.newaxis]
+    dlon, dlat = dlon_lat
 
     lon_2d_ = lon_2d + dlon
     lat_2d_ = lat_2d + dlat
@@ -515,7 +351,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
                     fdir=fdir,
                     date=sat0.date,
                     wavelength=650,
-                    surface_albedo=alb.mean(),
+                    surface_albedo=alb_650.mean(),
                     solar_zenith_angle=sza.mean(),
                     solar_azimuth_angle=saa.mean(),
                     sensor_zenith_angle=vza.mean(),
@@ -536,7 +372,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
                     fdir=fdir,
                     date=sat0.date,
                     wavelength=650,
-                    surface_albedo=alb.mean(),
+                    surface_albedo=alb_650.mean(),
                     solar_zenith_angle=sza.mean(),
                     solar_azimuth_angle=saa.mean(),
                     sensor_zenith_angle=vza.mean(),
@@ -701,109 +537,72 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
     # write cot_ipa into file
     #/----------------------------------------------------------------------------\#
-    f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r+')
-    try:
-        f0['mod/cld/cot_ipa0_650'] = cot_ipa0_650
-        f0['mod/cld/cer_ipa0_650'] = cer_ipa0_650
-        f0['mod/cld/cth_ipa0_650'] = cth_ipa0_650
-        f0['mod/cld/cot_ipa'] = cot_ipa
-        f0['mod/cld/cer_ipa'] = cer_ipa
-        f0['mod/cld/cth_ipa'] = cth_ipa
-        f0['mod/cld/cot_ipa0'] = cot_ipa_
-        f0['mod/cld/cer_ipa0'] = cer_ipa_
-        f0['mod/cld/cth_ipa0'] = cth_ipa_
-        f0['mod/cld/logic_cld'] = (cld_msk==1)
-        f0['mod/cld/logic_cld0'] = (cld_msk_==1)
-    except:
-        del(f0['mod/cld/cot_ipa0_650'])
-        del(f0['mod/cld/cer_ipa0_650'])
-        del(f0['mod/cld/cth_ipa0_650'])
-        del(f0['mod/cld/cot_ipa'])
-        del(f0['mod/cld/cer_ipa'])
-        del(f0['mod/cld/cth_ipa'])
-        del(f0['mod/cld/cot_ipa0'])
-        del(f0['mod/cld/cer_ipa0'])
-        del(f0['mod/cld/cth_ipa0'])
-        del(f0['mod/cld/logic_cld'])
-        del(f0['mod/cld/logic_cld0'])
-        f0['mod/cld/cot_ipa0_650'] = cot_ipa0_650
-        f0['mod/cld/cer_ipa0_650'] = cer_ipa0_650
-        f0['mod/cld/cth_ipa0_650'] = cth_ipa0_650
-        f0['mod/cld/cot_ipa'] = cot_ipa
-        f0['mod/cld/cer_ipa'] = cer_ipa
-        f0['mod/cld/cth_ipa'] = cth_ipa
-        f0['mod/cld/cot_ipa0'] = cot_ipa0
-        f0['mod/cld/cer_ipa0'] = cer_ipa0
-        f0['mod/cld/cth_ipa0'] = cth_ipa0
-        f0['mod/cld/logic_cld'] = (cld_msk==1)
-        f0['mod/cld/logic_cld0'] = (cld_msk_==1)
-    try:
+    with h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r+') as f0:
+        # Update or create groups with try-except blocks
+        group_data = {'mod/cld/cot_ipa0_650': cot_ipa0_650,
+                      'mod/cld/cer_ipa0_650': cer_ipa0_650,
+                      'mod/cld/cth_ipa0_650': cth_ipa0_650,
+                      'mod/cld/cot_ipa': cot_ipa,
+                      'mod/cld/cer_ipa': cer_ipa,
+                      'mod/cld/cth_ipa': cth_ipa,
+                      'mod/cld/cot_ipa0': cot_ipa0,
+                      'mod/cld/cer_ipa0': cer_ipa0,
+                      'mod/cld/cth_ipa0': cth_ipa0,
+                      'mod/cld/logic_cld': (cld_msk==1),
+                      'mod/cld/logic_cld0': (cld_msk_==1)
+                      }
+
+        for group_name, group_data in group_data.items():
+            if f0.get(group_name):
+                del f0[group_name]
+            f0[group_name] = group_data
+
+        # Delete and create cld_msk group
+        if f0.get('cld_msk'):
+            del f0['cld_msk']
+            
         g0 = f0.create_group('cld_msk')
-        g0['indices_x0'] = indices_x0
-        g0['indices_y0'] = indices_y0
-        g0['indices_x']  = indices_x
-        g0['indices_y']  = indices_y
-    except:
-        del(f0['cld_msk/indices_x0'])
-        del(f0['cld_msk/indices_y0'])
-        del(f0['cld_msk/indices_x'])
-        del(f0['cld_msk/indices_y'])
-        del(f0['cld_msk'])
-        g0 = f0.create_group('cld_msk')
-        g0['indices_x0'] = indices_x0
-        g0['indices_y0'] = indices_y0
-        g0['indices_x']  = indices_x
-        g0['indices_y']  = indices_y
-    try:
+        g0.update({
+            f'indices_{suffix}': indices for suffix, indices in [
+                ('x0', indices_x0),
+                ('y0', indices_y0),
+                ('x', indices_x),
+                ('y', indices_y)
+            ]
+        })
+
+
+        # Delete and create mca_ipa_thick group
+        if f0.get('mca_ipa_thick'):
+            del f0['mca_ipa_thick']
         g0 = f0.create_group('mca_ipa_thick')
-        g0['cot'] = f_mca_thick.cot
-        g0['ref'] = f_mca_thick.ref
-        g0['ref_std'] = f_mca_thick.ref_std
+        g0.update({
+            'cot': f_mca_thick.cot,
+            'ref': f_mca_thick.ref,
+            'ref_std': f_mca_thick.ref_std
+        })
+        # Delete and create mca_ipa_thin group
+        if f0.get('mca_ipa_thin'):
+            del f0['mca_ipa_thin']
         g0 = f0.create_group('mca_ipa_thin')
-        g0['cot'] = f_mca_thin.cot
-        g0['ref'] = f_mca_thin.ref
-        g0['ref_std'] = f_mca_thin.ref_std
-    except:
-        del(f0['mca_ipa_thick/cot'])
-        del(f0['mca_ipa_thick/ref'])
-        del(f0['mca_ipa_thick/ref_std'])
-        del(f0['mca_ipa_thick'])
-        del(f0['mca_ipa_thin/cot'])
-        del(f0['mca_ipa_thin/ref'])
-        del(f0['mca_ipa_thin/ref_std'])
-        del(f0['mca_ipa_thin'])
-        g0 = f0.create_group('mca_ipa_thick')
-        g0['cot'] = f_mca_thick.cot
-        g0['ref'] = f_mca_thick.ref
-        g0['ref_std'] = f_mca_thick.ref_std
-        g0 = f0.create_group('mca_ipa_thin')
-        g0['cot'] = f_mca_thin.cot
-        g0['ref'] = f_mca_thin.ref
-        g0['ref_std'] = f_mca_thin.ref_std
-    try:
+        g0.update({
+            'cot': f_mca_thin.cot,
+            'ref': f_mca_thin.ref,
+            'ref_std': f_mca_thin.ref_std
+        })
+
+        # Delete and create cld_corr group
+        if f0.get('cld_corr'):
+            del f0['cld_corr']
         g0 = f0.create_group('cld_corr')
-        g0['lon_ori'] = lon_cld
-        g0['lat_ori'] = lat_cld
-        g0['lon_corr_p'] = lon_corr_p
-        g0['lat_corr_p'] = lat_corr_p
-        g0['lon_corr'] = lon_corr
-        g0['lat_corr'] = lat_corr
-    except:
-        del(f0['cld_corr/lon_ori'])
-        del(f0['cld_corr/lat_ori'])
-        del(f0['cld_corr/lon_corr_p'])
-        del(f0['cld_corr/lat_corr_p'])
-        del(f0['cld_corr/lon_corr'])
-        del(f0['cld_corr/lat_corr'])
-        del(f0['cld_corr'])
-        g0 = f0.create_group('cld_corr')
-        g0['lon_ori'] = lon_cld
-        g0['lat_ori'] = lat_cld
-        g0['lon_corr_p'] = lon_corr_p
-        g0['lat_corr_p'] = lat_corr_p
-        g0['lon_corr'] = lon_corr
-        g0['lat_corr'] = lat_corr
-    f0.close()
+        g0.update({
+            'lon_ori': lon_cld,
+            'lat_ori': lat_cld,
+            'lon_corr_p': lon_corr_p,
+            'lat_corr_p': lat_corr_p,
+            'lon_corr': lon_corr,
+            'lat_corr': lat_corr
+        })
     #\----------------------------------------------------------------------------/#
 
     if plot:
@@ -831,7 +630,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         #/----------------------------------------------------------------------------\#
         ax2 = fig.add_subplot(442)
         cs = ax2.imshow(ref_2d.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=1.0)
-        ax2.set_title('L1B Reflectance (%d nm)' % wvl)
+        ax2.set_title('L1B Reflectance (650 nm)')
 
         divider = make_axes_locatable(ax2)
         cax = divider.append_axes('right', '5%', pad='3%')
@@ -862,9 +661,31 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         cax.axis('off')
         #\----------------------------------------------------------------------------/#
 
+        # 470 reflectance (MODIS)
+        #/----------------------------------------------------------------------------\#
+        ax17 = fig.add_subplot(4, 4, 5)
+        cs = ax17.imshow(ref_470_2d.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=0.4)
+        ax17.set_title('MODIS 470nm (filled and scaled)')
+
+        divider = make_axes_locatable(ax17)
+        cax = divider.append_axes('right', '5%', pad='3%')
+        cbar = fig.colorbar(cs, cax=cax)
+        #\----------------------------------------------------------------------------/#
+
+        # surface albedo (MYD43A3, white sky albedo)
+        #/----------------------------------------------------------------------------\#
+        ax16 = fig.add_subplot(4, 4, 9)
+        cs = ax16.imshow(alb_470.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=0.4)
+        ax16.set_title('43A3 WSA  470nm(filled and scaled)')
+
+        divider = make_axes_locatable(ax16)
+        cax = divider.append_axes('right', '5%', pad='3%')
+        cbar = fig.colorbar(cs, cax=cax)
+        #\----------------------------------------------------------------------------/#
+
         # cot l2
         #/----------------------------------------------------------------------------\#
-        ax5 = fig.add_subplot(445)
+        ax5 = fig.add_subplot(446)
         cs = ax5.imshow(cot_l2.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=50.0)
         ax5.set_title('L2 COT')
 
@@ -875,7 +696,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cer l2
         #/----------------------------------------------------------------------------\#
-        ax6 = fig.add_subplot(446)
+        ax6 = fig.add_subplot(447)
         cs = ax6.imshow(cer_l2.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=30.0)
         ax6.set_title('L2 CER [$\mu m$]')
 
@@ -886,7 +707,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cth l2
         #/----------------------------------------------------------------------------\#
-        ax7 = fig.add_subplot(447)
+        ax7 = fig.add_subplot(448)
         cs = ax7.imshow(cth.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=15.0)
         ax7.set_title('L2 CTH [km]')
 
@@ -897,7 +718,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cot ipa0
         #/----------------------------------------------------------------------------\#
-        ax9 = fig.add_subplot(449)
+        ax9 = fig.add_subplot(4,4,10)
         cs = ax9.imshow(cot_ipa0.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=50.0)
         ax9.set_title('New IPA COT')
 
@@ -908,7 +729,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cer ipa0
         #/----------------------------------------------------------------------------\#
-        ax10 = fig.add_subplot(4, 4, 10)
+        ax10 = fig.add_subplot(4, 4, 11)
         cs = ax10.imshow(cer_ipa0.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=30.0)
         ax10.set_title('New L2 CER [$\mu m$]')
 
@@ -919,7 +740,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cth ipa0
         #/----------------------------------------------------------------------------\#
-        ax11 = fig.add_subplot(4, 4, 11)
+        ax11 = fig.add_subplot(4, 4, 12)
         cs = ax11.imshow(cth_ipa0.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=15.0)
         ax11.set_title('New L2 CTH [km]')
 
@@ -930,7 +751,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cot_ipa
         #/----------------------------------------------------------------------------\#
-        ax13 = fig.add_subplot(4, 4, 13)
+        ax13 = fig.add_subplot(4, 4, 14)
         cs = ax13.imshow(cot_ipa.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=50.0)
         ax13.set_title('New IPA COT (Para. Corr.)')
 
@@ -941,7 +762,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cer_ipa
         #/----------------------------------------------------------------------------\#
-        ax14 = fig.add_subplot(4, 4, 14)
+        ax14 = fig.add_subplot(4, 4, 15)
         cs = ax14.imshow(cer_ipa.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=30.0)
         ax14.set_title('New L2 CER [$\mu m$] (Para. Corr.)')
 
@@ -952,7 +773,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
 
         # cth_ipa
         #/----------------------------------------------------------------------------\#
-        ax15 = fig.add_subplot(4, 4, 15)
+        ax15 = fig.add_subplot(4, 4, 16)
         cs = ax15.imshow(cth_ipa.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=15.0)
         ax15.set_title('New L2 CTH [km] (Para. Corr.)')
 
@@ -961,16 +782,7 @@ def cdata_cld_ipa(oco_band, sat0, fdir_data, fdir_cot, zpt_file, ref_threshold, 
         cbar = fig.colorbar(cs, cax=cax)
         #\----------------------------------------------------------------------------/#
 
-        # surface albedo (MYD43A3, white sky albedo)
-        #/----------------------------------------------------------------------------\#
-        ax16 = fig.add_subplot(4, 4, 16)
-        cs = ax16.imshow(alb_oco.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=0.4)
-        ax16.set_title('43A3 WSA (filled and scaled)')
-
-        divider = make_axes_locatable(ax16)
-        cax = divider.append_axes('right', '5%', pad='3%')
-        cbar = fig.colorbar(cs, cax=cax)
-        #\----------------------------------------------------------------------------/#
+        
         ax_list = [f'ax{num}' for num in range(1, 17)]
         ax_list.remove('ax8')
         ax_list.remove('ax12')

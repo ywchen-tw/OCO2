@@ -1,11 +1,9 @@
 import os
 import sys
-import glob
 import h5py
 import numpy as np
 import pandas as pd
 import datetime
-import time
 from scipy import stats as st
 import matplotlib as mpl
 #mpl.use('Agg')
@@ -17,9 +15,7 @@ from er3t.pre.abs import abs_oco_h5
 from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc # newly added for phase function
-from er3t.util.modis import modis_l1b
 from er3t.util.oco2 import oco2_std
-from er3t.util import grid_by_extent
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
 from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
@@ -31,10 +27,10 @@ from oco_subroutine.oco_cfg import grab_cfg, save_h5_info
 from oco_subroutine.oco_abs_snd_sat import oco_abs
 from oco_subroutine.oco_raw_collect import cdata_sat_raw
 from oco_subroutine.oco_cloud import cdata_cld_ipa
+from oco_subroutine.oco_post_process import cdata_all
+from oco_subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
 
 import timeit
-import argparse
-
 
 
 
@@ -72,19 +68,18 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     # mca_sfc object
     # =================================================================================
     #"""
-    data = {}
-    f_pre_data = h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r')
-    data['alb_2d'] = dict(data=f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], name='Surface albedo', units='N/A')
-    data['lon_2d'] = dict(data=f_pre_data['mod/sfc/lon'][...], name='Longitude', units='degrees')
-    data['lat_2d'] = dict(data=f_pre_data['mod/sfc/lat'][...], name='Latitude' , units='degrees')
+    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+        data = {
+            'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
+            'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
+            'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}
+        }
 
     #"""
-    avg_sfc_alb = np.nanmean(data['alb_2d']['data'][...])
+    avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
     print('Average sfc albedo: ', avg_sfc_alb)
-    simulated_sfc_alb = avg_sfc_alb
-    if sfc_alb_abs != None:
-        simulated_sfc_alb = sfc_alb_abs
-        data['alb_2d']['data'][...] = simulated_sfc_alb
+    simulated_sfc_alb = sfc_alb_abs if sfc_alb_abs is not None else avg_sfc_alb
+    data['alb_2d'] = {'data': simulated_sfc_alb, 'name': 'Surface albedo', 'units': 'N/A'}
 
     mod43     = sat_tmp(data)
     fname_sfc = '%s/sfc.pk' % fdir
@@ -102,37 +97,38 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
 
     # cld object
     # =================================================================================
-    data = {}
-    data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f_pre_data['lon'][...])
-    data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
-    data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
-    if solver.lower() == 'ipa':
-        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data['mod/cld/cot_ipa0'][...])
-        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data['mod/cld/cer_ipa0'][...])
-        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data['mod/cld/cth_ipa0'][...])
-    elif solver.lower() == '3d':
-        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data['mod/cld/cot_ipa'][...])
-        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data['mod/cld/cer_ipa'][...])
-        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data['mod/cld/cth_ipa'][...])
+    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+        data = {}
+        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f_pre_data['lon'][...])
+        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
+        data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
+        if solver.lower() == 'ipa':
+            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data['mod/cld/cot_ipa0'][...])
+            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data['mod/cld/cer_ipa0'][...])
+            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data['mod/cld/cth_ipa0'][...])
+        elif solver.lower() == '3d':
+            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data['mod/cld/cot_ipa'][...])
+            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data['mod/cld/cer_ipa'][...])
+            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data['mod/cld/cth_ipa'][...])
 
-    # =================================================================================
+        # =================================================================================
 
-    # aod object
-    # =================================================================================
-    AOD_550_land_mean = f_pre_data['mod/aod/AOD_550_land_mean'][...]
-    Angstrom_Exponent_land_mean = f_pre_data['mod/aod/Angstrom_Exponent_land_mean'][...]
-    SSA_land_mean = f_pre_data['mod/aod/SSA_660_land_mean'][...]
-    # =================================================================================
+        # aod object
+        # =================================================================================
+        AOD_550_land_mean = f_pre_data['mod/aod/AOD_550_land_mean'][...]
+        Angstrom_Exponent_land_mean = f_pre_data['mod/aod/Angstrom_Exponent_land_mean'][...]
+        SSA_land_mean = f_pre_data['mod/aod/SSA_660_land_mean'][...]
+        # =================================================================================
 
-    modl1b    =  sat_tmp(data)
-    fname_cld = '%s/cld.pk' % fdir
-    cth0 = modl1b.data['cth_2d']['data']
-    cth0[cth0>10.0] = 10.0
-    cgt0 = np.zeros_like(cth0)
-    cgt0[cth0>0.0] = 1.0                  # all clouds have geometrical thickness of 1 km
-    cgt0[cth0>4.0] = cth0[cth0>4.0]-3.0   # high clouds (cth>4km) has cloud base at 3 km
-    cld0      = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
-                        overwrite=overwrite)
+        modl1b    =  sat_tmp(data)
+        fname_cld = '%s/cld.pk' % fdir
+        cth0 = modl1b.data['cth_2d']['data']
+        cth0[cth0>10.0] = 10.0
+        cgt0 = np.zeros_like(cth0)
+        cgt0[cth0>0.0] = 1.0                  # all clouds have geometrical thickness of 1 km
+        cgt0[cth0>4.0] = cth0[cth0>4.0]-3.0   # high clouds (cth>4km) has cloud base at 3 km
+        cld0      = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
+                            overwrite=overwrite)
     # =================================================================================
 
 
@@ -157,7 +153,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
     aer_ext = aod / (atm0.lay['thickness']['data'].sum()*1000.0)
 
-    #atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
+    atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
     # data can be accessed at
     #     atm1d0.nml[ig]['Atm_zgrd0']['data']
     #     atm1d0.nml[ig]['Atm_wkd0']['data']
@@ -174,19 +170,19 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     atm_1ds = [atm1d0]
     atm_3ds = [atm3d0]
 
-    f_pre_data.close()
     # =================================================================================
 
+    
 
-    f_oco_l1b = h5py.File(sat.fnames['oco_l1b'][0], 'r')
-    lon_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_longitude'][...]
-    lat_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_latitude'][...]
-    logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
-    sza = f_oco_l1b['SoundingGeometry/sounding_solar_zenith'][...][logic].mean()
-    saa = f_oco_l1b['SoundingGeometry/sounding_solar_azimuth'][...][logic].mean()
-    vza = f_oco_l1b['SoundingGeometry/sounding_zenith'][...][logic].mean()
-    vaa = f_oco_l1b['SoundingGeometry/sounding_azimuth'][...][logic].mean()
-    f_oco_l1b.close()
+    with h5py.File(sat.fnames['oco_l1b'][0], 'r') as f_oco_l1b:
+        lon_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_longitude'][...]
+        lat_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_latitude'][...]
+        logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
+        sza = f_oco_l1b['SoundingGeometry/sounding_solar_zenith'][...][logic].mean()
+        saa = f_oco_l1b['SoundingGeometry/sounding_solar_azimuth'][...][logic].mean()
+        vza = f_oco_l1b['SoundingGeometry/sounding_zenith'][...][logic].mean()
+        vaa = f_oco_l1b['SoundingGeometry/sounding_azimuth'][...][logic].mean()
+
     if sza_abs != None:
         sza = sza_abs
 
@@ -194,11 +190,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         photons = photons*2
 
     # run mcarats
-    if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False:
-        run = False
-    else: 
-        run = True
-    print(wavelength)
+    run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
     mca0 = mcarats_ng(
             date=date,
             atm_1ds=atm_1ds,
@@ -267,10 +259,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         atm_3ds = [atm3d0]
 
         # run mcarats
-        if os.path.isdir('%s/%.4fnm/oco2/rad_%s0' % (fdir, wavelength, solver.lower())) and overwrite==False:
-            run = False
-        else: 
-            run = True
+        run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
         mca0 = mcarats_ng(
                 date=date,
                 atm_1ds=atm_1ds,
@@ -323,380 +312,77 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         # ------------------------------------------------------------------------------------------------------
     return simulated_sfc_alb, sza
 
+def preprocess(cfg_info, sfc_alb=None, sza=None):
+    # define date and region to study
+    # ===============================================================
+    date   = datetime.datetime(int(cfg_info['date'][:4]),    # year
+                               int(cfg_info['date'][4:6]),   # month
+                               int(cfg_info['date'][6:])     # day
+                              )
+    extent = [float(loc) for loc in cfg_info['subdomain']]
+    extent[0] -= 0.15 
+    extent[1] += 0.15
+    extent[2] -= 0.15 
+    extent[3] += 0.15
+    print(f'simulation extent: {extent}')
+    ref_threshold = float(cfg_info['ref_threshold'])
 
-def convert_photon_unit(data_photon, wavelength, scale_factor=2.0):
+    name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
+    # ===============================================================
 
-    c = 299792458.0
-    h = 6.62607015e-34
-    wavelength = wavelength * 1e-9
-    data = data_photon/1000.0*c*h/wavelength*scale_factor
+    # create data/australia_YYYYMMDD directory if it does not exist
+    # ===============================================================
+    fdir_data = os.path.abspath('data/%s' % name_tag)
+    if not os.path.exists(fdir_data):
+        os.makedirs(fdir_data)
+    # ===============================================================
 
-    return data
+    # download satellite data based on given date and region
+    # ===============================================================
+    fname_sat = '%s/sat.pk' % fdir_data
+    sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent, fname=fname_sat, overwrite=False)
+    # ===============================================================
+    if not ('l2' in cfg_info.keys()):
+        oco_data_dict = {'l2': 'oco_std',
+                         'met': 'oco_met',
+                         'l1b': 'oco_l1b',
+                         'lt': 'oco_lite',
+                         'dia': 'oco_dia',
+                         'imap': 'oco_imap',
+                         'co2prior': 'oco_co2prior'}
+        for key in oco_data_dict.keys():
+            save_h5_info(cfg_info['cfg_path'], key, sat0.fnames[oco_data_dict[key]][0].split('/')[-1])
+    # create tmp-data/australia_YYYYMMDD directory if it does not exist
+    # ===============================================================
+    fdir_cot_tmp = os.path.abspath('tmp-data/%s/cot' % (name_tag))
+    if not os.path.exists(fdir_cot_tmp):
+        os.makedirs(fdir_cot_tmp)
+    # ===============================================================
 
-class oco2_rad_nadir:
-
-    def __init__(self, sat, tag):
-
-        self.fname_l1b = sat.fnames['oco_l1b'][0]
-        self.fname_std = sat.fnames['oco_std'][0]
-
-        self.extent = sat.extent
-
-        # =================================================================================
-        self.cal_wvl()
-        # after this, the following three functions will be created
-        # Input: index, range from 0 to 7, e.g., 0, 1, 2, ..., 7
-        # self.get_wvl_o2_a(index)
-        # self.get_wvl_co2_weak(index)
-        # self.get_wvl_co2_strong(index)
-        # =================================================================================
-
-        # =================================================================================
-        self.get_index(self.extent)
-        # after this, the following attributes will be created
-        # self.index_s: starting index
-        # self.index_e: ending index
-        # =================================================================================
-
-        # =================================================================================
-        self.overlap(index_s=self.index_s, index_e=self.index_e)
-        # after this, the following attributes will be created
-        # self.logic_l1b
-        # self.lon_l1b
-        # self.lat_l1b
-        # =================================================================================
-
-        # =================================================================================
-        self.get_data(index_s=self.index_s, index_e=self.index_e)
-        # after this, the following attributes will be created
-        # self.rad_o2_a
-        # self.rad_co2_weak
-        # self.rad_co2_strong
-        # =================================================================================
-
-    def cal_wvl(self, Nchan=1016):
-
-        """
-        Oxygen A band: centered at 765 nm
-        Weak CO2 band: centered at 1610 nm
-        Strong CO2 band: centered at 2060 nm
-        """
-
-        f = h5py.File(self.fname_l1b, 'r')
-        wvl_coef = f['InstrumentHeader/dispersion_coef_samp'][...]
-        f.close()
-
-        Nspec, Nfoot, Ncoef = wvl_coef.shape
-
-        wvl_o2_a       = np.zeros((Nfoot, Nchan), dtype=np.float64)
-        wvl_co2_weak   = np.zeros((Nfoot, Nchan), dtype=np.float64)
-        wvl_co2_strong = np.zeros((Nfoot, Nchan), dtype=np.float64)
-
-        chan = np.arange(1, Nchan+1)
-        for i in range(Nfoot):
-            for j in range(Ncoef):
-                wvl_o2_a[i, :]       += wvl_coef[0, i, j]*chan**j
-                wvl_co2_weak[i, :]   += wvl_coef[1, i, j]*chan**j
-                wvl_co2_strong[i, :] += wvl_coef[2, i, j]*chan**j
-
-        wvl_o2_a       *= 1000.0
-        wvl_co2_weak   *= 1000.0
-        wvl_co2_strong *= 1000.0
-
-        self.get_wvl_o2_a       = lambda index: wvl_o2_a[index, :]
-        self.get_wvl_co2_weak   = lambda index: wvl_co2_weak[index, :]
-        self.get_wvl_co2_strong = lambda index: wvl_co2_strong[index, :]
-
-    def get_index(self, extent):
-
-        if extent is None:
-            self.index_s = 0
-            self.index_e = None
-        else:
-            f = h5py.File(self.fname_l1b, 'r')
-            lon_l1b     = f['SoundingGeometry/sounding_longitude'][...]
-            lat_l1b     = f['SoundingGeometry/sounding_latitude'][...]
-
-            logic = (lon_l1b>=extent[0]) & (lon_l1b<=extent[1]) & (lat_l1b>=extent[2]) & (lat_l1b<=extent[3])
-            indices = np.where(np.sum(logic, axis=1)>0)[0]
-            self.index_s = indices[0]
-            self.index_e = indices[-1]
-
-    def overlap(self, index_s=0, index_e=None, lat0=0.0, lon0=0.0):
-
-        f       = h5py.File(self.fname_l1b, 'r')
-        if index_e is None:
-            lon_l1b = f['SoundingGeometry/sounding_longitude'][...][index_s:, ...]
-            lat_l1b = f['SoundingGeometry/sounding_latitude'][...][index_s:, ...]
-            lon_l1b_o2a = f['FootprintGeometry/footprint_longitude'][...][index_s:, ..., 0]
-            lat_l1b_o2a = f['FootprintGeometry/footprint_latitude'][...][index_s:, ..., 0]
-            lon_l1b_wco2 = f['FootprintGeometry/footprint_longitude'][...][index_s:, ..., 1]
-            lat_l1b_wco2 = f['FootprintGeometry/footprint_latitude'][...][index_s:, ..., 1]
-            lon_l1b_sco2 = f['FootprintGeometry/footprint_longitude'][...][index_s:, ..., 2]
-            lat_l1b_sco2 = f['FootprintGeometry/footprint_latitude'][...][index_s:, ..., 2]
-            snd_id_l1b  = f['SoundingGeometry/sounding_id'][...][index_s:, ...]
-        else:
-            lon_l1b     = f['SoundingGeometry/sounding_longitude'][...][index_s:index_e, ...]
-            lat_l1b     = f['SoundingGeometry/sounding_latitude'][...][index_s:index_e, ...]
-            lon_l1b_o2a = f['FootprintGeometry/footprint_longitude'][...][index_s:index_e, ..., 0]
-            lat_l1b_o2a = f['FootprintGeometry/footprint_latitude'][...][index_s:index_e, ..., 0]
-            lon_l1b_wco2 = f['FootprintGeometry/footprint_longitude'][...][index_s:index_e, ..., 1]
-            lat_l1b_wco2 = f['FootprintGeometry/footprint_latitude'][...][index_s:index_e, ..., 1]
-            lon_l1b_sco2 = f['FootprintGeometry/footprint_longitude'][...][index_s:index_e, ..., 2]
-            lat_l1b_sco2 = f['FootprintGeometry/footprint_latitude'][...][index_s:index_e, ..., 2]
-            snd_id_l1b  = f['SoundingGeometry/sounding_id'][...][index_s:index_e, ...]
-        f.close()
-
-        shape    = lon_l1b.shape
-        lon_l1b  = lon_l1b
-        lat_l1b  = lat_l1b
-        lon_l1b_o2a  = lon_l1b_o2a
-        lat_l1b_o2a  = lat_l1b_o2a
-        lon_l1b_wco2  = lon_l1b_wco2
-        lat_l1b_wco2  = lat_l1b_wco2
-        lon_l1b_sco2  = lon_l1b_sco2
-        lat_l1b_sco2  = lat_l1b_sco2
-
-        f       = h5py.File(self.fname_std, 'r')
-        lon_std = f['RetrievalGeometry/retrieval_longitude'][...]
-        lat_std = f['RetrievalGeometry/retrieval_latitude'][...]
-        xco2_std= f['RetrievalResults/xco2'][...]
-        snd_id_std = f['RetrievalHeader/sounding_id'][...]
-        sfc_pres_std = f['RetrievalResults/surface_pressure_fph'][...]
-        f.close()
-
-        self.logic_l1b = np.in1d(snd_id_l1b, snd_id_std).reshape(shape)
-
-        self.lon_l1b   = lon_l1b
-        self.lat_l1b   = lat_l1b
-        #new
-        self.lon_l1b_o2a  = lon_l1b_o2a
-        self.lat_l1b_o2a  = lat_l1b_o2a
-        self.lon_l1b_wco2  = lon_l1b_wco2
-        self.lat_l1b_wco2  = lat_l1b_wco2
-        self.lon_l1b_sco2  = lon_l1b_sco2
-        self.lat_l1b_sco2  = lat_l1b_sco2
-        self.snd_id    = snd_id_l1b
-
-        xco2      = np.zeros_like(self.lon_l1b); xco2[...] = np.nan
-        sfc_pres  = np.zeros_like(self.lon_l1b); sfc_pres[...] = np.nan
-
-        for i in range(xco2.shape[0]):
-            for j in range(xco2.shape[1]):
-                logic = (snd_id_std==snd_id_l1b[i, j])
-                if logic.sum() == 1:
-                    xco2[i, j] = xco2_std[logic]
-                    sfc_pres[i, j] = sfc_pres_std[logic]
-                elif logic.sum() > 1:
-                    sys.exit('Error   [oco_rad_nadir]: More than one point is found.')
-
-        self.xco2      = xco2
-        self.sfc_pres  = sfc_pres
-
-    def get_data(self, index_s=0, index_e=None):
-
-        f       = h5py.File(self.fname_l1b, 'r')
-        if index_e is None:
-            self.rad_o2_a       = f['SoundingMeasurements/radiance_o2'][...][index_s:, ...]
-            self.rad_co2_weak   = f['SoundingMeasurements/radiance_weak_co2'][...][index_s:, ...]
-            self.rad_co2_strong = f['SoundingMeasurements/radiance_strong_co2'][...][index_s:, ...]
-            self.sza            = f['SoundingGeometry/sounding_solar_zenith'][...][index_s:, ...]
-            self.saa            = f['SoundingGeometry/sounding_solar_azimuth'][...][index_s:, ...]
-        else:
-            self.rad_o2_a       = f['SoundingMeasurements/radiance_o2'][...][index_s:index_e, ...]
-            self.rad_co2_weak   = f['SoundingMeasurements/radiance_weak_co2'][...][index_s:index_e, ...]
-            self.rad_co2_strong = f['SoundingMeasurements/radiance_strong_co2'][...][index_s:index_e, ...]
-            self.sza            = f['SoundingGeometry/sounding_solar_zenith'][...][index_s:index_e, ...]
-            self.saa            = f['SoundingGeometry/sounding_solar_azimuth'][...][index_s:index_e, ...]
-
-        for i in range(8):
-            self.rad_o2_a[:, i, :]       = convert_photon_unit(self.rad_o2_a[:, i, :]      , self.get_wvl_o2_a(i))
-            self.rad_co2_weak[:, i, :]   = convert_photon_unit(self.rad_co2_weak[:, i, :]  , self.get_wvl_co2_weak(i))
-            self.rad_co2_strong[:, i, :] = convert_photon_unit(self.rad_co2_strong[:, i, :], self.get_wvl_co2_strong(i))
-        f.close()
-
-def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza):
-
-    print(date)
-    print(tag)
-
-    # ==================================================================================================
-    oco = oco2_rad_nadir(sat, tag)
-
-    wvl_o2a  = np.zeros_like(oco.rad_o2_a      , dtype=np.float64)
-    wvl_wco2 = np.zeros_like(oco.rad_co2_weak  , dtype=np.float64)
-    wvl_sco2 = np.zeros_like(oco.rad_co2_strong, dtype=np.float64)
-    for i in range(oco.rad_o2_a.shape[0]):
-        for j in range(oco.rad_o2_a.shape[1]):
-            wvl_o2a[i, j, :]  = oco.get_wvl_o2_a(j)
-            wvl_wco2[i, j, :] = oco.get_wvl_co2_weak(j)
-            wvl_sco2[i, j, :] = oco.get_wvl_co2_strong(j)
-    # ==================================================================================================
-
-    # ==================================================================================================
-    f = h5py.File(fname_abs, 'r')
-    wvls = f['lamx'][...]*1000.0
-    wvls  = np.sort(wvls)
-    trans = f['tx'][...][np.argsort(f['lamx'][...])]
+    # create atmosphere based on OCO-Met and CO2_prior
+    # ===============================================================
+    zpt_file = os.path.abspath(f'{fdir_data}/zpt.h5')
+    if not os.path.isfile(zpt_file):
+        create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
+    # ===============================================================
 
 
-    modl1b = modis_l1b(fnames=sat.fnames['mod_02'], extent=sat.extent)
-    lon_2d, lat_2d, rad_2d_mod = grid_by_extent(modl1b.data['lon']['data'], modl1b.data['lat']['data'], modl1b.data['rad']['data'][0, ...], extent=sat.extent)
+    # read out wavelength information from absorption file
+    # ===============================================================
+    nx = int(cfg_info['nx'])
+    iband_dict = {'o2a':0, 'wco2':1, 'sco2':2,}
+    Trn_min = float(cfg_info['Trn_min'])
+    for band_tag in ['o2a', 'wco2', 'sco2']:
+        fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
+        if not os.path.isfile(fname_abs):
+            oco_abs(cfg, zpt_file=zpt_file, iband=iband_dict[band_tag], nx=nx, Trn_min=Trn_min, pathout=fdir_data, reextract=False, plot=True)
 
-    rad_mca_ipa0 = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_3d   = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
+    if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
+        cdata_sat_raw(sat0=sat０, overwrite=True, plot=True)
 
-    rad_mca_ipa0_std = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_std  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_3d_std   = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-
-    # modified ==============================================
-    fname = glob.glob('%s/mca-out-rad-oco2-ipa0_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[0])[:-1]))[0]
-    f = h5py.File(fname, 'r')
-    rad_ipa0     = f['mean/rad'][...]
-    f.close()
-    rad_mca_ipa0_domain = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_domain  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_3d_domain   = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-
-    rad_mca_ipa0_domain_std = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_domain_std  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_3d_domain_std   = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-
-    # =======================================================
-
-    toa = np.zeros(wvls.size, dtype=np.float64)
-    Np = np.zeros(wvls.size, dtype=np.float64)
-
-    for k in range(wvls.size):
-        print(wvls[k])
-
-        fname = glob.glob('%s/mca-out-rad-oco2-ipa0_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
-        f = h5py.File(fname, 'r')
-        rad_ipa0     = f['mean/rad'][...]
-        rad_ipa0_std = f['mean/rad_std'][...]
-        f.close()
-
-        fname = glob.glob('%s/mca-out-rad-oco2-ipa_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
-        f = h5py.File(fname, 'r')
-        rad_ipa     = f['mean/rad'][...]
-        rad_ipa_std = f['mean/rad_std'][...]
-        f.close()
-
-        fname = glob.glob('%s/mca-out-rad-oco2-3d_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
-        f = h5py.File(fname, 'r')
-        rad_3d     = f['mean/rad'][...]
-        rad_3d_std = f['mean/rad_std'][...]
-        toa0       = f['mean/toa'][...]
-        photons    = f['mean/N_photon'][...]
-        f.close()
-        toa[k] = toa0
-        Np[k] = photons.sum()
-
-        # ===================================
-        rad_mca_ipa0_domain[:, :, k] = rad_ipa0.copy()
-        rad_mca_ipa_domain[:, :, k]  = rad_ipa.copy()
-        rad_mca_3d_domain[:, :, k]   = rad_3d.copy()
-
-        rad_mca_ipa0_domain_std[:, :, k] = rad_ipa0_std.copy()
-        rad_mca_ipa_domain_std[:, :, k]  = rad_ipa_std.copy()
-        rad_mca_3d_domain_std[:, :, k]   = rad_3d_std.copy()
-        # ===================================
-
-        """
-        if k == np.argmax(trans):
-            rad_mca_3d_domain     = rad_3d.copy()
-            rad_mca_3d_domain_std = rad_3d_std.copy()
-        """
-        for i in range(wvl_o2a.shape[0]):
-            for j in range(wvl_o2a.shape[1]):
-                lon0 = oco.lon_l1b[i, j]
-                lat0 = oco.lat_l1b[i, j]
-                if tag == 'o2a':
-                    lon0 = oco.lon_l1b_o2a[i, j]
-                    lon0 = oco.lon_l1b_o2a[i, j]
-                elif tag == 'wco2':
-                    lon0 = oco.lon_l1b_wco2[i, j]
-                    lon0 = oco.lon_l1b_wco2[i, j]
-                elif tag == 'sco2':
-                    lon0 = oco.lon_l1b_sco2[i, j]
-                    lon0 = oco.lon_l1b_sco2[i, j]
-                index_lon = np.argmin(np.abs(lon_2d[:, 0]-lon0))
-                index_lat = np.argmin(np.abs(lat_2d[0, :]-lat0))
-
-                rad_mca_ipa0[i, j, k] = rad_ipa0[index_lon, index_lat]
-                rad_mca_ipa[i, j, k]  = rad_ipa[index_lon, index_lat]
-                rad_mca_3d[i, j, k]   = rad_3d[index_lon, index_lat]
-
-                rad_mca_ipa0_std[i, j, k] = rad_ipa0_std[index_lon, index_lat]
-                rad_mca_ipa_std[i, j, k]  = rad_ipa_std[index_lon, index_lat]
-                rad_mca_3d_std[i, j, k]   = rad_3d_std[index_lon, index_lat]
-    # ==================================================================================================
-
-    output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza)
-    f = h5py.File(output_file, 'w')
-    f['lon']          = oco.lon_l1b
-    f['lat']          = oco.lat_l1b
-    f['logic']        = oco.logic_l1b
-    f['toa']          = toa
-    f['Np']           = Np
-
-    if tag == 'o2a':
-        f['lon_fp']          = oco.lon_l1b_o2a
-        f['lat_fp']          = oco.lon_l1b_o2a
-        f['rad_oco']  = oco.rad_o2_a
-        f['wvl_oco']  = wvl_o2a
-    elif tag == 'wco2':
-        f['lon_fp']          = oco.lon_l1b_wco2
-        f['lat_fp']          = oco.lon_l1b_wco2
-        f['rad_oco']  = oco.rad_co2_weak
-        f['wvl_oco']  = wvl_wco2
-    elif tag == 'sco2':
-        f['lon_fp']          = oco.lon_l1b_sco2
-        f['lat_fp']          = oco.lon_l1b_sco2
-        f['rad_oco']  = oco.rad_co2_strong
-        f['wvl_oco']  = wvl_sco2
-
-    f['snd_id'] = oco.snd_id
-    f['xco2']   = oco.xco2
-    f['sfc_pres'] = oco.sfc_pres
-    f['sza'] = oco.sza
-    f['saa'] = oco.saa
-
-    logic = (oco.lon_l1b>=sat.extent[0]) & (oco.lon_l1b<=sat.extent[1]) & (oco.lat_l1b>=sat.extent[2]) & (oco.lat_l1b<=sat.extent[3])
-    sza_mca = np.zeros_like(oco.sza)
-    saa_mca = np.zeros_like(oco.saa)
-    sza_mca[...] = oco.sza[logic].mean()
-    saa_mca[...] = oco.saa[logic].mean()
-    f['sza_mca'] = sza_mca
-    f['saa_mca'] = saa_mca
-
-    f['rad_mca_3d']   = rad_mca_3d
-    f['rad_mca_ipa']  = rad_mca_ipa
-    f['rad_mca_ipa0'] = rad_mca_ipa0
-    f['rad_mca_3d_std']   = rad_mca_3d_std
-    f['rad_mca_ipa_std']  = rad_mca_ipa_std
-    f['rad_mca_ipa0_std'] = rad_mca_ipa0_std
-    # ==============
-    f['lon2d']          = lon_2d
-    f['lat2d']          = lat_2d
-    f['rad_mca_3d_domain']   = rad_mca_3d_domain
-    f['rad_mca_ipa_domain']  = rad_mca_ipa_domain
-    f['rad_mca_ipa0_domain'] = rad_mca_ipa0_domain
-    f['rad_mca_3d_domain_std']   = rad_mca_3d_domain_std
-    f['rad_mca_ipa_domain_std']  = rad_mca_ipa_domain_std
-    f['rad_mca_ipa0_domain_std'] = rad_mca_ipa0_domain_std
-    # ==============
-    f['wvl_mca']                = wvls
-    f['tra_mca']                = trans
-    #f['rad_mca_3d_domain']      = rad_mca_3d_domain
-    #f['rad_mca_3d_domain_std']  = rad_mca_3d_domain_std
-    f['extent_domain']          = sat.extent
-    f.close()
-
-    return output_file
-
+    # ===============================================================
+    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
+    
 
 def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
 
@@ -720,26 +406,9 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     # create data/australia_YYYYMMDD directory if it does not exist
     # ===============================================================
     fdir_data = os.path.abspath('data/%s' % name_tag)
-    if not os.path.exists(fdir_data):
-        os.makedirs(fdir_data)
-    # ===============================================================
-
-    # download satellite data based on given date and region
-    # ===============================================================
     fname_sat = '%s/sat.pk' % fdir_data
     sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent, fname=fname_sat, overwrite=False)
-    # ===============================================================
-    if not ('l2' in cfg_info.keys()):
-        save_h5_info(cfg_info['cfg_path'], 'l2',  sat0.fnames['oco_std'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'met', sat0.fnames['oco_met'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'l1b', sat0.fnames['oco_l1b'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'lt',  sat0.fnames['oco_lite'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'dia', sat0.fnames['oco_dia'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'imap', sat0.fnames['oco_imap'][0].split('/')[-1])
-        save_h5_info(cfg_info['cfg_path'], 'co2prior', sat0.fnames['oco_co2prior'][0].split('/')[-1])
-    # create tmp-data/australia_YYYYMMDD directory if it does not exist
-    # ===============================================================
-    #fdir_tmp = os.path.abspath('tmp-data/%s/%s' % (name_tag, band_tag))
+    
     if sfc_alb != None:
         fdir_tmp = os.path.abspath('tmp-data/%s_alb_%.3f_saz_%.1f/%s' % (name_tag, sfc_alb, sza, band_tag))
     else:
@@ -747,53 +416,26 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     print(fdir_tmp)
     if not os.path.exists(fdir_tmp):
         os.makedirs(fdir_tmp)
-    fdir_cot_tmp = os.path.abspath('tmp-data/%s/cot' % (name_tag))
-    if not os.path.exists(fdir_cot_tmp):
-        os.makedirs(fdir_cot_tmp)
-    # ===============================================================
-
-    # create atmosphere based on OCO-Met and CO2_prior
-    # ===============================================================
-    zpt_file = f'{fdir_data}/zpt.h5'
-    zpt_file = os.path.abspath(zpt_file)
-    if not os.path.isfile(zpt_file):
-        create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
-    # ===============================================================
+    zpt_file = os.path.abspath(f'{fdir_data}/zpt.h5')
 
 
     # read out wavelength information from absorption file
     # ===============================================================
-
-    nx = int(cfg_info['nx'])
-    fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-    iband_dict = {'o2a':0, 'wco2':1, 'sco2':2,}
-    Trn_min = float(cfg_info['Trn_min'])
-    if not os.path.isfile(fname_abs):
-        oco_abs(cfg, zpt_file=zpt_file, iband=iband_dict[band_tag], nx=nx, Trn_min=Trn_min, pathout=fdir_data, reextract=False, plot=True)
-    f = h5py.File(fname_abs, 'r')
-    wvls = f['lamx'][...]*1000.0
+    fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(int(cfg_info["nx"])+1):d}.h5'
+    with h5py.File(fname_abs, 'r') as f:
+        wvls = f['lamx'][...]*1000.0
     print(wvls)
-
-    if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
-        cdata_sat_raw(band_tag, sat0=sat０, overwrite=True, plot=True)
-
     # ===============================================================
-    """
-    for solver in ['IPA', '3D']:
-        cdata_cld_ipa(band_tag, sat０, fdir_tmp, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
-    #"""
 
-    
-    """
+    #"""
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='IPA', overwrite=False, case_name_tag=name_tag, photons=1e8)
-    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='IPA', wvl=650, ref_threshold=ref_threshold, plot=True)
-    cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver='3D', overwrite=True, case_name_tag=name_tag, photons=1e8)
-    modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver='3D', wvl=650, ref_threshold=ref_threshold, plot=True)
+    for solver in ['IPA', '3D']:
+        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver, overwrite=False, case_name_tag=name_tag, photons=1e8)
+        modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     #"""
 
     #"""
@@ -818,7 +460,9 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
 
 
 def run_simulation(cfg, sfc_alb=None, sza=None):
+    
     cfg_info = grab_cfg(cfg)
+    preprocess(cfg_info, sfc_alb=sfc_alb, sza=sza)
     #"""
     if 1:#not check_h5_info(cfg, 'o2'):
         starttime = timeit.default_timer()
@@ -829,7 +473,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -837,7 +481,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    #""""
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()

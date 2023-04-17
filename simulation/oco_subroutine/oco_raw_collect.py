@@ -37,34 +37,11 @@ def sfc_alb_mask_inter(lon_alb, lat_alb, sfc_alb, lon_2d, lat_2d):
     
 
 
-def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
+def cdata_sat_raw(sat0, overwrite=False, plot=True):
     """
     Purpose: Collect satellite data for OCO-2 retrieval
     oco_band: 'o2a', 'wco2', 'sco2'
     """
-    band_list = ['o2a', 'wco2', 'sco2']
-    # process wavelength
-    #/----------------------------------------------------------------------------\#
-    if oco_band.lower() == 'o2a':
-        wvl = 650
-        index_wvl = 0      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 860
-        index_wvl_sfc = 1  # select MODIS 860 nm band surface albedo for scaling
-    elif oco_band.lower() == 'wco2':
-        wvl = 1640
-        index_wvl = 5      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 1640
-        index_wvl_sfc = 5  # select MODIS 860 nm band surface albedo for scaling
-    elif oco_band.lower() == 'sco2':
-        wvl = 2130
-        index_wvl = 6      # select MODIS 650 nm band radiance/reflectance for IPA cloud retrieval
-        wvl_sfc = 2130
-        index_wvl_sfc = 6  # select MODIS 860 nm band surface albedo for scaling
-    else:
-        msg = '\nError [cdata_sat_raw]: Currently, only <oco_band=\'o2a\'> is supported.>'
-        sys.exit(msg)
-    #\----------------------------------------------------------------------------/#
-
 
     # Check if preprocessed data exists and return if overwrite is False
     if os.path.isfile(f'{sat0.fdir_out}/pre-data.h5') and not overwrite:
@@ -131,7 +108,7 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
                    'ref_1640': vars()[f'ref_2d_1640_inter'], 'rad_1640': vars()[f'ref_2d_1640_inter'], 
                    'ref_2130': vars()[f'ref_2d_2130_inter'], 'rad_2130': vars()[f'ref_2d_2130_inter']})
 
-        print('Message [cdata_sat_raw]: the processing of MODIS L1B radiance/reflectance at %d nm is complete.' % wvl)
+        print('Message [cdata_sat_raw]: the processing of MODIS L1B radiance/reflectance at 470, 555, 1640, 2130 nm is complete.')
 
         # Save longitude and latitude to HDF group
         f0.update({'lon': lon_2d, 'lat': lat_2d})
@@ -258,7 +235,9 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
         # OCO-2 data groups in the HDF file
         #/--------------------------------------------------------------\#
         gg = f0.create_group('oco')
-        gg1 = gg.create_group('o2a')
+        gg11 = gg.create_group('o2a')
+        gg12 = gg.create_group('wco2')
+        gg13 = gg.create_group('sco2')
         gg2 = gg.create_group('geo')
         gg3 = gg.create_group('met')
         gg4 = gg.create_group('sfc')
@@ -269,15 +248,21 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
         oco = er3t.util.oco2_rad_nadir(sat0)
 
         wvl_o2a  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
+        wvl_wco2  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
+        wvl_sco2  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
         for i in range(oco.rad_o2_a.shape[0]):
             for j in range(oco.rad_o2_a.shape[1]):
                 wvl_o2a[i, j, :]  = oco.get_wvl_o2_a(j)
+                wvl_wco2[i, j, :] = oco.get_wvl_co2_weak(j)
+                wvl_sco2[i, j, :] = oco.get_wvl_co2_strong(j)
         #\--------------------------------------------------------------/#
 
         # OCO L1B
         #/--------------------------------------------------------------\#
         gg.update({'lon': oco.lon_l1b, 'lat': oco.lat_l1b, 'logic': oco.logic_l1b, 'snd_id': oco.snd_id})
-        gg1.update({'rad': oco.rad_o2_a, 'wvl': wvl_o2a})
+        gg11.update({'rad': oco.rad_o2_a, 'wvl': wvl_o2a})
+        gg12.update({'rad': oco.rad_co2_weak, 'wvl': wvl_wco2})
+        gg13.update({'rad': oco.rad_co2_strong, 'wvl': wvl_sco2})
         gg2.update({'sza': oco.sza, 'saa': oco.saa, 'vza': oco.vza, 'vaa': oco.vaa})
         print('Message [cdata_sat_raw]: the processing of OCO-2 radiance is complete.')
         #\--------------------------------------------------------------/#
@@ -345,8 +330,8 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
             extent = f0['extent'][...]
 
             rgb = f0['mod/rgb'][...]
-            rad = f0['mod/rad/rad_%d' % 650][...]
-            ref = f0['mod/rad/ref_%d' % 650][...]
+            rad = f0['mod/rad/rad_650'][...]
+            ref = f0['mod/rad/ref_650'][...]
 
             sza = f0['mod/geo/sza'][...]
             saa = f0['mod/geo/saa'][...]
@@ -358,8 +343,8 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
             cth = f0['mod/cld/cth_l2'][...]
             sfh = f0['mod/geo/sfh'][...]
 
-            alb09 = f0['mod/sfc/alb_09_%d' % wvl][...]
-            alb43 = f0['mod/sfc/alb_43_%d' % wvl][...]
+            alb09 = f0['mod/sfc/alb_09_860'][...]
+            alb43 = f0['mod/sfc/alb_43_860'][...]
 
 
         # figure
@@ -370,10 +355,10 @@ def cdata_sat_raw(oco_band, sat0, overwrite=False, plot=True):
         fig, axes = plt.subplots(4, 4, figsize=(16, 16))
         fig.suptitle('MODIS Products Preview')
 
-        titles = ['RGB Imagery', f'L1B Radiance ({wvl} nm)', f'L1B Reflectance ({wvl} nm)', None, 
+        titles = ['RGB Imagery', f'L1B Radiance 650 nm)', f'L1B Reflectance 650 nm)', None, 
                   'Solar Zenith [°]', 'Solar Azimuth [°]', 'Viewing Zenith [°]', 'Viewing Azimuth [°]',
-                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', f'09A1 Reflectance at {wvl_sfc} nm',
-                  f'43A3 WSA at {wvl_sfc} nm']
+                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', f'09A1 Reflectance at 860 nm',
+                  f'43A3 WSA at 860 nm']
 
         data = [rgb, rad.T, ref.T, None, sza.T, saa.T, vza.T, vaa.T, cot.T, cer.T, cth.T, sfh.T, alb09.T, alb43.T]
         vmins = [None, 0.0, 0.0, None, None, None, None, None, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
