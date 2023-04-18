@@ -203,63 +203,65 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     if simulated_sfc_alb <= 0.2:
         photons = photons*2
 
-    # run mcarats
-    run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
-    mca0 = mcarats_ng(
-            date=date,
-            atm_1ds=atm_1ds,
-            atm_3ds=atm_3ds,
-            sfc_2d=sfc_2d,
-            sca=sca, # newly added for phase function
-            Ng=abs0.Ng,
-            target='radiance',
-            solar_zenith_angle   = sza,
-            solar_azimuth_angle  = saa,
-            sensor_zenith_angle  = vza,
-            sensor_azimuth_angle = vaa,
-            fdir='%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower()),
-            Nrun=3,
-            weights=abs0.coef['weight']['data'],
-            photons=photons,
-            solver=solver,
-            Ncpu=8,
-            mp_mode='py',
-            overwrite=run
-            )
-    
+    # output
+    output_file = '%s/mca-out-rad-oco2-%s_%.4fnm.h5' % (fdir, solver.lower(), wavelength)
+    if (not os.path.isfile(output_file)) or (overwrite==True):
+        # run mcarats
+        run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
+        mca0 = mcarats_ng(
+                date=date,
+                atm_1ds=atm_1ds,
+                atm_3ds=atm_3ds,
+                sfc_2d=sfc_2d,
+                sca=sca, # newly added for phase function
+                Ng=abs0.Ng,
+                target='radiance',
+                solar_zenith_angle   = sza,
+                solar_azimuth_angle  = saa,
+                sensor_zenith_angle  = vza,
+                sensor_azimuth_angle = vaa,
+                fdir='%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower()),
+                Nrun=3,
+                weights=abs0.coef['weight']['data'],
+                photons=photons,
+                solver=solver,
+                Ncpu=8,
+                mp_mode='py',
+                overwrite=run
+                )
+        
+        # mcarats output
+        out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
 
-    # mcarats output
-    out0 = mca_out_ng(fname='%s/mca-out-rad-oco2-%s_%.4fnm.h5' % (fdir, solver.lower(), wavelength), mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
+        oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
 
-    oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
+        # plot
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        fig = plt.figure(figsize=(12, 5.5))
+        ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122)
+        cs = ax1.imshow(modl1b.data['rad_2d']['data'].T, cmap='Greys_r', origin='lower', vmin=0.0, vmax=0.3, extent=sat.extent, zorder=0)
+        ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
+        ax1.set_xlabel('Longitude [$^\circ$]')
+        ax1.set_ylabel('Latitude [$^\circ$]')
+        ax1.set_xlim(sat.extent[:2])
+        ax1.set_ylim(sat.extent[2:])
+        ax1.set_title('MODIS Chanel 1')
 
-    # plot
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    fig = plt.figure(figsize=(12, 5.5))
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    cs = ax1.imshow(modl1b.data['rad_2d']['data'].T, cmap='Greys_r', origin='lower', vmin=0.0, vmax=0.3, extent=sat.extent, zorder=0)
-    ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-    ax1.set_xlabel('Longitude [$^\circ$]')
-    ax1.set_ylabel('Latitude [$^\circ$]')
-    ax1.set_xlim(sat.extent[:2])
-    ax1.set_ylim(sat.extent[2:])
-    ax1.set_title('MODIS Chanel 1')
-
-    cs = ax2.imshow(out0.data['rad']['data'].T, cmap='Greys_r', origin='lower', extent=sat.extent, zorder=0)
-    ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-    ax2.set_xlabel('Longitude [$^\circ$]')
-    ax2.set_ylabel('Latitude [$^\circ$]')
-    ax2.set_xlim(sat.extent[:2])
-    ax2.set_ylim(sat.extent[2:])
-    ax2.set_title('MCARaTS %s' % solver)
-    plt.subplots_adjust(hspace=0.5)
-    if cth is not None:
-        plt.savefig('%s/mca-out-rad-modis-%s_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
-    else:
-        plt.savefig('%s/mca-out-rad-modis-%s_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
-    plt.close(fig)
-    # ------------------------------------------------------------------------------------------------------
+        cs = ax2.imshow(out0.data['rad']['data'].T, cmap='Greys_r', origin='lower', extent=sat.extent, zorder=0)
+        ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
+        ax2.set_xlabel('Longitude [$^\circ$]')
+        ax2.set_ylabel('Latitude [$^\circ$]')
+        ax2.set_xlim(sat.extent[:2])
+        ax2.set_ylim(sat.extent[2:])
+        ax2.set_title('MCARaTS %s' % solver)
+        plt.subplots_adjust(hspace=0.5)
+        if cth is not None:
+            plt.savefig('%s/mca-out-rad-modis-%s_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
+        else:
+            plt.savefig('%s/mca-out-rad-modis-%s_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
+        plt.close(fig)
+        # ------------------------------------------------------------------------------------------------------
 
 
     if solver.lower() == 'ipa':
@@ -272,58 +274,61 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, fname='%s/mca_atm_3d.bin' % fdir)
         atm_3ds = [atm3d0]
 
-        # run mcarats
-        run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
-        mca0 = mcarats_ng(
-                date=date,
-                atm_1ds=atm_1ds,
-                atm_3ds=atm_3ds,
-                sfc_2d=sfc_2d,
-                Ng=abs0.Ng,
-                target='radiance',
-                solar_zenith_angle   = sza,
-                solar_azimuth_angle  = saa,
-                sensor_zenith_angle  = vza,
-                sensor_azimuth_angle = vaa,
-                fdir='%s/%.4fnm/oco2/rad_%s0' % (fdir, wavelength, solver.lower()),
-                Nrun=3,
-                weights=abs0.coef['weight']['data'],
-                photons=photons,
-                solver=solver,
-                Ncpu=8,
-                mp_mode='py',
-                overwrite=run,
-                )
+        # output
+        output_file = '%s/mca-out-rad-oco2-%s0_%.4fnm.h5' % (fdir, solver.lower(), wavelength)
+        if (not os.path.isfile(output_file)) or (overwrite==True):
+            # run mcarats
+            run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
+            mca0 = mcarats_ng(
+                    date=date,
+                    atm_1ds=atm_1ds,
+                    atm_3ds=atm_3ds,
+                    sfc_2d=sfc_2d,
+                    Ng=abs0.Ng,
+                    target='radiance',
+                    solar_zenith_angle   = sza,
+                    solar_azimuth_angle  = saa,
+                    sensor_zenith_angle  = vza,
+                    sensor_azimuth_angle = vaa,
+                    fdir='%s/%.4fnm/oco2/rad_%s0' % (fdir, wavelength, solver.lower()),
+                    Nrun=3,
+                    weights=abs0.coef['weight']['data'],
+                    photons=photons,
+                    solver=solver,
+                    Ncpu=8,
+                    mp_mode='py',
+                    overwrite=run,
+                    )
 
-        # mcarats output
-        out0 = mca_out_ng(fname='%s/mca-out-rad-oco2-%s0_%.4fnm.h5' % (fdir, solver.lower(), wavelength), mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
+            # mcarats output
+            out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
 
-        # plot
-        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        fig = plt.figure(figsize=(12, 5.5))
-        ax1 = fig.add_subplot(121)
-        ax2 = fig.add_subplot(122)
-        cs = ax1.imshow(modl1b.data['rad_2d']['data'].T, cmap='Greys_r', origin='lower', vmin=0.0, vmax=0.3, extent=sat.extent, zorder=0)
-        ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-        ax1.set_title('MODIS Chanel 1')
+            # plot
+            # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            fig = plt.figure(figsize=(12, 5.5))
+            ax1 = fig.add_subplot(121)
+            ax2 = fig.add_subplot(122)
+            cs = ax1.imshow(modl1b.data['rad_2d']['data'].T, cmap='Greys_r', origin='lower', vmin=0.0, vmax=0.3, extent=sat.extent, zorder=0)
+            ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
+            ax1.set_title('MODIS Chanel 1')
 
-        cs = ax2.imshow(out0.data['rad']['data'].T, cmap='Greys_r', origin='lower', extent=sat.extent, zorder=0)
-        ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-        ax2.set_title('MCARaTS %s' % solver)
+            cs = ax2.imshow(out0.data['rad']['data'].T, cmap='Greys_r', origin='lower', extent=sat.extent, zorder=0)
+            ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
+            ax2.set_title('MCARaTS %s' % solver)
 
-        for ax in [ax1, ax2]:
-            ax.set_xlabel('Longitude [$^\circ$]')
-            ax.set_ylabel('Latitude [$^\circ$]')
-            ax.set_xlim(sat.extent[:2])
-            ax.set_ylim(sat.extent[2:])
+            for ax in [ax1, ax2]:
+                ax.set_xlabel('Longitude [$^\circ$]')
+                ax.set_ylabel('Latitude [$^\circ$]')
+                ax.set_xlim(sat.extent[:2])
+                ax.set_ylim(sat.extent[2:])
 
-        plt.subplots_adjust(hspace=0.5)
-        if cth is not None:
-            plt.savefig('%s/mca-out-rad-modis-%s0_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
-        else:
-            plt.savefig('%s/mca-out-rad-modis-%s0_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
-        plt.close(fig)
-        # ------------------------------------------------------------------------------------------------------
+            plt.subplots_adjust(hspace=0.5)
+            if cth is not None:
+                plt.savefig('%s/mca-out-rad-modis-%s0_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
+            else:
+                plt.savefig('%s/mca-out-rad-modis-%s0_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
+            plt.close(fig)
+            # ------------------------------------------------------------------------------------------------------
     return simulated_sfc_alb, sza
 
 def preprocess(cfg_info, sfc_alb=None, sza=None):
