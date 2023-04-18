@@ -396,9 +396,7 @@ def preprocess(cfg_info, sfc_alb=None, sza=None):
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, overwrite=True, plot=True)
-
-    # ===============================================================
-    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
+        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
     # ===============================================================
 
 
@@ -518,8 +516,8 @@ if __name__ == '__main__':
     print(cfg)
     #run_simulation(cfg) #done
 
-    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
