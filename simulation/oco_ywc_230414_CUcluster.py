@@ -278,7 +278,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
         output_file = '%s/mca-out-rad-oco2-%s0_%.4fnm.h5' % (fdir, solver.lower(), wavelength)
         if (not os.path.isfile(output_file)) or (overwrite==True):
             # run mcarats
-            run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s' % (fdir, wavelength, solver.lower())) and overwrite==False else True
+            run = False if os.path.isdir('%s/%.4fnm/oco2/rad_%s0' % (fdir, wavelength, solver.lower())) and overwrite==False else True
             mca0 = mcarats_ng(
                     date=date,
                     atm_1ds=atm_1ds,
