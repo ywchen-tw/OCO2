@@ -1,8 +1,8 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=2
-#SBATCH --ntasks=2
-#SBATCH --ntasks-per-node=2
+#SBATCH --ntasks=4
+#SBATCH --ntasks-per-node=4
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -518,15 +518,19 @@ if __name__ == '__main__':
     print(cfg)
     #run_simulation(cfg) #done
 
-    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
-    # run_simulation(cfg, sfc_alb=0.3, sza=45) #done
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
-    # run_simulation(cfg, sfc_alb=0.2, sza=45)
-    # run_simulation(cfg, sfc_alb=0.15, sza=45)
-    # run_simulation(cfg, sfc_alb=0.1, sza=45)
-    # run_simulation(cfg, sfc_alb=0.05, sza=45)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
+
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, aod_550=0.1) #done
+    # run_simulation(cfg, sfc_alb=0.25, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.2, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.15, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.1, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.05, sza=45, aod_550=0.1)
+    # run_simulation(cfg, sfc_alb=0.025, sza=45, aod_550=0.1)
 
     # run_simulation(cfg, sfc_alb=0.3, sza=30)
     # run_simulation(cfg, sfc_alb=0.5, sza=30)
