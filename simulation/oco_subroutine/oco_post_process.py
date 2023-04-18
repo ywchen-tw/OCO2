@@ -194,7 +194,7 @@ class oco2_rad_nadir:
                 self.rad_co2_strong[:, i, :] = convert_photon_unit(self.rad_co2_strong[:, i, :], self.get_wvl_co2_strong(i))
 
 
-def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza):
+def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
     """
     Post-processing - combine the all the calculations into one dataset
     """
@@ -311,8 +311,11 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza):
                 rad_mca_ipa_std[i, j, k]  = rad_ipa_std[index_lon, index_lat]
                 rad_mca_3d_std[i, j, k]   = rad_3d_std[index_lon, index_lat]
     # ==================================================================================================
+    if aod_550 is None:
+        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza)
+    else:
+        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
 
-    output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza)
     with h5py.File(output_file, 'w') as f:
         f['lon']          = oco.lon_l1b
         f['lat']          = oco.lat_l1b

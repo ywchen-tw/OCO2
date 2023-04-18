@@ -462,18 +462,18 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     # ===============================================================
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
-            simulated_sfc_alb, sza = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
-                                                      fname_idl=fname_abs, cth=None, scale_factor=1.0, 
-                                                      fdir=fdir_tmp, solver=solver, 
-                                                      sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
-                                                      overwrite=True, photons=2e8)
+            simulated_sfc_alb, sza, aod_550 = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
+                                                                fname_idl=fname_abs, cth=None, scale_factor=1.0, 
+                                                                fdir=fdir_tmp, solver=solver, 
+                                                                sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
+                                                                overwrite=False, photons=2e8)
     # ===============================================================
     #"""
 
     #"""
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza)
+    return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza, aod_500=aod_550)
     # ===============================================================
     #"""
 
