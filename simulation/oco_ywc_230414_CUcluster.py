@@ -303,6 +303,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
             # mcarats output
             out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
 
+            oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
+
             # plot
             # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             fig = plt.figure(figsize=(12, 5.5))
