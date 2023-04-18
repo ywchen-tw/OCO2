@@ -1,6 +1,6 @@
 #!/bin/env python
 #SBATCH --partition=amilan
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --ntasks-per-node=4
 #SBATCH --time=24:00:00
@@ -464,7 +464,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
                                                                 fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                                 fdir=fdir_tmp, solver=solver, 
                                                                 sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
-                                                                overwrite=False, photons=2e8)
+                                                                overwrite=True, photons=2e8)
     # ===============================================================
     #"""
 

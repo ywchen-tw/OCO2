@@ -463,7 +463,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=True, photons=1e9)
+                                                      overwrite=False, photons=1e9)
     # ===============================================================
     #"""
 
