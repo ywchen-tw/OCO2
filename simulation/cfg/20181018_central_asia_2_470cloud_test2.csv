@@ -23,7 +23,7 @@ abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
 simulator information,,,,,,,
 #pathsim,/Users/schmidt/rtm/ocosim/dat/new/,,,,,,
 pathsim,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,,,,,,,
+o2,data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5,,,,,,
 wco2,,,,,,,
 sco2,,,,,,,
 ,,,,,,,

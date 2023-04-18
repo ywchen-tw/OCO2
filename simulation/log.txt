@@ -1,3 +1,26 @@
+Results come out in nm, need to convert to microns
+Save absorption data to pickle save file: ./oco_subroutine/abs/o2_v51.hdf.pkl
+0 277 0.11524630280138325 0.11547469165416331
+1 294 0.13253324822159074 0.13285132339517874
+2 316 0.14982019364179824 0.14952333111872212
+3 336 0.1671071390620057 0.1670502496451329
+4 359 0.1843940844822132 0.1860320377611637
+5 387 0.20168102990242065 0.202198646827574
+6 409 0.21896797532262816 0.21876498315961912
+7 435 0.2362549207428356 0.23691248206535048
+8 474 0.25354186616304314 0.25357802041094557
+9 532 0.27082881158325056 0.2711473086603439
+10 995 0.2881157570034581 0.2881157570034581
+Saving to file /projects/yuch8913/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/atm_abs_o2a_11.h5
+[55.0, 55.6, 33.7, 34.449999999999996]
+  
+  findi1i2: wavel1=2.08500 um, wavel2=2.04200 um
+  findi1i2: wcm1=4796.163069544365 cm-1, wcm2=4897.159647404505 cm-1
+  findi1i2: iwcm1,iwcm2  3616 13716
+  findi1i2: wcm(iwcm1),wcm(iwcm2)  4796.16 4897.16
+  findi1ii2: nwav  10101
+  findi1ii2: min and max wcmdat  4796.16 4897.16
+  findi1ii2: min and max wavedat  2.041999852976011 2.0850013344008542
   
   rdabs co2 FileName: ./oco_subroutine/abs/co2_v51.hdf
   
@@ -32,86 +55,70 @@
 
 
   rdabs co2: i,pco2(i),hpa_co2(i),tk_co2(i,j) for j=0,16
-   0 1.0609014 0.010609014    [1.17455185e+002 2.29175545e-312 2.37663529e-312 2.56761491e-312
- 2.22809558e-312 2.44029516e-312 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 2.37663529e-312 2.56761491e-312
- 2.22809558e-312 2.44029516e-312 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 2.56761491e-312
- 2.22809558e-312 2.44029516e-312 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 2.22809558e-312 2.44029516e-312 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 2.44029516e-312 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 2.41907520e-312 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 2.46151512e-312
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 2.22809558e-312 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.50395503e-312 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.29175545e-312 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.22809558e-312
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.27455185e+002
- 2.16443571e-312 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.27455185e+002
- 2.37455185e+002 2.41907520e-312 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.27455185e+002
- 2.37455185e+002 2.47455185e+002 2.05833592e-312 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.27455185e+002
- 2.37455185e+002 2.47455185e+002 2.57455200e+002 2.22809558e-312
- 2.33419537e-312]
-   0 1.0609014 0.010609014    [1.17455185e+002 1.27455185e+002 1.37455185e+002 1.47455185e+002
- 1.57455185e+002 1.67455185e+002 1.77455185e+002 1.87455185e+002
- 1.97455185e+002 2.07455185e+002 2.17455185e+002 2.27455185e+002
- 2.37455185e+002 2.47455185e+002 2.57455200e+002 2.67455200e+002
- 2.33419537e-312]
+   0 1.0609014 0.010609014    [117.45518494 213.23989868 223.23989868 233.23989868 243.23989868
+ 253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 223.23989868 233.23989868 243.23989868
+ 253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 233.23989868 243.23989868
+ 253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 243.23989868
+ 253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 263.23989868 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 273.23989868 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 283.23989868 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 293.23989868
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 303.23989868 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 313.23989868 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 227.45518494 323.23989868 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 227.45518494 237.45518494 333.23989868 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 227.45518494 237.45518494 247.45518494 343.23989868
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 227.45518494 237.45518494 247.45518494 257.4552002
+ 353.23989868 363.23989868]
+   0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
+ 167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
+ 217.45518494 227.45518494 237.45518494 247.45518494 257.4552002
+ 267.4552002  363.23989868]
    0 1.0609014 0.010609014    [117.45518494 127.45518494 137.45518494 147.45518494 157.45518494
  167.45518494 177.45518494 187.45518494 197.45518494 207.45518494
  217.45518494 227.45518494 237.45518494 247.45518494 257.4552002
@@ -4357,15 +4364,7 @@
    63 108400.0 1084.0    [203.23989868 213.23989868 223.23989868 233.23989868 243.23989868
  253.23989868 263.23989868 273.0836792  283.0836792  293.0836792
  303.0836792  313.0836792  323.0836792  333.0836792  343.0836792
- 353.0836792  363.0836792 ]  
-  findi1i2: wavel1=2.08500 um, wavel2=2.04200 um
-  findi1i2: wcm1=4796.163069544365 cm-1, wcm2=4897.159647404505 cm-1
-  findi1i2: iwcm1,iwcm2  3616 13716
-  findi1i2: wcm(iwcm1),wcm(iwcm2)  4796.16 4897.16
-  findi1ii2: nwav  10101
-  findi1ii2: min and max wcmdat  4796.16 4897.16
-  findi1ii2: min and max wavedat  2.041999852976011 2.0850013344008542
-
+ 353.0836792  363.0836792 ]
    63 108400.0 1084.0    [203.23989868 213.23989868 223.23989868 233.23989868 243.23989868
  253.23989868 263.23989868 273.23989868 283.0836792  293.0836792
  303.0836792  313.0836792  323.0836792  333.0836792  343.0836792
@@ -4444,6 +4443,14 @@
    33000 6279.99 1.5923592235019484
    34000 6289.99 1.589827646784812
    35000 6299.99 1.5873041068319156
+  
+  findi1i2: wavel1=2.08500 um, wavel2=2.04200 um
+  findi1i2: wcm1=4796.163069544365 cm-1, wcm2=4897.159647404505 cm-1
+  findi1i2: iwcm1,iwcm2  3616 13716
+  findi1i2: wcm(iwcm1),wcm(iwcm2)  4796.16 4897.16
+  findi1ii2: nwav  10101
+  findi1ii2: min and max wcmdat  4796.16 4897.16
+  findi1ii2: min and max wavedat  2.041999852976011 2.0850013344008542
   
   rdabs h2o FileName: ./oco_subroutine/abs/h2o_v51.hdf
   
@@ -8803,15 +8810,7 @@
    63 108400.0 1084.0    [203.23989868 213.23989868 223.23989868 233.23989868 243.23989868
  253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
  303.23989868 313.0836792  323.0836792  333.0836792  343.0836792
- 353.0836792  363.0836792 ]  
-  findi1i2: wavel1=2.08500 um, wavel2=2.04200 um
-  findi1i2: wcm1=4796.163069544365 cm-1, wcm2=4897.159647404505 cm-1
-  findi1i2: iwcm1,iwcm2  3616 13716
-  findi1i2: wcm(iwcm1),wcm(iwcm2)  4796.16 4897.16
-  findi1ii2: nwav  10101
-  findi1ii2: min and max wcmdat  4796.16 4897.16
-  findi1ii2: min and max wavedat  2.041999852976011 2.0850013344008542
-
+ 353.0836792  363.0836792 ]
    63 108400.0 1084.0    [203.23989868 213.23989868 223.23989868 233.23989868 243.23989868
  253.23989868 263.23989868 273.23989868 283.23989868 293.23989868
  303.23989868 313.23989868 323.0836792  333.0836792  343.0836792
@@ -12271,57 +12270,6 @@
    10080 4896.96 2.0420832516500034 1.365790924046753e-25
 Results come out in nm, need to convert to microns
 Save absorption data to pickle save file: ./oco_subroutine/abs/co2_v51.hdf.pkl
-0 0 0.18313172371146635 0.18313172371146635
-1 16 0.2022967096950101 0.20220249113992333
-2 28 0.2214616956785538 0.2204314363154023
-3 46 0.24062668166209752 0.2406375125905929
-4 61 0.2597916676456412 0.261377957984258
-5 81 0.2789566536291849 0.2792520425472621
-6 97 0.2981216396127287 0.2983293958758688
-7 124 0.3172866255962724 0.3173299695925487
-8 168 0.3364516115798161 0.33653985228693384
-9 291 0.35561659756335984 0.35559307747267377
-10 947 0.3747815835469035 0.37478158354690355
-Saving to file /Users/steven/programming/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/atm_abs_wco2_11.h5
-[1602.53371349 1603.6003757  1607.74645355 1608.1748291  1603.98526922
- 1609.53691071 1606.07369756 1614.08224481 1614.61698988 1603.05238558
- 1621.36998905]
-indices_x: [[   2    2    2 ...    2    2    2]
- [   6    6    6 ...    6    6    6]
- [  11   11   11 ...   11   11   11]
- ...
- [1096 1096 1096 ... 1096 1096 1096]
- [1101 1101 1101 ... 1101 1101 1101]
- [1105 1105 1105 ... 1105 1105 1105]]
-cot_ipa shape: (31,)
--0.46109745 -3.7805362
--0.4059373 -3.6735651
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-Message [para_corr]: Please make sure the units of 'cld_h' and 'sfc_h' are in 'meter'.
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-indices_x: [[   2    2    2 ...    2    2    2]
- [   6    6    6 ...    6    6    6]
- [  11   11   11 ...   11   11   11]
- ...
- [1096 1096 1096 ... 1096 1096 1096]
- [1101 1101 1101 ... 1101 1101 1101]
- [1105 1105 1105 ... 1105 1105 1105]]
-cot_ipa shape: (31,)
--0.46109745 -3.7805362
--0.4059373 -3.6735651
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-Message [para_corr]: Please make sure the units of 'cld_h' and 'sfc_h' are in 'meter'.
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-WCO2 band duration: 0.06646919777194445  h
-[55.0, 55.6, 33.7, 34.449999999999996]
-/Users/steven/programming/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/sco2
-[55.0, 55.6, 33.7, 34.449999999999996]
-Results come out in nm, need to convert to microns
-Save absorption data to pickle save file: ./oco_subroutine/abs/co2_v51.hdf.pkl
 0 269 0.1430708587150515 0.1426477764680039
 1 327 0.16453148752230926 0.16486927406935412
 2 367 0.18599211632956697 0.18598136861185985
@@ -12333,10 +12281,19 @@ Save absorption data to pickle save file: ./oco_subroutine/abs/co2_v51.hdf.pkl
 8 893 0.3147558891731133 0.31466319161843964
 9 974 0.33621651798037105 0.33614294610085244
 10 1008 0.35767714678762874 0.3576771467876288
-Saving to file /Users/steven/programming/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/atm_abs_sco2_11.h5
-[2065.26524635 2058.8268207  2056.51504874 2069.77476531 2059.20093482
- 2047.77933919 2059.07636018 2059.53249853 2082.53190824 2045.3071395
- 2079.69761399]
+Saving to file /projects/yuch8913/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/atm_abs_sco2_11.h5
+Message [cdata_sat_raw]: the processing of MODIS RGB imagery is complete.
+Message [cdata_sat_raw]: the processing of MODIS L1B radiance/reflectance at 470, 555, 1640, 2130 nm is complete.
+Message [cdata_sat_raw]: the processing of MODIS geo-info is complete.
+Message [cdata_sat_raw]: the processing of MODIS cloud properties is complete.
+Message [cdata_sat_raw]: the processing of MODIS surface properties is complete.
+(3, 203, 135)
+Message [cdata_sat_raw]: the processing of OCO-2 radiance is complete.
+Message [cdata_sat_raw]: the processing of OCO-2 meteorological data is complete.
+Message [cal_sfc_alb_2d]: slope: 0.9138016712696506
+Message [cal_sfc_alb_2d]: slope: 0.9842139598289326
+Message [cal_sfc_alb_2d]: slope: 1.0300433795497252
+Message [cdata_sat_raw]: the processing of OCO-2 surface reflectance is complete.
 indices_x: [[   2    2    2 ...    2    2    2]
  [   6    6    6 ...    6    6    6]
  [  11   11   11 ...   11   11   11]
@@ -12345,6 +12302,1509 @@ indices_x: [[   2    2    2 ...    2    2    2]
  [1101 1101 1101 ... 1101 1101 1101]
  [1105 1105 1105 ... 1105 1105 1105]]
 cot_ipa shape: (31,)
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=0.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-000.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-000.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-000.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-000.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=0.5> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-000.5_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-000.5_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-000.5_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-000.5_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.5_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.5_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.5_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-000.5_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=1.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-001.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-001.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-001.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-001.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=1.5> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-001.5_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-001.5_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-001.5_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-001.5_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.5_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.5_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.5_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-001.5_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=2.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-002.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-002.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-002.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-002.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-002.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-002.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-002.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-002.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=4.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-004.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-004.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-004.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-004.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-004.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-004.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-004.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-004.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=6.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-006.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-006.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-006.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-006.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-006.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-006.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-006.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-006.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=8.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-008.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-008.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-008.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-008.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-008.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-008.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-008.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-008.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=10.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-010.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-010.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-010.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-010.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-010.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-010.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-010.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-010.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=12.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-012.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-012.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-012.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-012.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-012.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-012.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-012.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-012.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=14.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-014.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-014.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-014.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-014.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-014.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-014.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-014.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-014.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=16.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-016.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-016.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-016.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-016.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-016.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-016.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-016.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-016.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=18.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-018.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-018.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-018.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-018.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-018.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-018.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-018.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-018.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=20.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-020.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-020.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-020.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-020.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-020.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-020.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-020.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-020.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=22.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-022.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-022.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-022.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-022.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-022.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-022.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-022.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-022.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=24.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-024.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-024.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-024.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-024.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-024.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-024.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-024.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-024.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=26.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-026.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-026.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-026.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-026.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-026.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-026.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-026.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-026.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=28.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-028.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-028.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-028.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-028.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-028.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-028.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-028.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-028.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=30.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-030.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-030.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-030.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-030.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-030.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-030.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-030.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-030.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=35.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-035.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-035.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-035.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-035.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-035.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-035.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-035.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-035.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=40.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-040.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-040.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-040.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-040.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-040.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-040.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-040.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-040.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=45.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-045.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-045.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-045.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-045.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-045.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-045.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-045.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-045.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=50.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-050.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-050.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-050.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-050.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-050.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-050.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-050.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-050.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=55.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-055.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-055.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-055.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-055.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-055.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-055.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-055.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-055.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=60.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-060.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-060.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-060.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-060.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-060.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-060.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-060.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-060.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=70.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-070.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-070.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-070.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-070.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-070.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-070.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-070.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-070.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=80.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-080.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-080.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-080.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-080.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-080.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-080.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-080.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-080.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=90.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-090.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-090.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-090.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-090.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-090.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-090.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-090.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-090.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=100.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-100.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-100.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-100.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-100.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-100.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-100.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-100.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-100.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=150.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-150.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-150.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-150.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-150.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-150.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-150.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-150.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-150.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=200.0> and <CER=25.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/cld_cot-200.0_cer-25.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_sca_cot-200.0_cer-25.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-200.0_cer-25.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/mca_atm_3d_cot-200.0_cer-25.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-200.0_cer-25.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-200.0_cer-25.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-200.0_cer-25.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thick/rtm-out_rad-3d_cot-200.0_cer-25.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=0.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-000.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-000.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-000.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-000.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=0.5> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-000.5_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-000.5_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-000.5_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-000.5_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.5_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.5_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.5_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-000.5_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=1.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-001.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-001.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-001.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-001.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=1.5> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-001.5_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-001.5_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-001.5_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-001.5_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.5_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.5_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.5_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-001.5_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=2.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-002.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-002.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-002.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-002.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-002.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-002.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-002.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-002.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=4.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-004.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-004.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-004.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-004.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-004.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-004.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-004.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-004.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=6.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-006.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-006.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-006.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-006.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-006.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-006.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-006.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-006.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=8.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-008.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-008.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-008.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-008.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-008.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-008.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-008.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-008.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=10.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-010.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-010.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-010.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-010.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-010.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-010.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-010.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-010.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=12.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-012.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-012.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-012.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-012.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-012.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-012.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-012.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-012.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=14.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-014.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-014.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-014.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-014.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-014.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-014.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-014.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-014.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=16.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-016.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-016.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-016.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-016.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-016.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-016.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-016.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-016.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=18.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-018.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-018.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-018.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-018.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-018.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-018.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-018.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-018.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=20.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-020.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-020.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-020.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-020.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-020.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-020.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-020.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-020.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=22.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-022.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-022.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-022.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-022.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-022.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-022.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-022.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-022.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=24.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-024.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-024.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-024.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-024.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-024.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-024.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-024.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-024.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=26.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-026.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-026.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-026.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-026.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-026.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-026.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-026.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-026.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=28.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-028.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-028.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-028.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-028.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-028.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-028.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-028.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-028.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=30.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-030.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-030.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-030.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-030.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-030.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-030.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-030.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-030.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=35.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-035.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-035.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-035.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-035.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-035.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-035.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-035.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-035.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=40.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-040.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-040.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-040.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-040.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-040.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-040.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-040.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-040.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=45.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-045.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-045.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-045.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-045.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-045.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-045.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-045.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-045.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=50.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-050.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-050.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-050.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-050.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-050.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-050.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-050.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-050.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=55.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-055.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-055.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-055.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-055.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-055.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-055.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-055.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-055.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=60.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-060.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-060.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-060.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-060.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-060.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-060.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-060.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-060.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=70.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-070.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-070.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-070.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-070.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-070.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-070.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-070.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-070.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=80.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-080.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-080.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-080.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-080.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-080.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-080.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-080.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-080.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=90.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-090.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-090.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-090.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-090.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-090.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-090.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-090.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-090.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=100.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-100.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-100.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-100.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-100.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-100.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-100.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-100.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-100.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=150.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-150.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-150.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-150.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-150.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-150.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-150.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-150.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-150.0_cer-10.0.h5> ...
+Message [cld_gen_hom]: Generating an artificial homogeneous 3D cloud field with <COT=200.0> and <CER=10.0 μm> ...
+Message [cld_gen_hom]: Saving object into /projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/cld_cot-200.0_cer-10.0.pk ...
+Message [pha_mie_wc]: Phase function for 650.00nm has been stored at </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk>.
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_sca_cot-200.0_cer-10.0.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-200.0_cer-10.0.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/mca_atm_3d_cot-200.0_cer-10.0.bin> is created.
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-200.0_cer-10.0/rad> is created.
+Message [mcarats_ng]: Created MCARaTS input files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-200.0_cer-10.0/rad>.
+Message [mcarats_ng]: Running MCARaTS to get output files under </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-200.0_cer-10.0/rad> ...
+----------------------------------------------------------
+                 General Information                      
+                     Date : 2018-10-18
+       Solar Zenith Angle : 49.27
+      Solar Azimuth Angle : -148.20
+           Surface Albedo : 0.27
+           Phase Function : Mie
+  Number of Photons / Set : 1.0e+07 (weighted distribution over 16 g)
+           Number of Runs : 16(g) * 3(set)
+           Number of CPUs : 12(used) of 64(total)
+                   Target : Radiance
+                   Solver : 3D
+----------------------------------------------------------
+Results come out in nm, need to convert to microns
+Save absorption data to pickle save file: ./oco_subroutine/abs/co2_v51.hdf.pkl
+0 0 0.18313172371146635 0.18313172371146635
+1 16 0.2022967096950101 0.20220249113992333
+2 28 0.2214616956785538 0.2204314363154023
+3 46 0.24062668166209752 0.2406375125905929
+4 61 0.2597916676456412 0.261377957984258
+5 81 0.2789566536291849 0.2792520425472621
+6 97 0.2981216396127287 0.2983293958758688
+7 124 0.3172866255962724 0.3173299695925487
+8 168 0.3364516115798161 0.33653985228693384
+9 291 0.35561659756335984 0.35559307747267377
+10 947 0.3747815835469035 0.37478158354690355
+Saving to file /projects/yuch8913/OCO2/simulation/data/20181018_central_asia_2_470cloud_test2_20181018/atm_abs_wco2_11.h5
+[55.0, 55.6, 33.7, 34.449999999999996]
+Message [mca_out_ng]: Reading <radiance> ...
+Message [mca_out_ng]: Saving <radiance> into </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot/ipa-0650.0nm_thin/rtm-out_rad-3d_cot-200.0_cer-10.0.h5> ...
 -0.46109745 -3.7805362
 -0.4059373 -3.6735651
 Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
@@ -12352,19 +13812,22 @@ Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
 Message [para_corr]: Please make sure the units of 'cld_h' and 'sfc_h' are in 'meter'.
 Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
 Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-indices_x: [[   2    2    2 ...    2    2    2]
- [   6    6    6 ...    6    6    6]
- [  11   11   11 ...   11   11   11]
- ...
- [1096 1096 1096 ... 1096 1096 1096]
- [1101 1101 1101 ... 1101 1101 1101]
- [1105 1105 1105 ... 1105 1105 1105]]
-cot_ipa shape: (31,)
--0.46109745 -3.7805362
--0.4059373 -3.6735651
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-Message [para_corr]: Please make sure the units of 'cld_h' and 'sfc_h' are in 'meter'.
-Message [wind_corr]: Please make sure the units of 'u' and 'v' are in 'meter/second' and 'dt' in 'second'.
-Message [wind_corr]: U: -0.4611 m/s; V: -3.7805 m/s; Time offset: -435.22 s
-SCO2 band duration: 0.06319803148694444  h
+[55.0, 55.6, 33.7, 34.449999999999996]
+/projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/o2a
+[764.793886   763.63211594 764.36955688 764.07916703 768.58323921
+ 762.21526509 762.18327323 769.90542408 762.11922346 766.56371591
+ 772.51646071]
+Message [sfc_sat]: Saving object into '/projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/sfc.pk' ...
+Message [mca_sfc_2d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/mca_sfc_2d.bin> is created.
+Message [pha_mie_wc]: Re-using phase function from </projects/yuch8913/wen_soft/er3t/tmp-data/pha/mie/pha_mie_wc_0650.0000nm.pk> ...
+Message [mca_sca]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/mca_sca.bin> is created.
+Message [mca_atm_3d]: Creating 3D atm file </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/mca_atm_3d.bin> for MCARaTS ...
+Message [mca_atm_3d]: File </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/mca_atm_3d.bin> is created.
+Angstrom Exponent: 0.7560975968883168
+aod 550nm mean: 0.178658545071191
+aod 650nm mean: 0.15745933315168173
+ssa 650nm mean: 0.8358928968456374
+cth mode: 1.3
+vza 15.087557495809907 ; vaa -99.5108952654115
+Message [mcarats_ng]: Directory </projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/modis_650/650.0000nm/rad_ipa> is created.
+Message [mcarats_ng]: Reading mode ...
