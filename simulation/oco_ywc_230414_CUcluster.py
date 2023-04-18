@@ -1,6 +1,6 @@
 #!/bin/env python
 #SBATCH --partition=amilan
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks=16
 #SBATCH --ntasks-per-node=16
 #SBATCH --time=24:00:00
