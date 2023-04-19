@@ -412,15 +412,15 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
     subdomain = cfg_info['subdomain']
 
-    compare_num = 13
+    compare_num = 5
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
-    if not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
+    if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
         if not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
 
-            filename = '../simulation/data_all_20181018_{}_{}.h5'
+            filename = '../simulation/data_all_20181018_{}_{}_photon_1e9.h5'
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
             o2a_file  = filename.format('o2a', id_num)
@@ -473,7 +473,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         
         # plt.show()
 
-        """ 
+        #""" 
         extent = [float(loc) for loc in cfg_info['subdomain']]
         mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
                               np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
