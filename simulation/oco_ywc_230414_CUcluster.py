@@ -485,7 +485,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess(cfg_info, sfc_alb=sfc_alb, sza=sza)
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'o2'):
         starttime = timeit.default_timer()
         o2_h5 = run_case('o2a', cfg_info, sfc_alb=sfc_alb, sza=sza)

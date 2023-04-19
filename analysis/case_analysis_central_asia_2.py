@@ -412,7 +412,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
     subdomain = cfg_info['subdomain']
 
-    compare_num = 5
+    compare_num = 9
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'

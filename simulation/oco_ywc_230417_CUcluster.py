@@ -517,8 +517,8 @@ if __name__ == '__main__':
     #run_simulation(cfg) #done
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
-    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
