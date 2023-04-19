@@ -471,7 +471,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     #"""
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza, aod_500=aod_550)
+    return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza, aod_550=aod_550)
     # ===============================================================
     #"""
 
@@ -517,8 +517,8 @@ if __name__ == '__main__':
     #run_simulation(cfg) #done
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
-    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
