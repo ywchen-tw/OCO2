@@ -464,7 +464,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
             simulated_sfc_alb, sza = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
-                                                      fname_idl=fname_abs, cth=None, scale_factor=1.0, 
+                                                      fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
                                                       overwrite=False, photons=1e7)
