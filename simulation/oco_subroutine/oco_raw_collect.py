@@ -308,7 +308,7 @@ def cdata_sat_raw(sat0, overwrite=False, plot=True):
 
             # gg4['alb_%s' % band_tag] = oco_sfc_alb
 
-            oco_sfc_alb_2d = cal_sfc_alb_2d(oco_lon, oco_lat, oco_sfc_alb, lon_2d, lat_2d, vars()[f'sfc_43_{band_tag}'], scale=True, replace=True)
+            oco_sfc_alb_2d = cal_sfc_alb_2d(oco_lon, oco_lat, oco_sfc_alb, lon_2d, lat_2d, vars()[f'sfc_43_{band_tag}'], scale=True, replace=False)
             # gg4['alb_%s_2d' % band_tag] = oco_sfc_alb_2d
 
             gg4.update({'alb_%s' % band_tag: oco_sfc_alb, 

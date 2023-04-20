@@ -406,7 +406,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     if 'o2' in cfg_info.keys():
-        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[-12:-3]
+        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[22:31]
         boundary = [[float(i) for i in cfg_info['subdomain']], 'r']
     else:
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
@@ -418,9 +418,13 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
+        if 1:#not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
+            
+            #filename = '../simulation/data_all_20181018_{}_{}.h5'
+            #filename = '../simulation/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
+            #filename = '../simulation/data_all_20181018_{}_{}_photon_2e8_no_aod.h5'
+            filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_0.500_sza_45.0_aod500_0.500.h5'
 
-            filename = '../simulation/data_all_20181018_{}_{}_photon_1e9.h5'
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
             o2a_file  = filename.format('o2a', id_num)
@@ -661,7 +665,6 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     f.savefig(f'central_asia_2_o2a_conti_{rad_c3d_compare}.png', dpi=300)
     # plt.show()
 
-
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
     png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
@@ -700,6 +703,47 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     
     f.tight_layout()
     f.savefig(f'central_asia_2_o2a_{slope_compare}.png', dpi=300)
+
+    f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
+    png       = ['../simulation/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+             [55.00, 55.60, 33.70, 34.45]]
+    img = png[0]
+    wesn= png[1]
+    img = mpimg.imread(img)
+    for ax in [ax1, ax2]:
+        ax.imshow(img, extent=wesn)
+        lon_dom = [wesn[0]+0.15, wesn[1]-0.15]
+        lat_dom = [wesn[2]+0.15, wesn[3]-0.15]
+        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    mask = ~(cth0>0)
+    c1 = ax1.scatter(o3.lon2d[mask], o3.lat2d[mask], 
+                   c=getattr(o3, slope_compare)[:,:,0][mask], s=10,
+                   cmap='RdBu_r', vmin=-0.3, vmax=0.3)
+    cbar1 = f.colorbar(c1, ax=ax1, extend='both')
+    cbar1.set_label('$\mathrm{SCO_2}$ slope', fontsize=label_size)
+
+    c2 = ax2.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+                   c=getattr(o1, inter_compare)[:,:,0][mask], s=10,
+                   cmap='RdBu_r', vmin=-0.15, vmax=0.15)
+    cbar2 = f.colorbar(c2, ax=ax2, extend='both')
+    cbar2.set_label('$\mathrm{SCO_2}$ intercept', fontsize=label_size)
+    
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    
+    f.tight_layout()
+    f.savefig(f'central_asia_2_sco2_{slope_compare}.png', dpi=300)
+
+
     plt.show()
 
 
