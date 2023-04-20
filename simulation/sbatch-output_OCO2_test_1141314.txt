@@ -1,0 +1,12 @@
+cfg/20181018_central_asia_2_470cloud_test2.csv
+simulation extent: [55.0, 55.6, 33.7, 34.449999999999996]
+Traceback (most recent call last):
+  File "/var/spool/slurmd/job1141314/slurm_script", line 521, in <module>
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
+  File "/var/spool/slurmd/job1141314/slurm_script", line 481, in run_simulation
+    preprocess(cfg_info, sfc_alb=sfc_alb, sza=sza)
+  File "/var/spool/slurmd/job1141314/slurm_script", line 376, in preprocess
+    os.makedirs(fdir_cot_tmp)
+  File "/projects/yuch8913/software/anaconda/envs/er3t/lib/python3.9/os.py", line 225, in makedirs
+    mkdir(name, mode)
+FileExistsError: [Errno 17] File exists: '/projects/yuch8913/OCO2/simulation/tmp-data/20181018_central_asia_2_470cloud_test2_20181018/cot'

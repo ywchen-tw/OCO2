@@ -476,7 +476,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     #"""
 
 
-def run_simulation(cfg, sfc_alb=None, sza=None, aod_550=None):
+def run_simulation(cfg, sfc_alb=None, sza=None, aod_550=0):
     cfg_info = grab_cfg(cfg)
     preprocess(cfg_info, sfc_alb=sfc_alb, sza=sza)
     #"""
@@ -516,11 +516,12 @@ if __name__ == '__main__':
     print(cfg)
     #run_simulation(cfg) #done
 
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
+    #run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0)
+    
     # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.5)
-    run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
+    #run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
 
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
+    #run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.3, sza=45, aod_550=0.1) #done
     # run_simulation(cfg, sfc_alb=0.25, sza=45, aod_550=0.1)
@@ -569,7 +570,7 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.05, sza=15)
     # run_simulation(cfg, sfc_alb=0.025, sza=15)
 
-    # run_simulation(cfg, sfc_alb=0.5, sza=75)
+    run_simulation(cfg, sfc_alb=0.5, sza=75)
     # run_simulation(cfg, sfc_alb=0.4, sza=75)
     # run_simulation(cfg, sfc_alb=0.3, sza=75)
     # run_simulation(cfg, sfc_alb=0.25, sza=75)

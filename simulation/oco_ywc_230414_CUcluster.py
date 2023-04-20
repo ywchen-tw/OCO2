@@ -470,7 +470,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=False, photons=2e8)
+                                                      overwrite=False, photons=5e8)
     # ===============================================================
     #"""
 
@@ -515,8 +515,8 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
-    # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
+    #cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
+    cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     print(cfg)
