@@ -170,7 +170,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
     aer_ext = aod / (atm0.lay['thickness']['data'].sum()*1000.0)
 
-    #atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
+    atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
     # data can be accessed at
     #     atm1d0.nml[ig]['Atm_zgrd0']['data']
     #     atm1d0.nml[ig]['Atm_wkd0']['data']
@@ -470,7 +470,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=True, photons=1e7)
+                                                      overwrite=True, photons=5e8)
     # ===============================================================
     #"""
 

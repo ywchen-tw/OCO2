@@ -419,10 +419,10 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     inter_compare = f'inter_{compare_num}avg'
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
         if 1:#not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
-            filename = '../simulation/data_all_20181018_{}_{}_test_2.h5'
+            filename = '../simulation/data_all_20181018_{}_{}_test_3.h5'
             # filename = '../simulation/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
             #filename = '../simulation/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
-            #filename = '../simulation/data_all_20181018_{}_{}_CURC_test_1e7.h5'
+            # filename = '../simulation/data_all_20181018_{}_{}_CURC_test_1e7.h5'
             #filename = '../simulation/data_all_20181018_{}_{}_photon_2e8_no_aod.h5'
             # filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_0.500_sza_45.0_aod500_0.000.h5'
 
