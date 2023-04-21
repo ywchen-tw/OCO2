@@ -222,7 +222,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
                 weights=abs0.coef['weight']['data'],
                 photons=photons,
                 solver=solver,
-                Ncpu=8,
+                Ncpu=16,
                 mp_mode='py',
                 overwrite=run
                 )
@@ -292,7 +292,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
                     weights=abs0.coef['weight']['data'],
                     photons=photons,
                     solver=solver,
-                    Ncpu=8,
+                    Ncpu=16,
                     mp_mode='py',
                     overwrite=run,
                     )
