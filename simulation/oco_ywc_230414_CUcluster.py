@@ -86,14 +86,17 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     #"""
     if sfc_alb_abs is not None:
+        print('sfc_alb_abs is not None')
         # avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
         # print('Average sfc albedo: ', avg_sfc_alb)
         simulated_sfc_alb = sfc_alb_abs #if sfc_alb_abs is not None else avg_sfc_alb
-        data['alb_2d']['data'][...] = simulated_sfc_alb
+        #data['alb_2d']['data'][...] = simulated_sfc_alb
     else:
+        print('sfc_alb_abs is None')
         avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
         print('Average sfc albedo: ', avg_sfc_alb)
         simulated_sfc_alb = avg_sfc_alb
+    
         
     mod43     = sat_tmp(data)
     fname_sfc = '%s/sfc.pk' % fdir
@@ -467,7 +470,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=False, photons=1e7)
+                                                      overwrite=True, photons=1e7)
     # ===============================================================
     #"""
 

@@ -13,6 +13,7 @@ def cal_sfc_alb_2d(x_ref, y_ref, data_ref, x_bkg_2d, y_bkg_2d, data_bkg_2d, scal
     data_ref = data_ref[logic]
 
     points = np.column_stack((x_bkg_2d.ravel(), y_bkg_2d.ravel()))
+    #points = np.transpose(np.vstack((x_bkg_2d.ravel(), y_bkg_2d.ravel())))
     data_bkg = interpolate.griddata(points, data_bkg_2d.ravel(), (x_ref, y_ref), method='nearest')
 
     logic_valid = (data_bkg>0.0) & (data_ref>0.0)

@@ -81,6 +81,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     simulated_sfc_alb = sfc_alb_abs if sfc_alb_abs is not None else avg_sfc_alb
     data['alb_2d'] = {'data': simulated_sfc_alb, 'name': 'Surface albedo', 'units': 'N/A'}
     """
+    simulated_sfc_alb = np.nanmean(data['alb_2d']['data'])
+
     mod43     = sat_tmp(data)
     fname_sfc = '%s/sfc.pk' % fdir
     sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=overwrite)
@@ -425,7 +427,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     print(wvls)
     # ===============================================================
 
-    #"""
+    """
     # run calculations for 650 nm
     # ===============================================================
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
@@ -445,7 +447,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
                                                       fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                       fdir=fdir_tmp, solver=solver, 
                                                       sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                                      overwrite=False, photons=5e8)
+                                                      overwrite=True, photons=1e7)
     # ===============================================================
     #"""
 
@@ -471,7 +473,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         starttime = timeit.default_timer()
         wco2_h5 = run_case('wco2', cfg_info, sfc_alb=sfc_alb, sza=sza)
@@ -479,7 +481,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         endtime = timeit.default_timer()
         print('WCO2 band duration:',(endtime-starttime)/3600.,' h')
     #"""
-    """"
+    #""""
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         starttime = timeit.default_timer()

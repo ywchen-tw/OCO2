@@ -27,8 +27,8 @@ def sfc_alb_mask_inter(lon_alb, lat_alb, sfc_alb, lon_2d, lat_2d):
     mask = sfc_alb >= 0
 
     # Create an array of valid (lon, lat) points
-    points = np.column_stack((lon_alb[mask].flatten(), lat_alb[mask].flatten()))
-    #points = np.transpose(np.vstack((lon_alb[mask].flatten(), lat_alb[mask].flatten())))
+    #points = np.column_stack((lon_alb[mask].flatten(), lat_alb[mask].flatten()))
+    points = np.transpose(np.vstack((lon_alb[mask].flatten(), lat_alb[mask].flatten())))
 
     # Interpolate sfc_alb values at lon_2d and lat_2d using nearest neighbor method
     sfc_alb_inter = interpolate.griddata(points, sfc_alb[mask].flatten(), 
@@ -101,8 +101,8 @@ def cdata_sat_raw(sat0, overwrite=False, plot=True):
         for var_name in ['ref_2d_470', 'ref_2d_555', 'ref_2d_1640', 'rad_2d_1640', 'ref_2d_2130', 'rad_2d_2130']:
             var = vars()[var_name]
             mask = var>=0
-            points_mask = np.column_stack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten()))
-            #points_mask = np.transpose(np.vstack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten())))
+            #points_mask = np.column_stack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten()))
+            points_mask = np.transpose(np.vstack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten())))
             vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
 
         # Add MODIS L1B data to HDF groups
