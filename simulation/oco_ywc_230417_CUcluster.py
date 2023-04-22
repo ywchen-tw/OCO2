@@ -391,9 +391,10 @@ def preprocess(cfg_info, sfc_alb=None, sza=None):
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, overwrite=True, plot=True)
+
+        # ===============================================================
         cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
     # ===============================================================
-
 
 
 def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
@@ -410,7 +411,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     extent[2] -= 0.15 
     extent[3] += 0.15
     print(extent)
-    ref_threshold = float(cfg_info['ref_threshold'])
+    
 
     name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     # ===============================================================
@@ -439,18 +440,19 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     print(wvls)
     # ===============================================================
 
-    """
+    #""
     # run calculations for 650 nm
     # ===============================================================
+    ref_threshold = float(cfg_info['ref_threshold'])
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
     for solver in ['IPA', '3D']:
-        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver, overwrite=False, case_name_tag=name_tag, photons=1e9)
-        modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
+        cal_mca_rad_650(sat0, zpt_file, 1640, fdir=fdir_tmp_650, solver=solver, overwrite=True, case_name_tag=name_tag, photons=2e7)
+        modis_650_simulation_plot(extent, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=1640, ref_threshold=ref_threshold, plot=True)
     #"""
 
-    #"""
+    """
     # run calculations for each wavelength
     # ===============================================================
     for wavelength in wvls:
@@ -463,7 +465,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     # ===============================================================
     #"""
 
-    #"""
+    """
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
     return cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, simulated_sfc_alb, sza, aod_550=aod_550)
@@ -565,7 +567,7 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.05, sza=15)
     # run_simulation(cfg, sfc_alb=0.025, sza=15)
 
-    run_simulation(cfg, sfc_alb=0.5, sza=75)
+    # run_simulation(cfg, sfc_alb=0.5, sza=75)
     # run_simulation(cfg, sfc_alb=0.4, sza=75)
     # run_simulation(cfg, sfc_alb=0.3, sza=75)
     # run_simulation(cfg, sfc_alb=0.25, sza=75)
