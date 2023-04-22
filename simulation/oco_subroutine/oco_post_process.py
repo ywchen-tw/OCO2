@@ -314,8 +314,8 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
     if aod_550 is None:
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza)
     else:
-        #output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
-        output_file = 'data_all_%s_%s_%4.4d_%4.4d_test.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
+        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
+        #output_file = 'data_all_%s_%s_%4.4d_%4.4d_test.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
 
 
     with h5py.File(output_file, 'w') as f:
