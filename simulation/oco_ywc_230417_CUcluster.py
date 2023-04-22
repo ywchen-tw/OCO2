@@ -459,7 +459,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
                                                                 fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                                                 fdir=fdir_tmp, solver=solver, 
                                                                 sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
-                                                                overwrite=True, photons=1e7)
+                                                                overwrite=False, photons=1e7)
     # ===============================================================
     #"""
 

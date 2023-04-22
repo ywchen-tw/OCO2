@@ -1,6 +1,6 @@
 #!/bin/env python
 #SBATCH --partition=amilan
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --ntasks=16
 #SBATCH --ntasks-per-node=16
 #SBATCH --time=24:00:00
@@ -76,7 +76,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     # mca_sfc object
     # =================================================================================
-    #"""
     with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
         data = {
             'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
@@ -84,7 +83,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
             'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}
         }
 
-    #"""
+
     if sfc_alb_abs is not None:
         print('sfc_alb_abs is not None')
         # avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
@@ -515,8 +514,8 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
-    #cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
+    #cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
+    cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     print(cfg)
