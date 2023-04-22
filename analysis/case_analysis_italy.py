@@ -406,7 +406,7 @@ def main(cfg_name='20151219_north_italy_470cloud_test.csv'):
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     if 'o2' in cfg_info.keys():
-        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[-12:-3]
+        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[22:31]
         boundary = [[float(i) for i in cfg_info['subdomain']], 'r']
     else:
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
@@ -417,10 +417,11 @@ def main(cfg_name='20151219_north_italy_470cloud_test.csv'):
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
-    if not os.path.isfile(f'o2a_para_{compare_num}_north_italy.csv'):
-        if not os.path.isfile(f'20151219_north_italy_470cloud_test_o2a.pkl'):
+    if 1:#not os.path.isfile(f'o2a_para_{compare_num}_north_italy.csv'):
+        if 1:#not os.path.isfile(f'20151219_north_italy_470cloud_test_o2a.pkl'):
 
-            filename = '../simulation/data_all_20151219_{}_{}.h5'
+            #filename = '../simulation/data_all_20151219_{}_{}.h5'
+            filename = '../simulation/data_all_20151219_{}_{}_photon_5e8_with_aod.h5'
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
             o2a_file  = filename.format('o2a', id_num)

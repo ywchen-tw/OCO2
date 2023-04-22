@@ -262,22 +262,31 @@ def near_rad_calc_all(OCO_class):
     OCO_class.sls_41 = (OCO_class.rad_c3ds_41/OCO_class.rad_clr_41 + OCO_class.rad_clrs_41/OCO_class.rad_clr_41)
 
 
-def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size)
-    ipa  = coarsening_subfunction(OCO_class.rad_c1d, OCO_class.cld_location, size)
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size)
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size)
-    ipa_std  = coarsening_subfunction(OCO_class.rad_c1ds, OCO_class.cld_location, size)
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size)
+def coarsening(OCO_class, size=3, keep_clouds=False):
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, keep_clouds=keep_clouds)
+    ipa  = coarsening_subfunction(OCO_class.rad_c1d, OCO_class.cld_location, size, keep_clouds=keep_clouds)
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, keep_clouds=keep_clouds)
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, keep_clouds=keep_clouds)
+    ipa_std  = coarsening_subfunction(OCO_class.rad_c1ds, OCO_class.cld_location, size, keep_clouds=keep_clouds)
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, keep_clouds=keep_clouds)
 
     return ipa0, ipa, c3d, ipa0_std, ipa_std, c3d_std, 
 
 
-def coarsening_subfunction(rad_mca, cld_position, size):
+def coarsening_subfunction(rad_mca, cld_position, size, keep_clouds=False):
+    """
+    Parameters:
+    -----------
+    rad_mca: 3D array, radiances of various wavelengths
+    cld_position: 2D array
+    size: int, size of the filter
+    keep_clouds: bool, default False, if True, cloudy pixels are not masked
+    """
     lams = rad_mca.shape[-1]
     tmp = np.zeros_like(rad_mca)
     rad_mca_mask_cld = rad_mca.copy()
-    rad_mca_mask_cld[cld_position] = -999999
+    if not keep_clouds:
+        rad_mca_mask_cld[cld_position] = -999999
     for i in range(lams):
         tmp[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp[tmp<0] = np.nan
@@ -412,20 +421,23 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
     subdomain = cfg_info['subdomain']
 
-    compare_num = 9
+    compare_num = 41
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        if 1:#not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
-            filename = '../simulation/data_all_20181018_{}_{}_test_3.h5'
+        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
+            # filename = '../simulation/data_all_20181018_{}_{}_test_3.h5'
             # filename = '../simulation/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
+            filename = '../simulation/data_all_20181018_{}_{}_photon_5e8_with_aod.h5'
             #filename = '../simulation/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
             # filename = '../simulation/data_all_20181018_{}_{}_CURC_test_1e7.h5'
             #filename = '../simulation/data_all_20181018_{}_{}_photon_2e8_no_aod.h5'
             # filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_0.500_sza_45.0_aod500_0.000.h5'
-
+            # filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_0.400_sza_45.0_aod500_0.100.h5'
+            #filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_0.500_sza_75.0_aod500_0.000.h5'
+            
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
             o2a_file  = filename.format('o2a', id_num)
@@ -1218,9 +1230,10 @@ def heatmap_xy_3(x, y, ax):
     #print(value_avg[val_mask])
     #print(value_std[val_mask])
     temp_r2 = 0
-    for cld_min in [1, 1., 1.5, 1.75]:
+    cld_val = cld_list[val_mask]
+    cld_min_list = [1, 1.25, 1.5, 1.75] if cld_val.min()<=2 else [cld_val.min().round(0)-0.25, cld_val.min().round(0)-0.5, cld_val.min().round(0), cld_val.min().round(0)+0.25, cld_val.min().round(0)+0.5] 
+    for cld_min in cld_min_list:
         for cld_max in np.arange(10, 18, 0.5):
-            cld_val = cld_list[val_mask]
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
