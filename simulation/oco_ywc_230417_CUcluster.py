@@ -1,8 +1,8 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks=8
+#SBATCH --ntasks-per-node=8
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -62,9 +62,9 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
 
     # atm object
     # =================================================================================
-    oco_zpt = h5py.File(zpt_file, 'r')
-    levels = oco_zpt['h_edge'][...]
-    oco_zpt.close()
+    with h5py.File(zpt_file, 'r') as oco_zpt:
+        levels = oco_zpt['h_edge'][...]
+
     fname_atm = '%s/atm.pk' % fdir
     atm0      = atm_atmmod(levels=levels, fname=fname_atm, overwrite=overwrite)
     # =================================================================================
@@ -72,12 +72,11 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
     # abs object, in the future, we will implement OCO2 MET file for this
     # =================================================================================
     fname_abs = '%s/abs.pk' % fdir
-    abs0      = abs_oco_h5(wavelength=wavelength, fname=fname_abs, fname_h5=fname_idl, atm_obj=atm0, overwrite=overwrite)
+    abs0      = abs_oco_h5(wavelength=wavelength, fname=fname_abs, fname_h5=fname_atm_abs, atm_obj=atm0, overwrite=overwrite)
     # =================================================================================
 
     # mca_sfc object
     # =================================================================================
-    #"""
     with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
         data = {
             'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
@@ -85,7 +84,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
             'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}
         }
 
-    #"""
     if sfc_alb_abs is not None:
         # avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
         # print('Average sfc albedo: ', avg_sfc_alb)
@@ -191,14 +189,11 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=N
 
     
 
-    with h5py.File(sat.fnames['oco_l1b'][0], 'r') as f_oco_l1b:
-        lon_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_longitude'][...]
-        lat_oco_l1b = f_oco_l1b['SoundingGeometry/sounding_latitude'][...]
-        logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
-        sza = f_oco_l1b['SoundingGeometry/sounding_solar_zenith'][...][logic].mean()
-        saa = f_oco_l1b['SoundingGeometry/sounding_solar_azimuth'][...][logic].mean()
-        vza = f_oco_l1b['SoundingGeometry/sounding_zenith'][...][logic].mean()
-        vaa = f_oco_l1b['SoundingGeometry/sounding_azimuth'][...][logic].mean()
+    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+        sza = f_pre_data['oco/geo/sza'][...].mean()
+        saa = f_pre_data['oco/geo/saa'][...].mean()
+        vza = f_pre_data['oco/geo/vza'][...].mean()
+        vaa = f_pre_data['oco/geo/vaa'][...].mean()
 
     if sza_abs != None:
         sza = sza_abs
@@ -464,7 +459,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
                                                                 fname_idl=fname_abs, cth=None, scale_factor=1.0, 
                                                                 fdir=fdir_tmp, solver=solver, 
                                                                 sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
-                                                                overwrite=False, photons=2e8)
+                                                                overwrite=True, photons=1e7)
     # ===============================================================
     #"""
 
@@ -522,7 +517,7 @@ if __name__ == '__main__':
     #run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=1)
 
     #run_simulation(cfg, sfc_alb=0.5, sza=45, aod_550=0.1)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
+    run_simulation(cfg, sfc_alb=0.4, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.3, sza=45, aod_550=0.1) #done
     # run_simulation(cfg, sfc_alb=0.25, sza=45, aod_550=0.1)
     # run_simulation(cfg, sfc_alb=0.2, sza=45, aod_550=0.1)
