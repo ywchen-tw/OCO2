@@ -50,7 +50,7 @@ class sat_tmp:
         self.data = data
 
 
-def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_idl=None, cth=None, 
+def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, cth=None, 
                      photons=1e6, scale_factor=1.0, 
                      fdir='tmp-data', solver='3D', 
                      sfc_alb_abs=None, sza_abs=None, aod_550=None,
@@ -456,7 +456,7 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None, aod_550=None):
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
             simulated_sfc_alb, sza, aod_550 = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
-                                                                fname_idl=fname_abs, cth=None, scale_factor=1.0, 
+                                                                fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                                                 fdir=fdir_tmp, solver=solver, 
                                                                 sfc_alb_abs=sfc_alb, sza_abs=sza, aod_550=aod_550,
                                                                 overwrite=True, photons=1e7)
