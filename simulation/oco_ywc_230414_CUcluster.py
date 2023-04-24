@@ -420,7 +420,6 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
     extent[2] -= 0.15 
     extent[3] += 0.15
     print(extent)
-    ref_threshold = float(cfg_info['ref_threshold'])
 
     name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     # ===============================================================
@@ -448,10 +447,11 @@ def run_case(band_tag, cfg_info, sfc_alb=None, sza=None):
         wvls = f['lamx'][...]*1000.0
     print(wvls)
     # ===============================================================
-
+    #
     """
     # run calculations for 650 nm
     # ===============================================================
+    ref_threshold = float(cfg_info['ref_threshold'])
     fdir_tmp_650 = os.path.abspath('tmp-data/%s/%s' % (name_tag, 'modis_650'))
     if not os.path.exists(fdir_tmp_650):
         os.makedirs(fdir_tmp_650)
@@ -515,8 +515,9 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 if __name__ == '__main__':
     
     #cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
-    cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
+    #cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
+    cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     print(cfg)
     run_simulation(cfg) #done
