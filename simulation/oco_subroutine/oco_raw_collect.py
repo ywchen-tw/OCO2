@@ -103,7 +103,13 @@ def cdata_sat_raw(sat0, overwrite=False, plot=True):
             mask = var>=0
             points_mask = np.column_stack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten()))
             #points_mask = np.transpose(np.vstack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten())))
-            vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
+            #vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
+
+            vars()[f'{var_name}_inter_linear'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
+            mask = vars()[f'{var_name}_inter_linear']>=0
+            points_mask = np.column_stack((lon_2d[mask].flatten(), lat_2d[mask].flatten()))
+
+            vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, vars()[f'{var_name}_inter_linear'][mask].flatten(), (lon_2d, lat_2d), method='linear')
 
         # Add MODIS L1B data to HDF groups
         g1.update({'ref_470': vars()[f'ref_2d_470_inter'], 'ref_555': vars()[f'ref_2d_555_inter'], 

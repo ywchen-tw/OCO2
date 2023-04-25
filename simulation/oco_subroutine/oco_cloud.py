@@ -164,8 +164,19 @@ def cloud_mask_rgb(
     indices_x  = np.unique(np.concatenate((indices_x, indices[0])))
     indices_y  = np.unique(np.concatenate((indices_y, indices[1])))"""
     logic_ref_nan0 = (ref_470_2d-alb_470) < ref_threshold
-    logic_ref_nan = np.logical_and(logic_rgb_nan[indices_x, indices_y], logic_ref_nan0)
-
+    logic_ref_nan0[0, :] = True
+    logic_ref_nan0[-1, :] = True
+    logic_ref_nan0[:, 0] = True
+    logic_ref_nan0[:, -1] = True 
+    # plt.scatter(lon_2d[~logic_ref_nan0], lat_2d[~logic_ref_nan0], s=1, c='r')
+    # plt.show()
+    
+    # logic_ref_nan = np.logical_and(logic_rgb_nan[indices_x, indices_y], logic_ref_nan0)
+    # plt.clf()
+    # plt.scatter(lon_2d[~logic_ref_nan], lat_2d[~logic_ref_nan], s=1, c='r')
+    # plt.show()
+    # sys.exit()
+    logic_ref_nan = logic_ref_nan0
 
     indices    = np.where(logic_ref_nan!=1)
     #\----------------------------------------------------------------------------/#

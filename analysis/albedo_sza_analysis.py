@@ -398,7 +398,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     if 'o2' in cfg_info.keys():
-        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[-12:-3]
+        id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[22:31]
         boundary = [[float(i) for i in cfg_info['subdomain']], 'r']
     else:
         boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
@@ -429,7 +429,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}.csv'):
         for alb in [0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]:
             for sza in [15, 30, 45, 60, 75]:
-                if not os.path.isfile(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_o2a.pkl'):
+                if 1:#not os.path.isfile(f'20181018_central_asia_2_470cloud_test_sfc_alb_{alb:.3f}_sza_{sza:.1f}_o2a.pkl'):
                     print(f'alb: {alb:.3f}, sza: {sza:.1f}')
                     filename = '../simulation/data_all_20181018_{}_{}_sfc_alb_{:.3f}_sza_{:.1f}.h5'
                     cld_lon, cld_lat, cld_location = cld_position(cfg_name)
@@ -855,8 +855,8 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
 
     ax21.set_ylim(0, 10)
 
-    ax1.set_ylabel('a', fontsize=label_size)
-    ax2.set_ylabel('a', fontsize=label_size)
+    ax1.set_ylabel('amplitude', fontsize=label_size)
+    ax2.set_ylabel('amplitude', fontsize=label_size)
 
     ax21.set_ylabel('e-folding distance (km)', fontsize=label_size)
     ax22.set_ylabel('e-folding distance (km)', fontsize=label_size)
@@ -870,6 +870,13 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     ax2.set_title('coefficient a for intercept', fontsize=label_size)
     ax21.set_title('e-folding distance for slope', fontsize=label_size)
     ax22.set_title('e-folding distance for intercept', fontsize=label_size)
+
+    for i in range(4):
+        ax = [ax1, ax2, ax21, ax22][i]
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(a)', fontsize=label_size+2, color='k')
+
     fig.tight_layout()
     fig.savefig(f'{band_tag}_slope_inter_cld_distance_{point_avg}avg.png', dpi=150)
     # plt.show()
