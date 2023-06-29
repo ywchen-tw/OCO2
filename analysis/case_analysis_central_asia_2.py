@@ -524,6 +524,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         cld_dist = cld_data['cld_dis']
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         #weighted_cld_dist_calc
         """if not os.path.isfile(f'{cfg_name[:-4]}_weighted_cld_distance_3.pkl'):
             weighted_cld_dist_calc(cfg_name, o2, slope_compare)
@@ -536,6 +537,8 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         print(cld_dist[cld_dist>0].min(), cld_dist.max())"""
         
 
+=======
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
 =======
 >>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
         xco2 = o1.co2
@@ -572,10 +575,13 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         print(parameters_cld_distance_list)
 <<<<<<< HEAD
+<<<<<<< HEAD
         
         # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 
         
+=======
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
 =======
 >>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
         # slope_a, slope_b, inter_a, inter_b
@@ -592,6 +598,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         output_csv = pd.DataFrame({'SND': snd[xco2_valid][mask_fp].flatten(),
                                    'LON': o1.lon[xco2_valid][mask_fp].flatten(),
                                    'LAT': o1.lat[xco2_valid][mask_fp].flatten(),
+<<<<<<< HEAD
 <<<<<<< HEAD
                                    'L2XCO2[ppm]': xco2[xco2_valid][mask_fp].flatten()*1e6,
                                    'L2PSUR[kPa]': psur[xco2_valid][mask_fp].flatten()/1000,
@@ -614,6 +621,8 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
         #sys.exit()
 =======
+=======
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
                                    'L2XCO2[ppm]': xco2[xco2_valid][mask_fp].flatten(),
                                    'L2PSUR[kPa]': psur[xco2_valid][mask_fp].flatten()/1000,
                                    #'cld_distance': oco_footprint_cld_distance.flatten(),
@@ -628,6 +637,9 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
         output_csv.to_csv(f'central_asia_2_footprint_cld_distance.csv', index=False)
 
         
+<<<<<<< HEAD
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
+=======
 >>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
         fitting_3bands_h_index(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, 'H_index_21', mask)
         
@@ -836,10 +848,14 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('$\mathrm{O_2-A}$ slope', fontsize=label_size)
 <<<<<<< HEAD
+<<<<<<< HEAD
     fp_mask = o1.co2>0
     # ax1.scatter(o1.lon[fp_mask], o1.lat[fp_mask], 
     #                c=getattr(o1, 'slope_25p')[:,:,0][fp_mask], s=10,
     #                cmap='RdBu_r', vmin=-0.3, vmax=0.3, edgecolors='k')
+=======
+    
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
 =======
     
 >>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
@@ -920,6 +936,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     f.savefig(f'central_asia_2_sco2_{slope_compare}.png', dpi=300)
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     f, (ax1, ax2, ax3)=plt.subplots(1, 3, figsize=(24, 7.5))
@@ -1028,6 +1045,8 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
     # plt.show()
 
+=======
+>>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
 =======
 >>>>>>> 39bdc35abaa82f0f5dff019020ea4ab780d26bd8
     # plt.show()
