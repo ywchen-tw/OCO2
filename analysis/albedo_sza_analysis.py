@@ -280,7 +280,7 @@ def coarsening_subfunction(rad_mca, cld_position, size):
     tmp[tmp<0] = np.nan
     return tmp
 
-def get_slope_np(toa, mu, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unperturb'):
+def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unperturb'):
      
     nwl=sls_np[z,fp,:].shape[0]
     flt=np.where(sls_np[z,fp,:]>1e-6)
@@ -289,9 +289,9 @@ def get_slope_np(toa, mu, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode=
     if use==nwl:
         w=1./sls_np[z,fp,:]    
         if mode=='unperturb':
-            x=c3d_np[z,fp,:]/(toa[:]*mu)*np.pi
+            x=c3d_np[z,fp,:]/toa[:]*np.pi
         else:
-            x=clr_np[z,fp,:]/(toa[:]*mu)*np.pi
+            x=clr_np[z,fp,:]/toa[:]*np.pi
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
         res=np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
@@ -310,9 +310,9 @@ def get_slope_1km(OCO_class,fp,z, points=11, mode='unperturb'):
     if use==nwl:
         w=1./OCO_class.sls_1km[z,fp,:]    
         if mode=='unperturb':
-            x=OCO_class.rad_1km_c3d[z,fp,:]/(OCO_class.toa[:]*OCO_class.mu)*np.pi
+            x=OCO_class.rad_1km_c3d[z,fp,:]/OCO_class.toa[:]*np.pi
         else:
-            x=OCO_class.rad_1km_clr[z,fp,:]/(OCO_class.toa[:]*OCO_class.mu)*np.pi
+            x=OCO_class.rad_1km_clr[z,fp,:]/OCO_class.toa[:]*np.pi
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
         mask = np.argsort(x)[5:]
@@ -332,9 +332,9 @@ def get_slope_25p(OCO_class, fp, z, points=11, mode='unperturb'):
     if use==nwl:
         w=1./OCO_class.sls_25p[z,fp,:]
         if mode=='unperturb':
-            x=OCO_class.rad_25p_c3d[z,fp,:]/(OCO_class.toa[:]*OCO_class.mu)*np.pi
+            x=OCO_class.rad_25p_c3d[z,fp,:]/OCO_class.toa[:]*np.pi
         else:
-            x=OCO_class.rad_25p_clr[z,fp,:]/(OCO_class.toa[:]*OCO_class.mu)*np.pi   
+            x=OCO_class.rad_25p_clr[z,fp,:]/OCO_class.toa[:]*np.pi   
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
         res=np.polyfit(x[mask],OCO_class.sl_25p[z,fp,:][mask],1,w=w[mask],cov=True) # now get covariance as well!
@@ -373,19 +373,19 @@ def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line 
 
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.mu, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, points=11, mode='unperturb')
             OCO_class.slope_5avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_5avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.mu, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, points=11, mode='unperturb')
             OCO_class.slope_9avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_9avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.mu, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, points=11, mode='unperturb')
             OCO_class.slope_13avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_13avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.mu, OCO_class.sl_41, OCO_class.sls_41, OCO_class.rad_c3d_41, OCO_class.rad_clr_41, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_41, OCO_class.sls_41, OCO_class.rad_c3d_41, OCO_class.rad_clr_41, fp, z, points=11, mode='unperturb')
             OCO_class.slope_41avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_41avg[z,fp,:]=[inter,interstd]
 
@@ -421,7 +421,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     sco2_inter_a_list = []
     sco2_inter_b_list = []
 
-    compare_num = 5
+    compare_num = 13
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
@@ -486,12 +486,12 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
                 mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
                                       np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3])).flatten()
                 
-                # ((o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b),
-                #  (wco2_slope_a, wco2_slope_b, wco2_inter_a, wco2_inter_b), 
-                #  (sco2_slope_a, sco2_slope_b, sco2_inter_a, sco2_inter_b)) = fitting_3bands(alb, sza, cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
+                ((o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b),
+                 (wco2_slope_a, wco2_slope_b, wco2_inter_a, wco2_inter_b), 
+                 (sco2_slope_a, sco2_slope_b, sco2_inter_a, sco2_inter_b)) = fitting_3bands(alb, sza, cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
 
                 
-                #"""
+                """
                 o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b = fitting(cld_dist, 
                                                                          getattr(o1, rad_c3d_compare)[:,:, -1].flatten(), 
                                                                          getattr(o1, rad_clr_compare)[:,:, -1].flatten(), 
@@ -514,7 +514,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
                                                                                  getattr(o3, slope_compare)[:,:,0].flatten(), 
                                                                                  getattr(o3, inter_compare)[:,:,0].flatten(),
                                                                                  alb, sza, mask, plot=False)
-                #"""
+                """
                 o2a_slope_a_list.append(o2_slope_a)
                 o2a_slope_b_list.append(o2_slope_b)
                 o2a_inter_a_list.append(o2_inter_a)

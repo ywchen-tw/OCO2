@@ -31,7 +31,6 @@ class OCOSIM:
         self.rad  = h1['rad_mca_3d_domain'][...]
         self.dom  = h1['extent_domain'][...] # lats/lons
         self.snd  = h1['snd_id'][...]
-        self.mu  = np.cos(np.radians(np.mean(h1['sza_mca'][...])))
         self.toa  = h1['toa'][...]
         self.np   = h1['Np'][...]
         self.logic= h1['logic'][...]
