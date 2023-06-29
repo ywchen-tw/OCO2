@@ -1,0 +1,38 @@
+descriptor,Susan,,,,,,
+,,,,,,,
+date,20150622,,,,,,
+juld,173,,,,,,# Julian Day
+,,,,,,,
+data files,,,,,,,
+pathdat,../dat/,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"
+l2,oco2_L2StdND_05176a_150622_B10206r_200723181441.h5,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.8r/2015/173/
+lt,,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r/2015/
+l1b,oco2_L1bScND_05176a_150622_B10003r_191113232757.h5,,,,,,# L1B file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L1B_Science.8r/2015/173/
+dia,,,,,,,# diagnostic file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Diagnostic.8r/2015/173/
+met,oco2_L2MetND_15574a_170605_B10003r_200216001743.h5,,,,,,# MET file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Met.8r/2015/173/
+imap,,,,,,,
+co2prior,oco2_L2CPrND_07794a_151219_B10003r_191121015231.h5,,,,,,
+sol,solar.txt,,,,,,# Location of solar file
+,,,,,,,
+absorption information,,,,,,,
+nx,10,,,,,,# number of transmittance interval
+Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
+abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
+,,,,,,,
+simulator information,,,,,,,
+#pathsim,/Users/schmidt/rtm/ocosim/dat/new/,,,,,,
+pathsim,/Users/schmidt/rtm/er3toco/oco/,,,,,,
+o2,,,,,,,
+wco2,,,,,,,
+sco2,,,,,,,
+,,,,,,,
+full physics retrieval information,,,,,,,
+python,/data/hong/soft/python3/anaconda/envs/oco/bin/python,,,,,,# python that is used for retrieval sub-process
+,,,,,,,
+domain info,,,,,,,
+png,20150622.png,,,,,,# PNG file
+pngwesn,-64.5552,-50.108,-14.2336,2.251,,,# PNG file extent
+subdomain,-57.9668,-57.5068,1.6343,2.251,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+location,-60.0217,-3.119,Manaus,,,,# special location to plot with label
+,,,,,,,
+ref_threshold,0.09,,,,,,

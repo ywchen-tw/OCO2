@@ -31,8 +31,6 @@ retrieval/
 test/
 simulation/data
 simulation/tmp-data
-simulation_dxdy/data
-simulation_dxdy/tmp-data
 test/tmp-data
 retrieval/RtRetrievalFramework
 build/
