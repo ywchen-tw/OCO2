@@ -43,7 +43,7 @@ from oco_subroutine.oco_raw_collect import cdata_sat_raw
 from oco_subroutine.oco_cloud import cdata_cld_ipa
 from oco_subroutine.oco_post_process import cdata_all
 from oco_subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
-from oco_subroutine.oco_utils import path_dir, sat_tmp, timing
+from oco_subroutine.oco_utils import path_dir, sat_tmp, timing, plot_mca_simulation
 from oco_subroutine.oco_atm_atmmod import atm_atmmod
 
 plt.rcParams["font.family"] = "Arial"
@@ -226,34 +226,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
             # plot
             # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            mod_img = mpl_img.imread(sat.fnames['mod_rgb'][0])
-            mod_img_wesn = sat.extent
-            fig = plt.figure(figsize=(12, 5.5))
-            ax1 = fig.add_subplot(121)
-            ax2 = fig.add_subplot(122)
-            ax1.imshow(mod_img, extent=mod_img_wesn)
-            ax2.imshow(mod_img, extent=mod_img_wesn)
-            cs = ax1.pcolormesh(modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data'], 
-                                modl1b.data['rad_2d']['data'], 
-                                cmap='Greys_r', vmin=0.0, vmax=0.3, zorder=0)
-            ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-            ax1.set_title('MODIS Chanel 1')
-            cs = ax2.pcolormesh(modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data'], 
-                                out0.data['rad']['data'], 
-                                cmap='Greys_r', zorder=0)
-            ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-            ax2.set_title('MCARaTS %s' % solver)
-            for ax in [ax1, ax2]:
-                ax.set_xlabel('Longitude [$^\circ$]')
-                ax.set_ylabel('Latitude [$^\circ$]')
-                ax.set_xlim(sat.extent[:2])
-                ax.set_ylim(sat.extent[2:])
-            plt.subplots_adjust(hspace=0.5)
-            if cth is not None:
-                plt.savefig('%s/mca-out-rad-modis-%s_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
-            else:
-                plt.savefig('%s/mca-out-rad-modis-%s_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
-            plt.close(fig)
+            plot_mca_simulation(sat, modl1b, out0, oco_std0,
+                                solver, fdir, cth, scale_factor, wavelength)
             # ------------------------------------------------------------------------------------------------------
 
 
@@ -293,37 +267,12 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
             # mcarats output
             out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
-
             oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
 
             # plot
             # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            fig = plt.figure(figsize=(12, 5.5))
-            ax1 = fig.add_subplot(121)
-            ax2 = fig.add_subplot(122)
-            ax1.imshow(mod_img, extent=mod_img_wesn)
-            ax2.imshow(mod_img, extent=mod_img_wesn)
-            cs = ax1.pcolormesh(modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data'], 
-                                modl1b.data['rad_2d']['data'], 
-                                cmap='Greys_r', vmin=0.0, vmax=0.3, zorder=0)
-            ax1.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-            ax1.set_title('MODIS Chanel 1')
-            cs = ax2.pcolormesh(modl1b.data['lon_2d']['data'], modl1b.data['lat_2d']['data'],
-                                out0.data['rad']['data'], 
-                                cmap='Greys_r', zorder=0)
-            ax2.scatter(oco_std0.data['lon']['data'], oco_std0.data['lat']['data'], s=20, c=oco_std0.data['xco2']['data'], cmap='jet', alpha=0.4, zorder=1)
-            ax2.set_title('MCARaTS %s' % solver)
-            for ax in [ax1, ax2]:
-                ax.set_xlabel('Longitude [$^\circ$]')
-                ax.set_ylabel('Latitude [$^\circ$]')
-                ax.set_xlim(sat.extent[:2])
-                ax.set_ylim(sat.extent[2:])
-            plt.subplots_adjust(hspace=0.5)
-            if cth is not None:
-                plt.savefig('%s/mca-out-rad-modis-%s0_cth-%.2fkm_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), cth, scale_factor, wavelength), bbox_inches='tight')
-            else:
-                plt.savefig('%s/mca-out-rad-modis-%s0_sf-%.2f_%.4fnm.png' % (fdir, solver.lower(), scale_factor, wavelength), bbox_inches='tight')
-            plt.close(fig)
+            plot_mca_simulation(sat, modl1b, out0, oco_std0,
+                                'ipa0', fdir, cth, scale_factor, wavelength)
             # ------------------------------------------------------------------------------------------------------
     return simulated_sfc_alb, sza
 
@@ -383,11 +332,10 @@ def preprocess(cfg_info):
     Trn_min = float(cfg_info['Trn_min'])
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-        if 1:#not os.path.isfile(fname_abs):
+        if not os.path.isfile(fname_abs):
             oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
                     nx=nx, Trn_min=Trn_min, pathout=fdir_data,
-                    reextract=True, plot=True)
-            sys.exit()
+                    reextract=False, plot=True)
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)

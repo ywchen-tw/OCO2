@@ -169,19 +169,16 @@ def oco_abs(cfg, sat, zpt_file,
         if (iband == 0) :
             jbroado2=1
             refl = alb_o2a
-            
 
         # Weak CO2 band
         if (iband == 1) :
             refl = alb_wco2
             jbroadco2=1
             
-
         # Strong CO2 band
         if (iband == 2):
             refl = alb_sco2
             jbroadco2=1
-            
 
         # todo: what is the broadening for the H2O self-broadening (if there
         # is such a thing?
@@ -374,15 +371,12 @@ def oco_abs(cfg, sat, zpt_file,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
                              absco, trns)
-
-            
             elif ((iband == 1) | (iband == 2)) :
                 # For CO2
                 ext0 = calc2(co2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
                              absco, trns)
-
             # For H2O
             ext1 = calc2(h2oden,
                             iz,solzen,musolzen,
@@ -412,8 +406,8 @@ def oco_abs(cfg, sat, zpt_file,
         wloco = oco_wv(iband, sat, footprint=1) # (micron)
         nlo = len(wloco)
         # (2) read instrument line shape
-        xx, yy = oco_ils(iband, sat) # xx: relative wl shift (nm)# yy: normalized ILS
-        xx  = xx*0.001 # convert xx into micron
+        xx, yy = oco_ils(iband, sat) # xx: relative wl shift (micron)# yy: normalized ILS
+        #xx  = xx*0.001 # convert xx into micron
         nils= len(xx)
         # (3) convolute tau & trns across entire wavelength range -- & how about kval
         ils = yy/np.max(yy) >= ils0	
@@ -459,7 +453,6 @@ def oco_abs(cfg, sat, zpt_file,
             tick_size = 14
 
             x = xx*1000
-            #y = trnsx[sx]
             ax.plot(x, yy, color='k')
             ax.vlines([x[ils[0]], x[ils[-1]]], ils0, 1, 'r')
             #ax.plot(1000*np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
@@ -605,7 +598,7 @@ def oco_abs(cfg, sat, zpt_file,
             #ax.set_ylim(ymin, ymax)
             #ax.set_xlim(xr[0],xr[1])
             #ax.legend(loc='center left', bbox_to_anchor=(0.65, 0.15), fontsize=legend_size)
-            ax.set_xlabel('Wavelength [$\mathrm{\mu m}$]', fontsize=label_size)
+            ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
             ax.set_ylabel('Transmittance', fontsize=label_size)
             #ax.set_title('Sub-band of '+lb, fontsize=title_size)
             
@@ -669,9 +662,6 @@ def oco_abs(cfg, sat, zpt_file,
             absgy[l, 0:indlr[lx[l], 2]] = ilg0 # ILS - yy ("weight")
             absgn[l]                   = indlr[lx[l],2] # additional stuff (# of k's)
             solx [l, 0:indlr[lx[l], 2]]= fsol[indlr[lx[l],1]:indlr[lx[l],0]+1]
-            # print('-'*15, l,  file=sys.stderr)
-            # print(fsol[indlr[lx[l],1]:indlr[lx[l],0]+1],  file=sys.stderr)
-            # print(fsol[indlr[lx[l],1]:indlr[lx[l],0]+1].min(), fsol[indlr[lx[l],1]:indlr[lx[l],0]+1].max(), file=sys.stderr)
             for z in range(0, nlay):
                 absgl[z,l,0:indlr[lx[l],2]]=ext[indlr[lx[l],1]:indlr[lx[l],0]+1,z]
                 if z == 0 and plot:
@@ -684,12 +674,12 @@ def oco_abs(cfg, sat, zpt_file,
 
                     x = np.arange(nfc)
                     y = trnsx[sx]
-                    ax.plot(1000*absgx[l,0:absgn[l]-1], absgy[l,0:absgn[l]-1], color='k')
-                    #ax.plot(1000*np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
-                    ax.plot(1000*absgx[l,0:absgn[l]-1], solx[l,0:absgn[l]-1], color='orange')
+                    ax.plot(absgx[l,0:absgn[l]-1], absgy[l,0:absgn[l]-1], color='k')
+                    #ax.plot(np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
+                    ax.plot(absgx[l,0:absgn[l]-1], solx[l,0:absgn[l]-1], color='orange')
 
                     norm = np.max(absgl[z,l,0:absgn[l]-1])
-                    ax.plot(1000*absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red')
+                    ax.plot(absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red')
 
                     #ax.set_xticks(range(0, 160, 20))
                     ax.tick_params(axis='both', labelsize=tick_size)
@@ -700,14 +690,12 @@ def oco_abs(cfg, sat, zpt_file,
                     #xmin, xmax = 0., 10.
                     #ax.set_ylim(ymin, ymax)
                     #ax.set_xlim(xmin, xmax)
-                    ax.set_xlabel('Wavelength (nm)', fontsize=label_size)
+                    ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
                     ax.set_ylabel('normalized # photons/nm', fontsize=label_size)
                     ax.set_title(f'# ILS terms {absgn[l]}', fontsize=title_size)
                     fig.savefig(f'{pathout}/band{iband}_3-test.png', dpi=150, bbox_inches='tight')
-
                         
                 extcheck[l,z]=np.sum(absgl[z,l,0:absgn[l]-1]*absgy[l,0:absgn[l]-1])/np.sum(absgy[l,0:absgn[l]-1])
-            
 
         # save output file
         if os.path.isfile(output): 

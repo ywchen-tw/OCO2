@@ -5,11 +5,10 @@ import h5py
 def oco_wv(iband, sat, footprint=1):
     """
     Sub-program calculates OCO wavelengths by L1b dispersion coefficients
-    
+
     # output
     wl: wavelength in mircon
     """
-
     if iband < 0 or iband > 2:
         sys.exit('oco_wl: wrong band #')
 

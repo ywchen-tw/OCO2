@@ -14,7 +14,7 @@ def oco_ils(iband, sat):
         del_lambda_mean = del_lambda[iband, :, :, :].mean(axis=(0, 1))
         rel_lresponse_mean = rel_lresponse[iband, :, :, :].mean(axis=(0, 1))
 
-    xx = del_lambda_mean*1000 # micron to nm
+    xx = del_lambda_mean#*1000 # micron to nm
     yy = rel_lresponse_mean/(rel_lresponse_mean).max()
 
     print('xx shape', xx.shape, file=sys.stderr)
