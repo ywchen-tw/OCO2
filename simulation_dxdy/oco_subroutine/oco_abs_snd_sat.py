@@ -1,6 +1,4 @@
-# import numpy as np
-import jax.numpy as np
-import timeit
+import numpy as np
 import platform
 import os, sys
 import pickle, h5py
@@ -52,11 +50,13 @@ from oco_subroutine.abs.calc2_v8 import calc2   # calculates extinction profiles
 from oco_subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
 from oco_subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 from oco_subroutine.abs.solar import solar   # read solar file
-from oco_subroutine.abs.oco_snd import *
+from oco_subroutine.oco_utils import timing
+from oco_subroutine.oco_cfg import grab_cfg
 
-
-def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=True, plot=False):
-    starttime = timeit.default_timer()
+@timing
+def oco_abs(cfg, sat, zpt_file, 
+            iband=0, nx=None, Trn_min=0, pathout=None, 
+            reextract=True, plot=False):
     # *********
     # Specify which band to work with
     # iband=0,1,2 for o2, weak co2, strong co2
@@ -133,7 +133,6 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
     # Get OCO sounding info
     cfg_info = grab_cfg(cfg)
     abs_inter = cfg_info['abs_interpolation']
-    sat = get_sat(cfg)
     wlsol0, fsol0 = solar(sol)
 
     # User specifications are done
@@ -410,7 +409,7 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
         # SCO2:     0.04                        0.10
         # ---------------------------------------------
         # (1) read wavelengths
-        wloco = oco_wv(iband) # (micron)
+        wloco = oco_wv(iband, sat, footprint=1) # (micron)
         nlo = len(wloco)
         # (2) read instrument line shape
         xx, yy = oco_ils(iband, sat) # xx: relative wl shift (nm)# yy: normalized ILS
@@ -426,14 +425,12 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
 
         for l in range(nlo):
             # get wl range within absco that falls within the ILS (total range) & within pre-set threshold
-            abswlL = wloco[l] + np.min(xx)      # left  full range
-            abswlR = wloco[l] + np.max(xx)      # right full range
-            abswlL0 = wloco[l] + np.min(xx[ils]) # left  "valid" range (ILS above threshold ils0)
-            abswlR0 = wloco[l] + np.max(xx[ils]) # right "valid" range (ILS above threshold ils0)
-            il = np.argmin(np.abs(wavedat-abswlL))
-            ir = np.argmin(np.abs(wavedat-abswlR))
-            il0 = np.argmin(np.abs(wavedat-abswlL0))
-            ir0 = np.argmin(np.abs(wavedat-abswlR0))
+            # --- left and right full ranges ---
+            abswlL, abswlR = wloco[l] + np.min(xx), wloco[l] + np.max(xx)
+            # --- left and right "valid" ranges (ILS above threshold ils0) ---
+            abswlL0, abswlR0 = wloco[l] + np.min(xx[ils]), wloco[l] + np.max(xx[ils])
+            il, ir = np.argmin(np.abs(wavedat-abswlL)),  np.argmin(np.abs(wavedat-abswlR))
+            il0, ir0 = np.argmin(np.abs(wavedat-abswlL0)), np.argmin(np.abs(wavedat-abswlR0))
             indlr[l,0] = il0        # left index
             indlr[l,1] = ir0        # right index
             indlr[l,2] = il0-ir0+1  # how many
@@ -451,8 +448,6 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
             trnsc[l] = np.sum(trns[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
             trnsc0[l] = np.sum(trns[ir0:il0]*ilg0)/np.sum(ilg0)
             #tauc[l] = np.sum(tau[ir:il]*ilg)/np.sum(ilg)
-
-
 
         # (4) plots
         if plot and pl_ils:
@@ -745,12 +740,9 @@ def oco_abs(cfg, zpt_file, iband=0, nx=None, Trn_min=0, pathout=None, reextract=
                               'wl_oco': wl_oco,
                               'trns_oco': trns_oco})
 
-    endtime = timeit.default_timer()
-    print(f'oco_abs_snd_sat Duration: {(endtime-starttime)/60.:.3f} min', file=sys.stderr)        
-    return None
+        return None
         #todo: check if vertical resolution changes tau and/or ext
 
 
 if __name__ == '__main__':
-    cfg = '/Users/yuch8913/programming/oco/simulation/cfg/20181018_central_asia_2_470cloud_test.csv'
-    oco_abs(cfg, iband=1, nx=10, reextract=True, plot=True)
+    None

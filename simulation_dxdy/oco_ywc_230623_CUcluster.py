@@ -15,7 +15,7 @@ import sys
 import platform
 import h5py
 import numpy as np
-import timeit
+import time
 from datetime import datetime
 from scipy import stats
 import matplotlib as mpl
@@ -43,7 +43,7 @@ from oco_subroutine.oco_raw_collect import cdata_sat_raw
 from oco_subroutine.oco_cloud import cdata_cld_ipa
 from oco_subroutine.oco_post_process import cdata_all
 from oco_subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
-from oco_subroutine.oco_utils import path_dir, sat_tmp, timeing
+from oco_subroutine.oco_utils import path_dir, sat_tmp, timing
 from oco_subroutine.oco_atm_atmmod import atm_atmmod
 
 plt.rcParams["font.family"] = "Arial"
@@ -327,7 +327,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
             # ------------------------------------------------------------------------------------------------------
     return simulated_sfc_alb, sza
 
-@timeing
+@timing
 def preprocess(cfg_info):
     # define date and region to study
     # ===============================================================
@@ -383,10 +383,11 @@ def preprocess(cfg_info):
     Trn_min = float(cfg_info['Trn_min'])
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-        if not os.path.isfile(fname_abs):
-            oco_abs(cfg, zpt_file=zpt_file, iband=iband, 
+        if 1:#not os.path.isfile(fname_abs):
+            oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
                     nx=nx, Trn_min=Trn_min, pathout=fdir_data,
-                    reextract=False, plot=True)
+                    reextract=True, plot=True)
+            sys.exit()
 
     if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
@@ -394,7 +395,7 @@ def preprocess(cfg_info):
     # ===============================================================
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
-@timeing
+@timing
 def run_case_modis_650(cfg_info, preprocess_info):
     # Get information from cfg_info
     # ======================================================================
@@ -413,7 +414,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
-@timeing
+@timing
 def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     # Get information from cfg_info
     # ======================================================================

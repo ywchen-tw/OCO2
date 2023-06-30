@@ -3,7 +3,6 @@ from .calc2_v8 import *
 from .findi1i2_v7 import *
 from .getiijj_v7 import *
 from .oco_ils import *
-from .oco_snd import *
 from .oco_wl import *
 from .rdabs_gas import *
 from .rdabsco_gas import *

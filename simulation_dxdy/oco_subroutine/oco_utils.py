@@ -20,7 +20,7 @@ class sat_tmp:
 
         self.data = data
 
-def timeing(f):
+def timing(f):
     @wraps(f)
     def wrap(*args, **kw):
         ts = time.time()
