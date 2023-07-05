@@ -3,7 +3,7 @@ import sys
 import h5py
 import glob
 from er3t.util.modis import modis_l1b
-from er3t.util import grid_by_extent
+from er3t.util import grid_by_dxdy
 
 
 def convert_photon_unit(data_photon, wavelength, scale_factor=2.0):
@@ -223,7 +223,7 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         trans = f['tx'][...][np.argsort(f['lamx'][...])]
 
     modl1b = modis_l1b(fnames=sat.fnames['mod_02'], extent=sat.extent)
-    lon_2d, lat_2d, rad_2d_mod = grid_by_extent(modl1b.data['lon']['data'], modl1b.data['lat']['data'], modl1b.data['rad']['data'][0, ...], extent=sat.extent)
+    lon_2d, lat_2d, rad_2d_mod = grid_by_dxdy(modl1b.data['lon']['data'], modl1b.data['lat']['data'], modl1b.data['rad']['data'][0, ...], extent=sat.extent, dx=250, dy=250, method='nearest')
 
     rad_mca_ipa0 = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
     rad_mca_ipa  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
@@ -317,7 +317,6 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
     else:
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
         #output_file = 'data_all_%s_%s_%4.4d_%4.4d_test.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
-
 
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('lon',    data=oco.lon_l1b)

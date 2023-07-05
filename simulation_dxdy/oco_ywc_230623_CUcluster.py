@@ -80,7 +80,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
         data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
                 'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
                 'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
-
+    print(sfc_alb_abs)
+    
     if sfc_alb_abs is not None:
         print('sfc_alb_abs is not None')
         print('Simulated uniform sfc albedo: ', sfc_alb_abs)
@@ -182,53 +183,52 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     if sza_abs is not None:
         sza = sza_abs
-
+    
     if simulated_sfc_alb <= 0.2:
         photons = photons*2
-
+    print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
     # cpu number used
     if platform.system() in ['Windows', 'Darwin']:
-        Ncpu=os.cpu_count()-2
+        Ncpu=os.cpu_count()-1
     else:
         Ncpu=32
 
-    if solver.lower() != 'ipa':
-        # output filename
-        output_file = f'{fdir}/mca-out-rad-oco2-{solver.lower()}_{wavelength:.4f}nm.h5'
+    # output filename
+    output_file = f'{fdir}/mca-out-rad-oco2-{solver.lower()}_{wavelength:.4f}nm.h5'
 
-        if (not os.path.isfile(output_file)) or (overwrite==True):
-            # run mcarats
-            temp_dir = f'{fdir}/{wavelength:.4f}nm/oco2/rad_{solver.lower()}'
-            run = False if os.path.isdir(temp_dir) and overwrite==False else True
-            mca0 = mcarats_ng(date=date,
-                            atm_1ds=atm_1ds,
-                            atm_3ds=atm_3ds,
-                            surface_albedo=sfc_2d,
-                            sca=sca, # newly added for phase function
-                            Ng=int(abs0.Ng),
-                            target='radiance',
-                            solar_zenith_angle   = sza,
-                            solar_azimuth_angle  = saa,
-                            sensor_zenith_angle  = vza,
-                            sensor_azimuth_angle = vaa,
-                            fdir=temp_dir,
-                            Nrun=3,
-                            weights=abs0.coef['weight']['data'],
-                            photons=photons,
-                            solver=solver,
-                            Ncpu=Ncpu,
-                            mp_mode='py',
-                            overwrite=run)
-            
-            # mcarats output
-            out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
-            oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
+    if (not os.path.isfile(output_file)) or (overwrite==True):
+        # run mcarats
+        temp_dir = f'{fdir}/{wavelength:.4f}nm/oco2/rad_{solver.lower()}'
+        run = False if os.path.isdir(temp_dir) and overwrite==False else True
+        mca0 = mcarats_ng(date=date,
+                        atm_1ds=atm_1ds,
+                        atm_3ds=atm_3ds,
+                        surface_albedo=sfc_2d,
+                        sca=sca, # newly added for phase function
+                        Ng=int(abs0.Ng),
+                        target='radiance',
+                        solar_zenith_angle   = sza,
+                        solar_azimuth_angle  = saa,
+                        sensor_zenith_angle  = vza,
+                        sensor_azimuth_angle = vaa,
+                        fdir=temp_dir,
+                        Nrun=3,
+                        weights=abs0.coef['weight']['data'],
+                        photons=photons,
+                        solver=solver,
+                        Ncpu=Ncpu,
+                        mp_mode='py',
+                        overwrite=run)
+        
+        # mcarats output
+        out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
+        oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
 
-            # plot
-            # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            plot_mca_simulation(sat, modl1b, out0, oco_std0,
-                                solver, fdir, cth, scale_factor, wavelength)
-            # ------------------------------------------------------------------------------------------------------
+        # plot
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        plot_mca_simulation(sat, modl1b, out0, oco_std0,
+                            solver, fdir, cth, scale_factor, wavelength)
+        # ------------------------------------------------------------------------------------------------------
 
 
     if solver.lower() == 'ipa':
@@ -356,9 +356,9 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
     ref_threshold = float(cfg_info['ref_threshold'])
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
-    for solver in ['IPA']:#, '3D']:
+    for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=False, case_name_tag=name_tag, photons=5e7)
+                        overwrite=True, case_name_tag=name_tag, photons=5e7)
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -387,19 +387,19 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     #"""
     # run calculations for each wavelength
     # ===============================================================
-    for wavelength in wvls:
+    for wavelength in wvls[::-1]:
         for solver in ['IPA', '3D']:
-            sfc_alb, sza = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
+            sfc_alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=5e8)
+                                            overwrite=True, photons=5e8)
     # ===============================================================
     #"""
 
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, sfc_alb, sza)
+    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, sfc_alb_sim, sza_sim)
     # ===============================================================
     
     return collect_data
@@ -408,8 +408,8 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    run_case_modis_650(cfg_info, preprocess_info)
-    """
+    # run_case_modis_650(cfg_info, preprocess_info)
+    # """
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)
@@ -417,12 +417,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    # """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    """"
+    # """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
