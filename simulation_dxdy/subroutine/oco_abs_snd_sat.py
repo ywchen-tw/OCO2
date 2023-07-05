@@ -40,18 +40,18 @@ plt.rcParams["font.family"] = "Arial"
 #  - implement H2O broadening
 #  - bi/trilinear interpolation in {T,p,(h)} - can re-use Odele's code
 #---------------------------------------------------------------------------
-from oco_subroutine.abs.read_atm import read_oco_zpt
+from subroutine.abs.read_atm import read_oco_zpt
 # from oco_subroutine.abs.rho_air import rho_air  # density of air
-from oco_subroutine.abs.rdabs_gas import rdabs_species
-from oco_subroutine.abs.findi1i2_v7 import findi1i2 # get wavenumber indices.initialize()import abs/getiijj_v7.pro  # find levels in absco files that are closest to the atmosphere
-from oco_subroutine.abs.getiijj_v7 import getiijj  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
-from oco_subroutine.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
-from oco_subroutine.abs.calc2_v8 import calc2   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
-from oco_subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
-from oco_subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
-from oco_subroutine.abs.solar import solar   # read solar file
-from oco_subroutine.oco_utils import timing
-from oco_subroutine.oco_cfg import grab_cfg
+from subroutine.abs.rdabs_gas import rdabs_species
+from subroutine.abs.findi1i2_v7 import findi1i2 # get wavenumber indices.initialize()import abs/getiijj_v7.pro  # find levels in absco files that are closest to the atmosphere
+from subroutine.abs.getiijj_v7 import getiijj  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
+from subroutine.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
+from subroutine.abs.calc2_v8 import calc2   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
+from subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
+from subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
+from subroutine.abs.solar import solar   # read solar file
+from subroutine.oco_utils import timing
+from subroutine.oco_cfg import grab_cfg
 
 @timing
 def oco_abs(cfg, sat, zpt_file, 
