@@ -27,8 +27,8 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca # newly added for phase function
 
-from oco_subroutine.oco_atm_atmmod import atm_atmmod
-from oco_subroutine.oco_utils import path_dir, sat_tmp
+from subroutine.oco_atm_atmmod import atm_atmmod
+from subroutine.oco_utils import path_dir, sat_tmp
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
