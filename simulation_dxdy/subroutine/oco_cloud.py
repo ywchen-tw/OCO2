@@ -259,7 +259,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     # read in data
     #/----------------------------------------------------------------------------\#
-    # f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r')
+    # f0 = h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r')
     # extent = f0['extent'][...]
     # ref_2d = f0['mod/rad/ref_650'][...]
     # rad_2d = f0['mod/rad/rad_650'][...]
@@ -283,7 +283,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
     # v_10m = f0['oco/met/v_10m'][...]
     # delta_t = f0['oco/met/delta_t'][...]
     # f0.close()
-    with h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r') as f0:
+    with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r') as f0:
         extent, ref_2d, ref_470_2d, rgb, cot_l2, cer_l2, lon_2d, lat_2d, cth, sfh, sza, saa, vza, vaa, alb_650, alb_470, u_10m, v_10m, delta_t = \
             [np.array(f0[k][...]) for k in ['extent', 'mod/rad/ref_650', 'mod/rad/ref_470', 'mod/rgb', 'mod/cld/cot_l2', 'mod/cld/cer_l2', 
                                             'lon', 'lat', 'mod/cld/cth_l2', 'mod/geo/sfh', 'mod/geo/sza', 'mod/geo/saa', 'mod/geo/vza', 
@@ -611,7 +611,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     # write cot_ipa into file
     #/----------------------------------------------------------------------------\#
-    with h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r+') as f0:
+    with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r+') as f0:
         # Update or create groups with try-except blocks
         group_data = {'mod/cld/cot_ipa0_650': cot_ipa0_650,
                       'mod/cld/cer_ipa0_650': cer_ipa0_650,
@@ -876,7 +876,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
         #/--------------------------------------------------------------\#
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         _metadata = {'Computer': os.uname()[1], 'Script': os.path.abspath(__file__), 'Function':sys._getframe().f_code.co_name, 'Date':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-        plt.savefig('%s/<%s>.png' % (sat0.fdir_out, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
+        plt.savefig('%s/<%s>.png' % (sat0.fdir_pre_data, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
         #\--------------------------------------------------------------/#
         #\----------------------------------------------------------------------------/#
 

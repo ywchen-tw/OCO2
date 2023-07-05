@@ -45,7 +45,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     # sfc object
     # =================================================================================
     data = {}
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
         data['alb_2d'] = dict(data=f['mod/sfc/alb_43_650'][...], name='Surface albedo', units='N/A')
         data['lon_2d'] = dict(data=f['mod/sfc/lon'][...], name='Longitude', units='degrees')
         data['lat_2d'] = dict(data=f['mod/sfc/lat'][...], name='Latitude' , units='degrees')
@@ -59,7 +59,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     # cld object
     # =================================================================================
     data = {}
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
         data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
@@ -102,7 +102,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
     # add homogeneous 1d mcarats "atmosphere", aerosol layer
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
         AOD_550_land_mean = f['mod/aod/AOD_550_land_mean'][...]
         Angstrom_Exponent_land_mean = f['mod/aod/Angstrom_Exponent_land_mean'][...]
         SSA_land_mean = f['mod/aod/SSA_660_land_mean'][...]
@@ -147,7 +147,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     
     # solar zenith/azimuth angles and sensor zenith/azimuth angles
     # =================================================================================
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
         sza = f['mod/geo/sza'][...].mean()
         saa = f['mod/geo/saa'][...].mean()
         vza = f['mod/geo/vza'][...].mean()
@@ -321,5 +321,5 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
             ax.set_ylim(extent_list[2]+0.15, extent_list[3]-0.15)
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
-        plt.savefig(f'{sat.fdir_out}/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')
+        plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')
         # ==================================================================================================

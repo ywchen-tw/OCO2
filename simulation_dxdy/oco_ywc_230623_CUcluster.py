@@ -76,7 +76,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     # mca_sfc object
     # =================================================================================
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
         data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
                 'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
                 'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
@@ -107,7 +107,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     # 3D-cld and 1D-AOD object
     # =================================================================================
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
         data = {}
         data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f_pre_data['lon'][...])
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
@@ -175,7 +175,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
 
     # =================================================================================
 
-    with h5py.File(f'{sat.fdir_out}/pre-data.h5', 'r') as f_pre_data:
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
         sza = f_pre_data['oco/geo/sza'][...].mean()
         saa = f_pre_data['oco/geo/saa'][...].mean()
         vza = f_pre_data['oco/geo/vza'][...].mean()
@@ -300,9 +300,13 @@ def preprocess(cfg_info):
     fname_sat = '/'.join([fdir_data, 'sat.pk'])
     print(f'fname_sat: {fname_sat}')
 
-    sat0 = satellite_download(date=date, fdir_out='../simulation/data', extent=extent,
+    sat0 = satellite_download(date=date, 
+                              fdir_out='../simulation/data', 
+                              fdir_pre_data=fdir_data,
+                              extent=extent,
                               extent_analysis=extent_analysis,
                               fname=fname_sat, overwrite=False)
+
     # ===============================================================
     if not ('l2' in cfg_info.keys()):
         oco_data_dict = {'l2': 'oco_std',
@@ -337,7 +341,7 @@ def preprocess(cfg_info):
                     nx=nx, Trn_min=Trn_min, pathout=fdir_data,
                     reextract=False, plot=True)
 
-    if not os.path.isfile(f'{sat０.fdir_out}/pre-data.h5') :
+    if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
         cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
     # ===============================================================
@@ -358,7 +362,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=5e7)
+                        overwrite=False, case_name_tag=name_tag, photons=5e7)
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -393,7 +397,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=True, photons=5e8)
+                                            overwrite=False, photons=5e8)
     # ===============================================================
     #"""
 
@@ -408,8 +412,8 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    # run_case_modis_650(cfg_info, preprocess_info)
-    # """
+    run_case_modis_650(cfg_info, preprocess_info)
+    """
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)

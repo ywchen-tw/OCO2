@@ -18,6 +18,7 @@ class satellite_download:
                  extent_analysis=None,
                  fname=None,
                  fdir_out='data',
+                 fdir_pre_data='data',
                  overwrite=False,
                  quiet=False,
                  verbose=False):
@@ -28,6 +29,7 @@ class satellite_download:
         self.extent   = extent
         self.extent_analysis = extent_analysis
         self.fdir_out = fdir_out
+        self.fdir_pre_data = fdir_pre_data
         self.quiet    = quiet
         self.verbose  = verbose
 

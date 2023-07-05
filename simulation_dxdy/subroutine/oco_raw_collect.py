@@ -45,12 +45,12 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
     """
 
     # Check if preprocessed data exists and return if overwrite is False
-    if os.path.isfile(f'{sat0.fdir_out}/pre-data.h5') and not overwrite:
-        print(f'Message [pre_data]: {sat0.fdir_out}/pre-data.h5 exsit.')
+    if os.path.isfile(f'{sat0.fdir_pre_data}/pre-data.h5') and not overwrite:
+        print(f'Message [pre_data]: {sat0.fdir_pre_data}/pre-data.h5 exsit.')
         return None
     else:
         # Open the HDF file and create MODIS data groups
-        f0 = h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'w')
+        f0 = h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'w')
         f0['extent'] = sat0.extent
 
         # MODIS data groups in the HDF file
@@ -333,7 +333,7 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
     if plot:
         
-        with h5py.File(f'{sat0.fdir_out}/pre-data.h5', 'r') as f0:
+        with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r') as f0:
             extent = f0['extent'][...]
 
             rgb = f0['mod/rgb'][...]
@@ -395,6 +395,6 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         #/--------------------------------------------------------------\#
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         _metadata = {'Computer': os.uname()[1], 'Script': os.path.abspath(__file__), 'Function':sys._getframe().f_code.co_name, 'Date':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-        plt.savefig('%s/<%s>.png' % (sat0.fdir_out, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
+        plt.savefig('%s/<%s>.png' % (sat0.fdir_pre_data, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
         #\--------------------------------------------------------------/#
         #\----------------------------------------------------------------------------/#
