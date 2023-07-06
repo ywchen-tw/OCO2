@@ -162,6 +162,8 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
         Ncpu=os.cpu_count()-2
     else:
         Ncpu=32
+    temp_dir = '%s/%.4fnm/rad_%s' % (fdir, wavelength, solver.lower())
+    run = False if os.path.isdir(temp_dir) and overwrite==False else True
     mca0 = mcarats_ng(
             date=sat.date,
             atm_1ds=atm_1ds,
@@ -174,14 +176,14 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
             solar_azimuth_angle  = saa,
             sensor_zenith_angle  = vza,
             sensor_azimuth_angle = vaa,
-            fdir='%s/%.4fnm/rad_%s' % (fdir, wavelength, solver.lower()),
+            fdir=temp_dir,
             Nrun=3,
             weights=abs0.coef['weight']['data'],
             photons=photons,
             solver=solver,
             Ncpu=Ncpu,
             mp_mode='py',
-            overwrite=overwrite
+            overwrite=run
             )
 
     # mcarats output

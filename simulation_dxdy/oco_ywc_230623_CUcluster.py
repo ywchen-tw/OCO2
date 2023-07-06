@@ -362,7 +362,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=False, case_name_tag=name_tag, photons=5e7)
+                        overwrite=True, case_name_tag=name_tag, photons=1e8)
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -391,13 +391,13 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     #"""
     # run calculations for each wavelength
     # ===============================================================
-    for wavelength in wvls[::-1]:
+    for wavelength in wvls:
         for solver in ['IPA', '3D']:
             sfc_alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=5e8)
+                                            overwrite=True, photons=1e9)
     # ===============================================================
     #"""
 
