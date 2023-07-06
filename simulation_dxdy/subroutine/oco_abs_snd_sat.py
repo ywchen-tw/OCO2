@@ -65,7 +65,7 @@ def oco_abs(cfg, sat, zpt_file,
         print('iband should be either 0 (O2), 1 (weak CO2), or 2 (Strong CO2), set to the default 0.')
         iband   = 0
 
-    pathinp = './oco_subroutine/abs/'
+    pathinp = './subroutine/abs/'
     if pathout == None:
         pathout = './'
 
