@@ -1,6 +1,6 @@
 import sys
-import jax.numpy as np
-#import numpy as np
+# import jax.numpy as np
+import numpy as np
 import h5py
 import bisect as bs
 
