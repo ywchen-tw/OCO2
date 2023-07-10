@@ -193,42 +193,43 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     else:
         Ncpu=32
 
-    # output filename
-    output_file = f'{fdir}/mca-out-rad-oco2-{solver.lower()}_{wavelength:.4f}nm.h5'
+    if solver.lower()=='3d':
+        # output filename
+        output_file = f'{fdir}/mca-out-rad-oco2-{solver.lower()}_{wavelength:.4f}nm.h5'
 
-    if (not os.path.isfile(output_file)) or (overwrite==True):
-        # run mcarats
-        temp_dir = f'{fdir}/{wavelength:.4f}nm/oco2/rad_{solver.lower()}'
-        run = False if os.path.isdir(temp_dir) and overwrite==False else True
-        mca0 = mcarats_ng(date=date,
-                        atm_1ds=atm_1ds,
-                        atm_3ds=atm_3ds,
-                        surface_albedo=sfc_2d,
-                        sca=sca, # newly added for phase function
-                        Ng=int(abs0.Ng),
-                        target='radiance',
-                        solar_zenith_angle   = sza,
-                        solar_azimuth_angle  = saa,
-                        sensor_zenith_angle  = vza,
-                        sensor_azimuth_angle = vaa,
-                        fdir=temp_dir,
-                        Nrun=3,
-                        weights=abs0.coef['weight']['data'],
-                        photons=photons,
-                        solver=solver,
-                        Ncpu=Ncpu,
-                        mp_mode='py',
-                        overwrite=run)
-        
-        # mcarats output
-        out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
-        oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
+        if (not os.path.isfile(output_file)) or (overwrite==True):
+            # run mcarats
+            temp_dir = f'{fdir}/{wavelength:.4f}nm/oco2/rad_{solver.lower()}'
+            run = False if os.path.isdir(temp_dir) and overwrite==False else True
+            mca0 = mcarats_ng(date=date,
+                            atm_1ds=atm_1ds,
+                            atm_3ds=atm_3ds,
+                            surface_albedo=sfc_2d,
+                            sca=sca, # newly added for phase function
+                            Ng=int(abs0.Ng),
+                            target='radiance',
+                            solar_zenith_angle   = sza,
+                            solar_azimuth_angle  = saa,
+                            sensor_zenith_angle  = vza,
+                            sensor_azimuth_angle = vaa,
+                            fdir=temp_dir,
+                            Nrun=3,
+                            weights=abs0.coef['weight']['data'],
+                            photons=photons,
+                            solver=solver,
+                            Ncpu=Ncpu,
+                            mp_mode='py',
+                            overwrite=run)
+            
+            # mcarats output
+            out0 = mca_out_ng(fname=output_file, mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
+            oco_std0 = oco2_std(fnames=sat.fnames['oco_std'], extent=sat.extent)
 
-        # plot
-        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        plot_mca_simulation(sat, modl1b, out0, oco_std0,
-                            solver, fdir, cth, scale_factor, wavelength)
-        # ------------------------------------------------------------------------------------------------------
+            # plot
+            # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            plot_mca_simulation(sat, modl1b, out0, oco_std0,
+                                solver, fdir, cth, scale_factor, wavelength)
+            # ------------------------------------------------------------------------------------------------------
 
 
     if solver.lower() == 'ipa':
@@ -336,11 +337,11 @@ def preprocess(cfg_info):
     Trn_min = float(cfg_info['Trn_min'])
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-        if not os.path.isfile(fname_abs):
+        if 1:#not os.path.isfile(fname_abs):
             oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
                     nx=nx, Trn_min=Trn_min, pathout=fdir_data,
                     reextract=False, plot=True)
-
+            
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
         cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
@@ -421,12 +422,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    # """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    """"
+    # """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -435,7 +436,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_470cloud_test2.csv'
+    cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'

@@ -66,21 +66,21 @@ def rdabsco_species(filnm,
 
     elif mode == 'trilinear':
         # P, T, H2O mixing ratio trilinear interpolation
-        print(f'p={pobs}, [{p_species[jj]/100}, {p_species[jj+1]/100}]', file=sys.stderr)
-        print(f'T={tkobs}, [{tk_species[jj, ii]}, {tk_species[jj, ii+1]}]', file=sys.stderr)
+        print(f'p={pobs:.2f} hPa, [{p_species[jj]/100:.2f} hPa, {p_species[jj+1]/100:.2f} hPa]', file=sys.stderr)
+        print(f'T={tkobs:2f} K, [{tk_species[jj, ii]:2f} K, {tk_species[jj, ii+1]:2f} K]', file=sys.stderr)
 
         hh = bs.bisect_left(broad_species, h2o_vmr)-1
         if hh == 2:
             print('H2O mixing ratio out ouf range, using extrapolation!', file=sys.stderr)
             hh = 1
-        print(f'H2O vmr={h2o_vmr}, [{broad_species[hh]}, {broad_species[hh+1]}]', file=sys.stderr)
+        print(f'H2O vmr={h2o_vmr:.2e}, [{broad_species[hh]:.2e}, {broad_species[hh+1]:.2f}]', file=sys.stderr)
 
         dp = (pobs-hpa_species[jj])/(hpa_species[jj+1]-hpa_species[jj])
         dT = (tkobs-tk_species[jj, ii])/(tk_species[jj, ii+1]-tk_species[jj, ii])
         dH2O_vmr = (h2o_vmr-broad_species[hh])/(broad_species[hh+1]-broad_species[hh])
-        print('dp:', dp, file=sys.stderr)
-        print('dT:', dT, file=sys.stderr)
-        print('dH2O_vmr:', dH2O_vmr, file=sys.stderr)
+        print(f'dp: {dp:.2f} hPa', file=sys.stderr)
+        print(f'dT: {dT:.2f} K', file=sys.stderr)
+        print(f'dH2O_vmr: {dH2O_vmr:.2e}', file=sys.stderr)
         matrix =  np.array([[ 1,  0,  0,  0,  0,  0,  0,  0],
                             [-1,  0,  0,  0,  1,  0,  0,  0],
                             [-1,  0,  1,  0,  0,  0,  0,  0],

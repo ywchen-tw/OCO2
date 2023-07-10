@@ -226,11 +226,11 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
     lon_2d, lat_2d, rad_2d_mod = grid_by_dxdy(modl1b.data['lon']['data'], modl1b.data['lat']['data'], modl1b.data['rad']['data'][0, ...], extent=sat.extent, dx=250, dy=250, method='nearest')
 
     rad_mca_ipa0 = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
+    # rad_mca_ipa  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
     rad_mca_3d   = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
 
     rad_mca_ipa0_std = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_std  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
+    # rad_mca_ipa_std  = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
     rad_mca_3d_std   = np.zeros((wvl_o2a.shape[0], wvl_o2a.shape[1], wvls.size), dtype=np.float64)
 
     # modified ==============================================
@@ -239,11 +239,11 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         rad_ipa0     = f['mean/rad'][...]
 
     rad_mca_ipa0_domain = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_domain  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
+    # rad_mca_ipa_domain  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
     rad_mca_3d_domain   = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
 
     rad_mca_ipa0_domain_std = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
-    rad_mca_ipa_domain_std  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
+    # rad_mca_ipa_domain_std  = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
     rad_mca_3d_domain_std   = np.zeros((rad_ipa0.shape[0], rad_ipa0.shape[1], wvls.size), dtype=np.float64)
 
     # =======================================================
@@ -259,10 +259,10 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
             rad_ipa0     = f['mean/rad'][...]
             rad_ipa0_std = f['mean/rad_std'][...]
 
-        fname = glob.glob('%s/mca-out-rad-oco2-ipa_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
-        with h5py.File(fname, 'r') as f:
-            rad_ipa     = f['mean/rad'][...]
-            rad_ipa_std = f['mean/rad_std'][...]
+        # fname = glob.glob('%s/mca-out-rad-oco2-ipa_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
+        # with h5py.File(fname, 'r') as f:
+        #     rad_ipa     = f['mean/rad'][...]
+        #     rad_ipa_std = f['mean/rad_std'][...]
 
         fname = glob.glob('%s/mca-out-rad-oco2-3d_%s*nm.h5' % (fdir_mca, ('%.4f' % wvls[k])[:-1]))[0]
         with h5py.File(fname, 'r') as f:
@@ -275,11 +275,11 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
 
         # ===================================
         rad_mca_ipa0_domain[:, :, k] = rad_ipa0.copy()
-        rad_mca_ipa_domain[:, :, k]  = rad_ipa.copy()
+        # rad_mca_ipa_domain[:, :, k]  = rad_ipa.copy()
         rad_mca_3d_domain[:, :, k]   = rad_3d.copy()
 
         rad_mca_ipa0_domain_std[:, :, k] = rad_ipa0_std.copy()
-        rad_mca_ipa_domain_std[:, :, k]  = rad_ipa_std.copy()
+        # rad_mca_ipa_domain_std[:, :, k]  = rad_ipa_std.copy()
         rad_mca_3d_domain_std[:, :, k]   = rad_3d_std.copy()
         # ===================================
 
@@ -305,11 +305,11 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
                 index_lat = np.argmin(np.abs(lat_2d[0, :]-lat0))
 
                 rad_mca_ipa0[i, j, k] = rad_ipa0[index_lon, index_lat]
-                rad_mca_ipa[i, j, k]  = rad_ipa[index_lon, index_lat]
+                # rad_mca_ipa[i, j, k]  = rad_ipa[index_lon, index_lat]
                 rad_mca_3d[i, j, k]   = rad_3d[index_lon, index_lat]
 
                 rad_mca_ipa0_std[i, j, k] = rad_ipa0_std[index_lon, index_lat]
-                rad_mca_ipa_std[i, j, k]  = rad_ipa_std[index_lon, index_lat]
+                # rad_mca_ipa_std[i, j, k]  = rad_ipa_std[index_lon, index_lat]
                 rad_mca_3d_std[i, j, k]   = rad_3d_std[index_lon, index_lat]
     # ==================================================================================================
     if aod_550 is None:
@@ -356,19 +356,19 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         f.create_dataset('saa_mca', data=saa_mca)
 
         f.create_dataset('rad_mca_3d',   data=rad_mca_3d)
-        f.create_dataset('rad_mca_ipa',  data=rad_mca_ipa)
+        # f.create_dataset('rad_mca_ipa',  data=rad_mca_ipa)
         f.create_dataset('rad_mca_ipa0', data=rad_mca_ipa0)
         f.create_dataset('rad_mca_3d_std',   data=rad_mca_3d_std)
-        f.create_dataset('rad_mca_ipa_std',  data=rad_mca_ipa_std)
+        # f.create_dataset('rad_mca_ipa_std',  data=rad_mca_ipa_std)
         f.create_dataset('rad_mca_ipa0_std', data=rad_mca_ipa0_std)
         # ==============
         f.create_dataset('lon2d',                data=lon_2d)
         f.create_dataset('lat2d',                data=lat_2d)
         f.create_dataset('rad_mca_3d_domain',    data=rad_mca_3d_domain)
-        f.create_dataset('rad_mca_ipa_domain',   data=rad_mca_ipa_domain)
+        # f.create_dataset('rad_mca_ipa_domain',   data=rad_mca_ipa_domain)
         f.create_dataset('rad_mca_ipa0_domain',  data=rad_mca_ipa0_domain)
         f.create_dataset('rad_mca_3d_domain_std',    data=rad_mca_3d_domain_std)
-        f.create_dataset('rad_mca_ipa_domain_std',   data=rad_mca_ipa_domain_std)
+        # f.create_dataset('rad_mca_ipa_domain_std',   data=rad_mca_ipa_domain_std)
         f.create_dataset('rad_mca_ipa0_domain_std',  data=rad_mca_ipa0_domain_std)
         # ==============
         f.create_dataset('wvl_mca',    data=wvls)
