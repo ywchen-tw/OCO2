@@ -302,7 +302,7 @@ def preprocess(cfg_info):
     print(f'fname_sat: {fname_sat}')
 
     sat0 = satellite_download(date=date, 
-                              fdir_out='../simulation/data', 
+                              fdir_out=cfg_info['path_sat_data'], 
                               fdir_pre_data=fdir_data,
                               extent=extent,
                               extent_analysis=extent_analysis,
@@ -363,7 +363,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=1e8)
+                        overwrite=True, case_name_tag=name_tag, photons=cfg_info['modis_650_N_photons'])
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -398,7 +398,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=True, photons=1e9)
+                                            overwrite=True, photons=cfg_info['oco_N_photons'])
     # ===============================================================
     #"""
 
@@ -413,6 +413,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
+    sys.exit()
     # run_case_modis_650(cfg_info, preprocess_info)
     # """
     if 1:#not check_h5_info(cfg, 'o2'): 
@@ -436,12 +437,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
+    # cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
-    # cfg = 'cfg/20170605_amazon_470cloud.csv'
+    cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622photon_163_225_470cloud.csv'
     print(cfg)
     run_simulation(cfg) #done
