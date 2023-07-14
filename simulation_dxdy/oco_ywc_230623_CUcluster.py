@@ -363,7 +363,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=cfg_info['modis_650_N_photons'])
+                        overwrite=True, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -398,7 +398,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=True, photons=cfg_info['oco_N_photons'])
+                                            overwrite=True, photons=float(cfg_info['oco_N_photons']))
     # ===============================================================
     #"""
 
