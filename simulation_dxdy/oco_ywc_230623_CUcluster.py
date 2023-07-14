@@ -413,7 +413,6 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    sys.exit()
     # run_case_modis_650(cfg_info, preprocess_info)
     # """
     if 1:#not check_h5_info(cfg, 'o2'): 

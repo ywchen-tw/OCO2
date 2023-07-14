@@ -576,7 +576,7 @@ def oco_abs(cfg, sat, zpt_file,
         prob_g_final = np.zeros((nlay, nx+1, g))
         weight_g_final = np.zeros((nlay, nx+1, g))
         sol_g_final = np.zeros((nx+1, g))
-        g_mode = True
+        g_mode = False
         for i in range(0, nx+1):
             ods[i] = (m0*np.float64(i)+mn)*refl
             wli0 = np.argmin(np.abs(ods[i]-trnsx*refl))
