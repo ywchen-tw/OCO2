@@ -106,12 +106,13 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5'):
         h_edge[:, 1:] = np.cumsum(dz_hydrostatic[:, :], axis=1) + np.repeat(sfc_gph.reshape(len(sfc_gph), 1), repeats=72, axis=1)
         
         air_layer = pprf_l/(kb*tprf_l)/1e6  # air number density in molec/cm3
-        o2_layer = air_layer*o2mix          # O2 number density in molec/cm3
+        dry_air_layer = (pprf_l-eprf_l)/(kb*tprf_l)/1e6  # air number density in molec/cm3
+        o2_layer = dry_air_layer*o2mix          # O2 number density in molec/cm3
         h2o_layer = eprf_l/(kb*tprf_l)/1e6  # H2O number density in molec/cm3
-        co2_layer = air_layer*co2_prf_l     # CO2 number density in molec/cm3
+        co2_layer = dry_air_layer*co2_prf_l     # CO2 number density in molec/cm3
         air_ml = 28.0134*(1-0.20935) + 31.999*0.20935
-        o3_layer = air_layer*air_ml*o3mrprf_l/47.9982     # O3 number density in molec/cm3
-        h2o_vmr = h2o_layer/air_layer       # H2O volume mixing ratio
+        o3_layer = dry_air_layer*air_ml*o3mrprf_l/47.9982     # O3 number density in molec/cm3
+        h2o_vmr = h2o_layer/dry_air_layer       # H2O volume mixing ratio
         
 
 
