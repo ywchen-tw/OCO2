@@ -422,12 +422,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    # """
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    # """"
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -436,13 +436,13 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    # cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
+    cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     # cfg = 'cfg/20170605_amazon_2.csv'
-    cfg = 'cfg/20150622_amazon.csv'
+    # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     run_simulation(cfg) #done
     
