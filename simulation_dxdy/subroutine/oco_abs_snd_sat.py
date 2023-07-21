@@ -46,12 +46,16 @@ from subroutine.abs.rdabs_gas import rdabs_species
 from subroutine.abs.findi1i2_v7 import findi1i2 # get wavenumber indices.initialize()import abs/getiijj_v7.pro  # find levels in absco files that are closest to the atmosphere
 from subroutine.abs.getiijj_v7 import getiijj  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
 from subroutine.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
-from subroutine.abs.calc2_v8 import calc2   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
+from subroutine.abs.calc2_v8 import calc_ext   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
 from subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
 from subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 from subroutine.abs.solar import solar   # read solar file
+from subroutine.abs.oco_convolve import oco_conv
+from subroutine.abs.oco_abs_g_mode import oco_wv_select
 from subroutine.oco_utils import timing
 from subroutine.oco_cfg import grab_cfg
+
+
 
 @timing
 def oco_abs(cfg, sat, zpt_file, 
@@ -74,15 +78,9 @@ def oco_abs(cfg, sat, zpt_file,
     all_r   = 0       # 0: use T-sampling >0: full range & percentage of transmittance
     if nx < 0:
         nx = 5       # # of representative wavelengths @ native resolution of Vivienne's data base
-    ils0        = 0.05  # lowest level within ILS that will be included in calculations
-                # standard: 0.002 --> 0.2% cutoff for lines 
-                # (not worth calculating them)
     pdmax       = 100   # max difference between requested & available atmospheric pressure level
     tdmax       = 10    # max difference between requested & available atmospheric temp value
     sol         = pathinp+'sol/solar.txt' # high spectral resolution solar file at 1 AU
-
-    f = open("log.txt", "w")
-    f.close()
 
     original_stdout = sys.stdout
     sys.stdout = original_stdout
@@ -117,9 +115,9 @@ def oco_abs(cfg, sat, zpt_file,
     wr, xr, lb = wr_dict[iband], xr_dict[iband], lb_dict[iband]     
     output = pathout+'/atm_abs_'+lb+'_'+str(nx+1)+'.h5' 
 
-    print('***********************************************************', file=sys.stderr)
-    print('Make MCARATS atmosphere/gas absorption input for '+lb, file=sys.stderr)
-    print('***********************************************************', file=sys.stderr)
+    print('***********************************************************')
+    print(f'Make MCARATS atmosphere/gas absorption input for {lb}')
+    print('***********************************************************')
 
 
     # Files that contain the ABSCO coefficients
@@ -134,23 +132,25 @@ def oco_abs(cfg, sat, zpt_file,
     # Get OCO sounding info
     cfg_info = grab_cfg(cfg)
     abs_inter = cfg_info['abs_interpolation']
+    fp = int(cfg_info['footprint'])-1
+    if fp < 0 or fp > 7:
+        print('footprint should be between 1 and 8, set to the default 1.')
+        fp = 0
+    
+    # ils0: lowest level within ILS that will be included in calculations
+    # standard: 0.002 --> 0.2% cutoff for lines 
+    # (not worth calculating them)
+    ils0 = float(cfg_info['ils_min'])
+    if ils0 < 0 or ils0 > 1:
+        print('ils_min should be between 0 and 1, set to the default 0.05.')
+        ils0 = 0.05
     wlsol0, fsol0 = solar(sol)
 
-    # User specifications are done
-    oco_ils(iband, sat, footprint=1)
     # ******************************************************************************************************
     # Extract information from oco_subroutine.absCOF files (native resolution).
     # Check whether this was previously extracted.
     savpkl = f'{pathout}/{lb_dict[iband]}_abs.pkl'
     if not os.path.isfile(savpkl) or reextract==True:
-
-        # *********
-        # Identify which file is for co2, & which is for o2
-        # These numbers are file specific ! Careful !
-        io2   = 0
-        ico2w = 1
-        ico2s = 2
-
         # *********
         # Read in z,p,t profile from radiosonde, calculate layer & interface properties
 
@@ -162,15 +162,18 @@ def oco_abs(cfg, sat, zpt_file,
      
         nlay=len(lay)
         
+        # absco hdf5 file for target band
+        filnm=files[iband] 
+
         # *********
         # Specify the wavelength (wavenumber) range to work with
         #   refl is the surface reflectance (ignore)
         #   jbroado2 is the broadening index that is used
         wavel1, wavel2 = xr[0], xr[1]
         if (iband == 0) :
-            jbroado2=1
             refl = alb_o2a
-
+            jbroado2=1
+            
         # Weak CO2 band
         if (iband == 1) :
             refl = alb_wco2
@@ -181,8 +184,7 @@ def oco_abs(cfg, sat, zpt_file,
             refl = alb_sco2
             jbroadco2=1
 
-        # todo: what is the broadening for the H2O self-broadening (if there
-        # is such a thing?
+        # no H2O broadening for single interpolation option
         jbroadh2o=0
         
         # *********
@@ -199,9 +201,6 @@ def oco_abs(cfg, sat, zpt_file,
         # *********
         # Read in O2 absco atmosphere information
         if iband == 0 :
-            print(iband, file=sys.stderr)
-            # absco hdf5 file for o2
-            filnm = files[io2]
 
             # Find out the pressure,temperature,boadening,wavenumber(wavelength) grid within
             # the O2 absco file (do not read absorption yet)
@@ -217,18 +216,16 @@ def oco_abs(cfg, sat, zpt_file,
         # *********
         # Read in CO2 atmosphere information
         if ((iband == 1) | (iband == 2)) :
-            if (iband == 1) :       # absco hdf5 file for weak co2 band
-                filnm=files[ico2w]  
-            elif (iband == 2) :       # absco hdf5 file for strong co2 band
-                filnm=files[ico2s]
-
+             
             # Find out the pressure,temperature,broadening,wavenumber info
             # species names for wco2 and sco2 are same
             npco2,ntkco2,nbroadco2,nwcmco2, wcmco2,pco2,tkco2, \
             broadco2, hpaco2,wavelco2, nunits,unitsco2 = rdabs_species(filnm=filnm, species='co2', iout=True)
                     
             # *********
-            # Obtain the wavenumber indices to work with
+            # Obtain the wavenumber indices to work with target gas
+            # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
+            # from ABSCO file, based on wavelength interval as specified by the user
             iwcm1, iwcm2, nwav, wcmdat, wavedat = findi1i2(wcm1, wcm2, wcmco2, iout=True)
 
         # *********
@@ -246,7 +243,7 @@ def oco_abs(cfg, sat, zpt_file,
         iwcm1h2o,iwcm2h2o, nwavh2o,wcmdath2o,wavedath2o = findi1i2(wcm1, wcm2, wcmh2o, iout=True)
             
         if nwav != nwavh2o: 
-            print('[Warning] Wavenumber gridding of O2 & H2O ABSCO files do not match.', file=sys.stderr)                
+            print('[Warning] Wavenumber gridding of O2 & H2O ABSCO files do not match.')                
 
         # *********
         # Now that the {p,T,vH2O,wl} grid is set up, based on ABSCO data base
@@ -265,7 +262,7 @@ def oco_abs(cfg, sat, zpt_file,
         # Start at top of atmosphere & go to the surface
         for iz in range(nlay)[::-1]: 
         # ADD FUNCTIONALITY    print,'  iz ',iz
-            print(f'  iz  {iz}', file=sys.stderr)
+            print(f'  iz  {iz}')
             tkobs, pobs = tprf[iz], pprf[iz]
 
             ext0  = np.zeros(nwav) # absorption coef for O2 or CO2
@@ -285,19 +282,19 @@ def oco_abs(cfg, sat, zpt_file,
                 ii, jj = getiijj(tkobs, pobs, tko2, hpao2, trilinear=trilinear_opt, iout=True)
 
                 if np.abs(pobs-hpao2[jj]) > pdmax: 
-                    print('[Warning] O2 pressure grid too coarse - interpolate?', file=sys.stderr)
+                    print('[Warning] O2 pressure grid too coarse - interpolate?')
                 if np.abs(tkobs-tko2[jj, ii]) > tdmax: 
-                    print('[Warning] O2 Temperature grid too coarse - interpolate?', file=sys.stderr)
+                    print('[Warning] O2 Temperature grid too coarse - interpolate?')
 
                 # (2) get {p,T} indices within H2O ABSCO grid
                 iih2o,jjh2o = getiijj(tkobs, pobs, tkh2o, hpah2o, trilinear=trilinear_opt, iout=True)
 
                 if np.abs(pobs-hpah2o[jjh2o]) > pdmax: 
-                    print('[Warning] H2O pressure grid too coarse - interpolate?', file=sys.stderr)
+                    print('[Warning] H2O pressure grid too coarse - interpolate?')
                 if np.abs(tkobs-tkh2o[jjh2o, iih2o]) > tdmax: 
-                    print('[Warning] H2O temperature grid too coarse - interpolate?', file=sys.stderr)
-                print(f'p (O2, H2O) : {pobs:.2f} hPa, {hpao2[jj]:.2f} hPa, {hpah2o[jjh2o]:.2f} hPa', file=sys.stderr)
-                print(f'T (O2, H2O) : {tkobs:.2f} K, {tko2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K', file=sys.stderr)
+                    print('[Warning] H2O temperature grid too coarse - interpolate?')
+                print(f'p (O2, H2O) : {pobs:.2f} hPa, {hpao2[jj]:.2f} hPa, {hpah2o[jjh2o]:.2f} hPa')
+                print(f'T (O2, H2O) : {tkobs:.2f} K, {tko2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K')
                 
             # For co2
             if ((iband == 1) | (iband == 2)) :
@@ -308,11 +305,11 @@ def oco_abs(cfg, sat, zpt_file,
                 iih2o,jjh2o = getiijj(tkobs, pobs, tkh2o, hpah2o, trilinear=trilinear_opt, iout=True)
 
                 if np.abs(pobs-hpah2o[jjh2o]) > pdmax: 
-                    print('[Warning] H2O pressure grid too coarse - interpolate?', file=sys.stderr)
+                    print('[Warning] H2O pressure grid too coarse - interpolate?')
                 if np.abs(tkobs-tkh2o[jjh2o, iih2o]) > tdmax: 
-                    print('[Warning] H2O temperature grid too coarse - interpolate?', file=sys.stderr)
+                    print('[Warning] H2O temperature grid too coarse - interpolate?')
                 print(f'p (CO2, H2O) : {pobs:.2f} hPa, {hpaco2[jj]:.2f} hPa, {hpah2o[jjh2o]:.2f} hPa',file=sys.stderr)
-                print(f'T (CO2, H2O) : {tkobs:.2f} K, {tkco2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K', file=sys.stderr)                    
+                print(f'T (CO2, H2O) : {tkobs:.2f} K, {tkco2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K')                    
             
             # *********
             # Specify the absorption coefficients - here is where we actually read
@@ -368,82 +365,36 @@ def oco_abs(cfg, sat, zpt_file,
 
             if iband == 0:
                 # For O2
-                ext0 = calc2(o2den,
+                ext0 = calc_ext(o2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
                              absco, trns)
             elif ((iband == 1) | (iband == 2)) :
                 # For CO2
-                ext0 = calc2(co2den,
+                ext0 = calc_ext(co2den,
                              iz,solzen,musolzen,
                              nwav,wcmdat,wavedat,
                              absco, trns)
             # For H2O
-            ext1 = calc2(h2oden,
+            ext1 = calc_ext(h2oden,
                             iz,solzen,musolzen,
                             nwavh2o,wcmdath2o,wavedath2o,
                             abscoh2o, trns)   
 
             # Store the results in ext
             ext[:,iz] = ext0 + ext1 # ext0: O2/CO2, ext1: H2O
-            # tau did not change in calc2 function for now!!!
-            tau_in += ext[:,iz] *dzf[iz]*musolzen
-            tau_out += ext[:,iz] *dzf[iz]*muobszen
-
+            tau_in += ext[:,iz] * dzf[iz] * musolzen
+            tau_out += ext[:,iz] * dzf[iz] * muobszen
 
             # End of loop down to the surface     
         trns = np.exp(-(tau_in+tau_out))#*refl
-        #trns = np.exp(-(tau_out))
-        
         # *********
-        # Get OCO wavelengths & slit function
-        # ---------------------------------------------
-        #       sampling interval (nm)      FWHM (nm)
-        # O2A:      0.015                       0.04
-        # WCO2:     0.031                       0.08
-        # SCO2:     0.04                        0.10
-        # ---------------------------------------------
-        # (1) read wavelengths
-        wloco = oco_wv(iband, sat, footprint=1) # (micron)
-        nlo = len(wloco)
-        # (2) read instrument line shape
-        xx, yy = oco_ils(iband, sat, footprint=1) # xx: relative wl shift (micron)# yy: normalized ILS
-        #xx  = xx*0.001 # convert xx into micron
-        nils= len(xx)
-        # (3) convolute tau & trns across entire wavelength range -- & how about kval
-        
-        trnsc = np.empty(nlo)
-        tauc  = np.empty(nlo)
-        trnsc0 = np.empty(nlo) 
-        indlr = np.empty((nlo,3), dtype=int) # left & right index for cropped ILS (in ABSCO gridding) + total #
+        # End of loop over all layers
 
-        for l in range(nlo):
-            ils = yy[l, :]/np.max(yy[l, :]) >= ils0	
-            nils0 = ils.nonzero()[0]
-            # get wl range within absco that falls within the ILS (total range) & within pre-set threshold
-            # --- left and right full ranges ---
-            abswlL, abswlR = wloco[l] + np.min(xx[l, :]), wloco[l] + np.max(xx[l, :])
-            # --- left and right "valid" ranges (ILS above threshold ils0) ---
-            abswlL0, abswlR0 = wloco[l] + np.min(xx[l, ils]), wloco[l] + np.max(xx[l, ils])
-            il, ir = np.argmin(np.abs(wavedat-abswlL)),  np.argmin(np.abs(wavedat-abswlR))
-            il0, ir0 = np.argmin(np.abs(wavedat-abswlL0)), np.argmin(np.abs(wavedat-abswlR0))
-            indlr[l,0] = il0        # left index
-            indlr[l,1] = ir0        # right index
-            indlr[l,2] = il0-ir0+1  # how many
-            if ir0 == 0: 
-                print('[Warning] Range exceeded (R)')
-            if il0 == nwav-1: 
-                print('[Warning] Range exceeded (L)')
-            if ir  >= il : 
-                print('[Warning] Something wrong with range/ILS')
-            if ir0 >= il0: 
-                print('[Warning] Something wrong with range/ILS0')
-            # actual convolution ---
-            ilg = np.interp(wavedat[ir:il], xx[l, :]+wloco[l], yy[l, :])                # full slit function in absco gridding
-            ilg0 = np.interp(wavedat[ir0:il0], xx[l, ils]+wloco[l], yy[l, ils])   # partial slit function within valid range
-            trnsc[l] = np.sum(trns[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
-            trnsc0[l] = np.sum(trns[ir0:il0]*ilg0)/np.sum(ilg0)
-            #tauc[l] = np.sum(tau[ir:il]*ilg)/np.sum(ilg)
+ 
+        wloco = oco_wv(iband, sat, footprint=fp) # (micron)
+        xx, yy = oco_ils(iband, sat, footprint=fp)
+        trnsc, trnsc0, indlr, ils = oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=fp)
 
         # (4) plots
         if plot and pl_ils:
@@ -457,24 +408,13 @@ def oco_abs(cfg, sat, zpt_file,
             x = xx.mean(axis=0)*1000
             ax.plot(x, yy.mean(axis=0), color='k')
             ax.vlines([x[ils[0]], x[ils[-1]]], ils0, 1, 'r')
-            #ax.plot(1000*np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
 
-            #norm = np.max(absgl[z,l,0:absgn[l]-1])
-            #ax.plot(1000*absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red')
-
-            #ax.set_xticks(range(0, 160, 20))
             ax.tick_params(axis='both', labelsize=tick_size)
 
-            ymin, ymax = ax.get_ylim()
-            xmin, xmax = ax.get_xlim()
-            #ymin, ymax = -1., 1.
-            #xmin, xmax = 0., 10.
-            #ax.set_ylim(ymin, ymax)
-            #ax.set_xlim(xmin, xmax)
-            ax.set_xlabel('Wavelength (nm)', fontsize=label_size)
+            ax.set_xlabel('$\mathrm{\Delta}$ Wavelength (nm)', fontsize=label_size)
             ax.set_ylabel('response', fontsize=label_size)
             ax.set_title('# ILS terms', fontsize=title_size)
-            fig.savefig(f'{pathout}/band{iband}_4-test.png', dpi=150, bbox_inches='tight')
+            fig.savefig(f'{pathout}/band{iband}_4_ILS_mean.png', dpi=150, bbox_inches='tight')
 
         # read solar file
         wlsol0, fsol0 = solar(sol) # obtain irradiance [W m-2 nm-1]
@@ -487,379 +427,220 @@ def oco_abs(cfg, sat, zpt_file,
         # *** ---3) solar file (interpolated to absorption data base resolution)
         # *** When changing atmosphere | wavelength range, need to re-read (run with flag /r)
         #savpkl = filnm+'.pkl'
-        print('Save absorption data to pickle save file: ' + savpkl, file=sys.stderr)
-        print(savpkl, file=sys.stderr)
+        print('Save absorption data to pickle save file: ' + savpkl)
         with open(savpkl, 'wb') as f:  # Python 3: open(..., 'wb')
-            pickle.dump([wcmdat,tprf,pprf,trnsc,tauc,ext,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf, refl], f)
+            pickle.dump([wcmdat, tprf, pprf, trnsc, ext, tau_in, tau_out, wloco, 
+                         indlr, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl], f)
 
     else: # if no previous hdf5 save file exists of this band
-        print('Restore absorption data from IDL save file: '+savpkl, file=sys.stderr)
+        print('Restore absorption data from IDL save file: '+savpkl)
         with open(savpkl, 'rb') as f:
-            wcmdat,tprf,pprf,trnsc,tauc,ext,tau_in, tau_out,wloco,indlr,xx,yy,fsol,lay,nlay,pintf,dzf,intf, refl = pickle.load(f)
+            (wcmdat, tprf, pprf, trnsc, ext, tau_in, tau_out, wloco, 
+             indlr, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl) = pickle.load(f)
     # End: Extract information from oco_subroutine.absCOF file (native resolution)
 
 
     # *********
     # Sub-sampling, output & display
-    if plot:
-        wl = 10000./np.float64(wcmdat) 
-        nl = len(wl)
-        wlc = wloco.copy()
-        tauex = tauc.copy() # column-integrated absorption optical thickness
-        tauex0 = tauex.copy()
-        # ** define spectral sub-range within band
-        # ** & extract k values at two altitudes (surface & higher) 
-        flt = np.logical_and(wl  >= wr[0], wl  < wr[1]).nonzero()[0]
-        nf = len(flt)
-        flc = np.logical_and(wlc >= wr[0], wlc < wr[1]).nonzero()[0]
-        nfc = len(flc)
-        wlf = wlc[flc]
-        ###k1=kval[flt,ai1]   # at altitude
-        ###k0=kval[flt,ai0]   # surface 
-        tauex = tauex[flc]   # extract spectral sub-range OD
-        trnsx = trnsc[flc]   # extract spectral sub-range transmittance
-        tlf = trnsx
-        sx = np.argsort(trnsx)     # can also use tauex, but now trying trnsx (for linearity# range)
-        # *********
 
-        if plot == 1 :
-            plt.clf()
-            fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
-            fig.tight_layout(pad=5.0)
-            title_size = 18
-            label_size = 16
-            legend_size = 16
-            tick_size = 14
-            x = np.arange(nfc)
-            y = trnsx[sx]*refl
-            ax.scatter(x, y, color='k', s=3)
-            
-            #ax.set_xticks(range(0, 160, 20))
-            ax.tick_params(axis='both', labelsize=tick_size)
+    wl = 10000./np.float64(wcmdat) 
+    wlc = wloco.copy()
 
-            ymin, ymax = ax.get_ylim()
-            xmin, xmax = ax.get_xlim()
-            #ymin, ymax = -1., 1.
-            #xmin, xmax = 0., 10.
-            #ax.set_ylim(ymin, ymax)
-            #ax.set_xlim(xmin, xmax)
-            ax.set_xlabel('Wavelength index', fontsize=label_size)
-            ax.set_ylabel('Transmittance', fontsize=label_size)
-            ax.set_title('Sub-band of '+lb, fontsize=title_size)
+    # ** define spectral sub-range within band
+    flt = np.logical_and(wl  >= wr[0], wl  < wr[1]).nonzero()[0]
+    nf = len(flt)
+    flc = np.logical_and(wlc >= wr[0], wlc < wr[1]).nonzero()[0]
+    nfc = len(flc)
+    wlf = wlc[flc]
 
-        # sort column-integrated tau & two altitudes using transmittance (v2 of code: using OD)
-        tauex = tauex[sx]
-        trnsx = trnsx[sx] 
-        ###k1   =k1[sx]
-        ###k0   =k0[sx]
-        wls = wlf[sx]   # these are the wavelengths within the sub-range
+    trnsx = trnsc[flc]   # extract spectral sub-range transmittance
+    # sort column-integrated tau & two altitudes using transmittance (v2 of code: using OD)
+    sx = np.argsort(trnsx)     # sort the transmittance
+    trnsx = trnsx[sx] 
+    wls = wlf[sx]   # these are the wavelengths within the sub-range
 
+    if all_r > 0 :
+        flr = (trnsx < np.max(trnsx)*all_r/100.).nonzero()[0]
+        nx = len(flr)
+        wlf = wlf[flr]
+        trnsx = trnsx[flr]
+        print(f'Now using {nx} wavelengths.')
+        nx = nx-1
+
+    g_mode = cfg_info['g_mode']
+    if g_mode == 'TRUE':
+        g_mode = True
+    elif g_mode == 'FALSE':
+        g_mode = False
+    else:
+        sys.exit('"g_mode" in the config file should be either "TRUE" or "FALSE".')
+    g = 16
+    wli, abs_g_final, prob_g_final, \
+        weight_g_final, sol_g_final = oco_wv_select(trnsx, Trn_min, refl, nlay, nx, all_r, 
+                                                    wlc, wlf, wls, wl, indlr, xx, yy, ext, fsol, iband,
+                                                    g_mode, g=g)
+
+    # ** Now extract all the absorption data for the wavelengths that correspond
+    # ** to the OD increments (wavelengths are defined above)
+    wx = np.empty(nx+1) # wavelengths
+    lx = np.empty(nx+1, dtype=int) # wavelength indices in original gridding
+    tx = np.empty(nx+1) # transmittance in original gridding
+    for i in range(nx+1):
         if all_r > 0 :
-            flr = (tlf < np.max(tlf)*all_r/100.).nonzero()[0]
-            nx = len(flr)
-            wlf = wlf[flr]
-            tlf = tlf[flr]
-            print(f'Now using {nx} wavelengths.')
-            nx = nx-1
+            l0 = np.argmin(np.abs(wlc-wlf[i]))
+        else:
+            l0 = np.argmin(np.abs(wlc-wls[np.int(wli[i])]))
+        wx[i] = wlc[l0]
+        lx[i] = l0
+        tx[i] = trnsc[l0]*refl
 
-        # ** do spectral sub-sample using equi-distant transmittance values
-        mx = np.max(trnsx)            # maximum transmittance (T) within spectral sub-range
-        mn = np.max([Trn_min*np.max(trnsx), np.min(trnsx)])    # minimum transmittance with spectral sub-range
-        m0 = (mx-mn)/np.float64(nx)  # T increments
-        ods = np.empty(nx+1) # T sorted (nx sub-samples)
-        wli = np.empty(nx+1) # wl index
-        # plot setting
+    if plot:
+        title_size = 18
+        label_size = 16
+        legend_size = 16
+        tick_size = 14
+
+        plt.clf()
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
+        fig.tight_layout(pad=5.0)
+        ax.plot(wlc, trnsc*refl, color='k')
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
+        ax.set_ylabel('Transmittance', fontsize=label_size)
+        ax.set_title(f'Sub-band of {lb}', fontsize=title_size)
+        ax.plot([wr[0],wr[0]],[0, 0.5], color='orange', linestyle='--', linewidth=3)
+        ax.plot([wr[1],wr[1]],[0, 0.5], color='orange', linestyle='--', linewidth=3)
+        for i in range(nx+1):
+            ax.scatter(wlc[lx[i]], tx[i], facecolors='none', edgecolor='orange', marker='D')
+        fig.savefig(f'{pathout}/band{iband}_1-transmittance_sat.png', dpi=150, bbox_inches='tight')
+
+        plt.clf()
         norm = colors.Normalize(vmin=0.0, vmax=255.0, clip=True)
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.rainbow)
-        g = 16
-        abs_g_final = np.zeros((nlay, nx+1, g))
-        prob_g_final = np.zeros((nlay, nx+1, g))
-        weight_g_final = np.zeros((nlay, nx+1, g))
-        sol_g_final = np.zeros((nx+1, g))
-        g_mode = False
-        for i in range(0, nx+1):
-            ods[i] = (m0*np.float64(i)+mn)*refl
-            wli0 = np.argmin(np.abs(ods[i]-trnsx*refl))
-            #l0 = wli0.copy()
-            if g_mode:
-                g_test = False
-                
-                print(f'--------- start: {i} ---------', file=sys.stderr)
-                print(ods[i], wli0, file=sys.stderr)
-                while not g_test:
-                    if all_r > 0 :
-                        l0 = np.argmin(np.abs(wlc-wlf[np.int(wli0)]))
-                    else:
-                        l0 = np.argmin(np.abs(wlc-wls[np.int(wli0)]))
-
-                    absgx_tmp = wl[indlr[l0,1]:indlr[l0,0]+1] # ILS - xx (lamda)
-                    ilg0 = np.interp(wl[indlr[l0,1]:indlr[l0,0]+1], xx[l0, :]+wlc[l0], yy[l0, :]) # partial slit function within valid range
-                    absgy_tmp = ilg0 # ILS - yy ("weight")
-                    absgn_tmp = indlr[l0,2]
-                    absgl_tmp = np.zeros((nlay, absgn_tmp))
-                    abs_g = np.zeros((nlay, g))
-                    prob_g = np.zeros((nlay, g))
-                    weight_g = np.zeros((nlay, g))
-                    for z in range(0, nlay):
-                        absgl_tmp[z, :] = ext[indlr[l0,1]:indlr[l0,0]+1,z]
-                        sort_ind = np.argsort(absgl_tmp[z, :])
-                        x_sort = np.arange(len(sort_ind))+1
-                        prob = x_sort/np.max(x_sort)
-
-                        prob_select = np.linspace(prob[0], prob[-1], g+1)
-                        #print(prob_select)
-                        select_ind = np.zeros(g+1, dtype=int)
-
-                        y = (absgl_tmp[z, :])*absgy_tmp[:]
-                        sort_w_weight_ind = np.argsort(y)
-                        sorted_y = y[sort_w_weight_ind]
-                        for j in range(g):
-                            start_ind = np.argmin(np.abs(prob-prob_select[j]))
-                            end_ind = np.argmin(np.abs(prob-prob_select[j+1]))
-                            prob_g[z, j] = np.mean([prob[start_ind:end_ind+1]])
-                            abs_g[z, j] = np.mean([sorted_y[start_ind:end_ind+1]])
-                            weight_g[z, j] = prob_select[j+1] - prob_select[j]
-                    ori_abs = np.nansum(absgl_tmp[:, :]*absgy_tmp[:], axis=1)
-                    g_abs = (np.sum(abs_g*weight_g, axis=1)/np.sum(weight_g, axis=1))*absgn_tmp
-                    #print('-'*15, file=sys.stderr)
-                    # print('ori_abs', ori_abs, file=sys.stderr)
-                    # print('g_abs', g_abs, file=sys.stderr)
-                    ratio_mean, ratio_std = np.mean(g_abs/ori_abs), np.std(g_abs/ori_abs)
-                    threshold = 0.01 if iband != 1 else 0.06
-                    if np.abs(1-ratio_mean) <= threshold:
-                        g_test = True
-                        
-                        print(f'index {i} with wli0 {wli0} g_abs/ori_abs: {(ratio_mean):.4f}')
-                        print('Succes!')
-                    else:
-                        if iband == 1:
-                            print(f'index {i} with wli0 {wli0} g_abs/ori_abs: {(ratio_mean):.4f}')
-                            print('Test next...')
-                        if i != nx:
-                            wli0 += 1
-                        else:
-                            wli0 -= 1
-                
-                abs_g_final[:, i, :] = abs_g
-                prob_g_final[:, i, :] = prob_g
-                weight_g_final[:, i, :] = weight_g
-
-                solx_tmp = fsol[indlr[l0,1]:indlr[l0,0]+1]
-                sort_sol_ind = np.argsort(solx_tmp)
-                sol_indx_sort = np.arange(len(sort_sol_ind))+1
-                prob_sol = sol_indx_sort/np.max(sol_indx_sort)
-                prob_sol_select = np.linspace(prob_sol[0], prob_sol[-1], g+1)
-                y_sol = (solx_tmp)*absgy_tmp
-                sort_sol_weight_ind = np.argsort(y_sol)
-                sorted_y_sol = y_sol[sort_sol_weight_ind]
-                for j in range(g):
-                    start_ind = np.argmin(np.abs(prob_sol-prob_sol_select[i]))
-                    end_ind = np.argmin(np.abs(prob_sol-prob_sol_select[i+1]))
-                    sol_g_final[i, j] = np.mean([sorted_y_sol[start_ind:end_ind+1]])
-
-            
-            print(i, wli0, ods[i], trnsx[wli0]*refl)
-            wli[i] = wli0
-            if plot == 1 :
-                # ax.plot([0,nfc],[ods[i],ods[i]],color='orange',linestyle='dotted')
-                # ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
-                # cl = 30*(i+1)
-                # if cl == 0: 
-                #     cl=255
-                # ax.plot([wli0,wli0], [0,ods[i]], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)
-                transmittance = trnsx[wli0]*refl
-                ax.plot([0,nfc],[transmittance, transmittance],color='orange',linestyle='dotted')
-                ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
-                cl = 30*(i+1)
-                if cl == 0: 
-                    cl=255
-                ax.plot([wli0, wli0], [0, transmittance], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)
-                    
-        # ods[nx] = mn*refl
-        # wli0 = np.argmin(np.abs(ods[nx]-trnsx*refl))
-        # wli[nx]=wli0
-        # print(nx, wli0, ods[nx], trnsx[wli0]*refl)
-        # cl = 30*nx
-        # ax.plot([wli0,wli0],[0,ods[nx]],linestyle='dashed',color=mapper.to_rgba(cl), linewidth=2)
-        # ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
+        fig.tight_layout(pad=5.0)
+        ax.scatter(np.arange(nfc), trnsx[sx]*refl, color='k', s=3)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('Wavelength index', fontsize=label_size)
+        ax.set_ylabel('Transmittance', fontsize=label_size)
+        ax.set_title(f'Sub-band of {lb}', fontsize=title_size)
+        for i in range(nx+1):
+            wli0 = wli[i]
+            transmittance = trnsx[wli0]*refl
+            ax.plot([0,nfc],[transmittance, transmittance],color='orange',linestyle='dotted')
+            ax.plot([wli0,nfc],[trnsx[wli0]*refl,trnsx[wli0]*refl],linestyle='dashed',color='orange')
+            cl = 30*(i+1)
+            ax.plot([wli0, wli0], [0, transmittance], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)        
         fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
-        
-        print('wli:', wli)
 
-        # sys.exit()
+    # ** assign values / profiles for atm/abs file (final output)
+    nlg       = np.max(indlr[:,2])  # max # of individual absco wl for each oco wl (within ILS)
+    # todo: # z needs to be nz, not nz-1
+    absgl     = np.empty((nlay,nx+1,nlg)) # absorption coefficient profile for nx+1 wavelengths & nlg individual absorption lines
+    absgn     = np.empty(nx+1, dtype=int)          # # of absorption lines that have to be considered for each wl, given the ILS
+    absgx     = np.empty((nx+1,nlg))      # ILS-lamdas for each of the selected OCO-2 wavelengths at ABSCO resolution
+    absgy     = np.empty((nx+1,nlg))      # ILS-shape  for each of the selected OCO-2 wavelengths at ABSCO resolution
+    atm_dz    = dzf*1000.             # layer thickness in m
+    atm_zgrd  = intf*1000.            # altitudes [m]
+    unit_z    = 'm'
+    lamx      = wx                    # these are the sub-selected wavelengths from OCO-2
+    unit_l    = 'nm'
+    atm_p     = pprf                  # pressure profile for layers
+    unit_p    = 'hPa'
+    atm_temp  = tprf                  # temperature profile for layers
+    unit_T    = 'K'
+    solx      = np.empty((nx+1,nlg))      # solar irradiance for each of the selected OCO-2 wavelengths at full ABSCO resolution
+    unit_abs  = '/km'
+    # reminder: wl = ABSCO resolution !
 
+    extcheck = np.empty((nx+1,nlay)) # check the extinction profile
+    
+    # nan initialization
+    absgl[...] = np.nan
+    absgx[...] = np.nan
+    absgy[...] = np.nan
+    solx[...] = np.nan
+    
+    for l in range(0, nx+1):
+        absgx[l, 0:indlr[lx[l],2]]= wl[indlr[lx[l],1]:indlr[lx[l],0]+1] # ILS - xx (lamda)
+        ilg0 = np.interp(wl[indlr[lx[l],1]:indlr[lx[l],0]+1], xx[lx[l], :]+wlc[lx[l]], yy[lx[l], :]) # partial slit function within valid range
+        absgy[l, 0:indlr[lx[l], 2]] = ilg0 # ILS - yy ("weight")
+        absgn[l]                   = indlr[lx[l],2] # additional stuff (# of k's)
+        solx [l, 0:indlr[lx[l], 2]]= fsol[indlr[lx[l],1]:indlr[lx[l],0]+1]
+        for z in range(0, nlay):
+            absgl[z,l,0:indlr[lx[l],2]]=ext[indlr[lx[l],1]:indlr[lx[l],0]+1,z]
+            if z == 0 and plot:
+                plt.clf()
+                fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
+                fig.tight_layout(pad=5.0)
+                ax.plot(absgx[l,0:absgn[l]-1], absgy[l,0:absgn[l]-1], color='k', label='ILS')
+                ax.plot(absgx[l,0:absgn[l]-1], solx[l,0:absgn[l]-1], color='orange', label='solar')
+                norm = np.max(absgl[z,l,0:absgn[l]-1])
+                ax.plot(absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red', label='rel. abs coeff.')
+                ax.tick_params(axis='both', labelsize=tick_size)
+                ax.legend(fontsize=legend_size)
+                ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
+                ax.set_ylabel('normalized # photons/nm', fontsize=label_size)
+                ax.set_title(f'# ILS terms {absgn[l]}', fontsize=title_size)
+                fig.savefig(f'{pathout}/band{iband}_3-individual_line_at_wvl_{wx[l]:.5f}nm.png', dpi=150, bbox_inches='tight')
+                    
+            extcheck[l,z] = np.sum(absgl[z,l,0:absgn[l]-1]*absgy[l,0:absgn[l]-1])/np.sum(absgy[l,0:absgn[l]-1])
 
-        if plot == 1 :
-            plt.clf()
-            fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
-            fig.tight_layout(pad=5.0)
-            title_size = 18
-            label_size = 16
-            legend_size = 16
-            tick_size = 14
-
-            ax.plot(wlc, trnsc*refl, color='k')
-            ax.tick_params(axis='both', labelsize=tick_size)
-
-            #ax.set_ylim(ymin, ymax)
-            #ax.set_xlim(xr[0],xr[1])
-            #ax.legend(loc='center left', bbox_to_anchor=(0.65, 0.15), fontsize=legend_size)
-            ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
-            ax.set_ylabel('Transmittance', fontsize=label_size)
-            #ax.set_title('Sub-band of '+lb, fontsize=title_size)
-            
-            ax.plot([wr[0],wr[0]],[0,0.5], color='orange', linestyle='--', linewidth=3)
-            ax.plot([wr[1],wr[1]],[0,0.5], color='orange', linestyle='--', linewidth=3)
-            #!P.multi=0
-            
-        
-            
-        # ** Now extract all the absorption data for the wavelengths that correspond
-        # ** to the OD increments (wavelengths are defined above)
-        wx = np.empty(nx+1) # wavelengths
-        lx = np.empty(nx+1, dtype=np.int64) # wavelength indices in original gridding
-        tx = np.empty(nx+1) # transmittance in original gridding
-        for i in range(0, nx+1):
-            if all_r > 0 :
-                l0 = np.argmin(np.abs(wlc-wlf[i]))
-            else:
-                l0 = np.argmin(np.abs(wlc-wls[np.int(wli[i])]))
-            wx[i] = wlc[l0]
-            lx[i] = l0
-            tx[i] = trnsc[l0]*refl
-            if plot == 1: 
-                ax.scatter(wlc[lx[i]], tx[i], facecolors='none', edgecolor='orange', marker='D')
-            
-        if plot:
-            fig.savefig(f'{pathout}/band{iband}_1-transmittance_sat.png', dpi=150, bbox_inches='tight')
-            #plt.show()
-            
-        # ** assign values / profiles for atm/abs file (final output)
-        nlg       = np.max(indlr[:,2])  # max # of individual absco wl for each oco wl (within ILS)
-        # todo: # z needs to be nz, not nz-1
-        absgl     = np.empty((nlay,nx+1,nlg)) # absorption coefficient profile for nx+1 wavelengths & nlg individual absorption lines
-        absgn     = np.empty(nx+1, dtype=int)          # # of absorption lines that have to be considered for each wl, given the ILS
-        absgx     = np.empty((nx+1,nlg))      # ILS-lamdas for each of the selected OCO-2 wavelengths at ABSCO resolution
-        absgy     = np.empty((nx+1,nlg))      # ILS-shape  for each of the selected OCO-2 wavelengths at ABSCO resolution
-        atm_dz    = dzf*1000.             # layer thickness in m
-        atm_zgrd  = intf*1000.            # altitudes [m]
-        unit_z    = 'm'
-        lamx      = wx                    # these are the sub-selected wavelengths from OCO-2
-        unit_l    = 'nm'
-        atm_p     = pprf                  # pressure profile for layers
-        unit_p    = 'hPa'
-        atm_temp  = tprf                  # temperature profile for layers
-        unit_T    = 'K'
-        solx      = np.empty((nx+1,nlg))      # solar irradiance for each of the selected OCO-2 wavelengths at full ABSCO resolution
-        unit_abs  = '/km'
-        # reminder: wl = ABSCO resolution !
-
-        extcheck = np.empty((nx+1,nlay)) # check the extinction profile
-        
-        # nan initialization
-        absgl[...] = np.nan
-        absgx[...] = np.nan
-        absgy[...] = np.nan
-        solx[...] = np.nan
-        
-        for l in range(0, nx+1):
-            absgx[l, 0:indlr[lx[l],2]]= wl[indlr[lx[l],1]:indlr[lx[l],0]+1] # ILS - xx (lamda)
-            ilg0 = np.interp(wl[indlr[lx[l],1]:indlr[lx[l],0]+1], xx[lx[l], :]+wlc[lx[l]], yy[lx[l], :]) # partial slit function within valid range
-            absgy[l, 0:indlr[lx[l], 2]] = ilg0 # ILS - yy ("weight")
-            absgn[l]                   = indlr[lx[l],2] # additional stuff (# of k's)
-            solx [l, 0:indlr[lx[l], 2]]= fsol[indlr[lx[l],1]:indlr[lx[l],0]+1]
-            for z in range(0, nlay):
-                absgl[z,l,0:indlr[lx[l],2]]=ext[indlr[lx[l],1]:indlr[lx[l],0]+1,z]
-                if z == 0 and plot:
-                    fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
-                    fig.tight_layout(pad=5.0)
-                    title_size = 18
-                    label_size = 16
-                    legend_size = 16
-                    tick_size = 14
-
-                    x = np.arange(nfc)
-                    y = trnsx[sx]
-                    ax.plot(absgx[l,0:absgn[l]-1], absgy[l,0:absgn[l]-1], color='k', label='ILS')
-                    #ax.plot(np.array([wlc[l], wlc[l]]),[ils0,1], linestyle='--')
-                    ax.plot(absgx[l,0:absgn[l]-1], solx[l,0:absgn[l]-1], color='orange', label='solar')
-
-                    norm = np.max(absgl[z,l,0:absgn[l]-1])
-                    ax.plot(absgx[l,0:absgn[l]-1], absgl[z,l,0:absgn[l]-1]/norm, color='red', label='rel. abs coeff.')
-
-                    #ax.set_xticks(range(0, 160, 20))
-                    ax.tick_params(axis='both', labelsize=tick_size)
-                    ax.legend(fontsize=legend_size)
-                    ymin, ymax = ax.get_ylim()
-                    xmin, xmax = ax.get_xlim()
-                    #ymin, ymax = -1., 1.
-                    #xmin, xmax = 0., 10.
-                    #ax.set_ylim(ymin, ymax)
-                    #ax.set_xlim(xmin, xmax)
-                    ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
-                    ax.set_ylabel('normalized # photons/nm', fontsize=label_size)
-                    ax.set_title(f'# ILS terms {absgn[l]}', fontsize=title_size)
-                    fig.savefig(f'{pathout}/band{iband}_3-test_{wx[l]:.5f}.png', dpi=150, bbox_inches='tight')
-                        
-                extcheck[l,z]=np.sum(absgl[z,l,0:absgn[l]-1]*absgy[l,0:absgn[l]-1])/np.sum(absgy[l,0:absgn[l]-1])
-
-        # save output file
-        if os.path.isfile(output): 
-            print('[Warning] Output file exists - overwriting!')
-        print('Saving to file '+output)
-        wl_oco = wlc
-        trns_oco = trnsc
-        atm_pi = pintf
-        if not g_mode:
-            with h5py.File(output, 'w') as h5_output:
-                h5_output.update({'atm_zgrd': atm_zgrd, 
-                                'lay': lay, 
-                                'atm_p': atm_p,
-                                'atm_pi': atm_pi, 
-                                'atm_temp': atm_temp, 
-                                'atm_dz': atm_dz,
-                                'lamx': lamx, 
-                                'tx': tx, 
-                                'absgl': absgl,
-                                'absgn': absgn, 
-                                'absgx': absgx, 
-                                'absgy': absgy, 
-                                'solx': solx, 
-                                'ils0': ils0, 
-                                'unit_z': unit_z, 
-                                'unit_l': unit_l, 
-                                'unit_p': unit_p, 
-                                'unit_T': unit_T, 
-                                'unit_abs': unit_abs, 
-                                'wl_oco': wl_oco,
-                                'trns_oco': trns_oco})
-        else:
-            with h5py.File(output, 'w') as h5_output:
-                h5_output.update({'atm_zgrd': atm_zgrd, 
-                                'lay': lay, 
-                                'atm_p': atm_p,
-                                'atm_pi': atm_pi, 
-                                'atm_temp': atm_temp, 
-                                'atm_dz': atm_dz,
-                                'lamx': lamx, 
-                                'tx': tx, 
-                                'absgl': abs_g_final,
-                                'absgn': np.array([g,]*(nx+1)), 
-                                'absgx': np.ones((nx+1, g)), 
-                                'absgy': np.ones((nx+1, g)), 
-                                'solx': sol_g_final, 
-                                'ils0': ils0, 
-                                'unit_z': unit_z, 
-                                'unit_l': unit_l, 
-                                'unit_p': unit_p, 
-                                'unit_T': unit_T, 
-                                'unit_abs': unit_abs, 
-                                'wl_oco': wl_oco,
-                                'trns_oco': trns_oco})
-
-        return None
-        #todo: check if vertical resolution changes tau and/or ext
-
+    # save output file
+    if os.path.isfile(output): 
+        print('[Warning] Output file exists - overwriting!')
+    print('Saving to file '+output)
+    wl_oco = wlc
+    trns_oco = trnsc
+    atm_pi = pintf
+    if not g_mode:
+        with h5py.File(output, 'w') as h5_output:
+            h5_output.update({'atm_zgrd': atm_zgrd, 
+                            'lay': lay, 
+                            'atm_p': atm_p,
+                            'atm_pi': atm_pi, 
+                            'atm_temp': atm_temp, 
+                            'atm_dz': atm_dz,
+                            'lamx': lamx, 
+                            'tx': tx, 
+                            'absgl': absgl,
+                            'absgn': absgn, 
+                            'absgx': absgx, 
+                            'absgy': absgy, 
+                            'solx': solx, 
+                            'ils0': ils0, 
+                            'unit_z': unit_z, 
+                            'unit_l': unit_l, 
+                            'unit_p': unit_p, 
+                            'unit_T': unit_T, 
+                            'unit_abs': unit_abs, 
+                            'wl_oco': wl_oco,
+                            'trns_oco': trns_oco})
+    else:
+        with h5py.File(output, 'w') as h5_output:
+            h5_output.update({'atm_zgrd': atm_zgrd, 
+                            'lay': lay, 
+                            'atm_p': atm_p,
+                            'atm_pi': atm_pi, 
+                            'atm_temp': atm_temp, 
+                            'atm_dz': atm_dz,
+                            'lamx': lamx, 
+                            'tx': tx, 
+                            'absgl': abs_g_final,
+                            'absgn': np.array([g,]*(nx+1)), 
+                            'absgx': np.ones((nx+1, g)), 
+                            'absgy': weight_g_final, 
+                            'solx': sol_g_final, 
+                            'ils0': ils0, 
+                            'unit_z': unit_z, 
+                            'unit_l': unit_l, 
+                            'unit_p': unit_p, 
+                            'unit_T': unit_T, 
+                            'unit_abs': unit_abs, 
+                            'wl_oco': wl_oco,
+                            'trns_oco': trns_oco})
+    return None
+    #todo: check if vertical resolution changes tau and/or ext
 
 if __name__ == '__main__':
     None

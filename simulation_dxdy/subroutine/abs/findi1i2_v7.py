@@ -10,11 +10,7 @@ def findi1i2(wcm1, wcm2, wcm, iout=True):
     wcm: wavenumber series from the absco file
     iout: True to save details to the exist log.txt
     """
-    if iout:
-        original_stdout = sys.stdout # Save a reference to the original standard output
-        f = open("log.txt", "a")
-        sys.stdout = f
-    
+
     iwcm1 = bs(wcm, wcm1)-1
     iwcm2 = bs(wcm, wcm2) #bs(wcm, wcm2)-1 
 
@@ -44,9 +40,6 @@ def findi1i2(wcm1, wcm2, wcm, iout=True):
         print('  findi1ii2: min and max wcmdat ',np.min(wcmdat),np.max(wcmdat))
         print('  findi1ii2: min and max wavedat ',np.min(wavedat),np.max(wavedat))
     # *********
-
-    if iout:
-        f.close()
 
     return iwcm1, iwcm2, nwav, wcmdat, wavedat
 

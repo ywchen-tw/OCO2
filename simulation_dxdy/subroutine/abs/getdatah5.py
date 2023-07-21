@@ -6,13 +6,6 @@ def getdatah5(nopr, FileName, VarName, iout=True):
     """
     iout: True to save details to the exist log.txt
     """
-    if iout:
-        original_stdout = sys.stdout # Save a reference to the original standard output
-        f = open("log.txt", "a")
-        sys.stdout = f
-
-
-
     # ****************
     # See get_aura.pro
     h5data = h5py.File(FileName, 'r')
@@ -54,8 +47,7 @@ def getdatah5(nopr, FileName, VarName, iout=True):
         print('  ',np.min(data),np.max(data))
 
     # ******************************
-    #if iout:
-    #    f.close()
+
     
     return Dims, data
 

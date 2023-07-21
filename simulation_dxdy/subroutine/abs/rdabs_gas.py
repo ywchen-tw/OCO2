@@ -6,11 +6,6 @@ def rdabs_species(filnm, species, iout=True):
     """
     iout: True to save details to the exist log.txt
     """
-    if iout:
-        original_stdout = sys.stdout # Save a reference to the original standard output
-        f = open("log.txt", "a")
-        sys.stdout = f
-  
 
     #########
     # Open the hdf5 file
@@ -87,7 +82,7 @@ def rdabs_species(filnm, species, iout=True):
         wavel_species[i] = 1.0e4/wcm_species[i] 
 
     # *********
-    if iout == 1:
+    if iout:
         print('  ')
         print(f'  rdabs {species}: filnm ',filnm)
         print(f'  rdabs {species}: np_{species},ntk_{species},nbroad_{species},nwcm_{species}')

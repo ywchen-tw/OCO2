@@ -326,7 +326,7 @@ def preprocess(cfg_info):
 
     # create atmosphere based on OCO-Met and CO2_prior
     # ===============================================================
-    zpt_file = os.path.abspath('/'.join([fdir_data, 'zpt_h5']))
+    zpt_file = os.path.abspath('/'.join([fdir_data, 'zpt.h5']))
     if not os.path.isfile(zpt_file):
         create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
     # ===============================================================
@@ -337,11 +337,11 @@ def preprocess(cfg_info):
     Trn_min = float(cfg_info['Trn_min'])
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-        if 1:#not os.path.isfile(fname_abs):
+        if not os.path.isfile(fname_abs):
             oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
                     nx=nx, Trn_min=Trn_min, pathout=fdir_data,
                     reextract=False, plot=True)
-            
+    
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
         cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)

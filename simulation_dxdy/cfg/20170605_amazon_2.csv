@@ -3,7 +3,12 @@ descriptor,Susan,,,,,,
 date,20170605,,,,,,
 juld,156,,,,,,# Julian Day
 ,,,,,,,
-data files,,,,,,,
+domain info,,,,,,,
+png,20170718.png,,,,,,# PNG file
+pngwesn,-67.1991,-66.2404,-0.0047,1.097,,,# PNG file extent
+subdomain,-67.1991,-66.2404,-0.0047,1.097,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+,,,,,,,
+# data files,,,,,,,
 path_sat_data,../sat_data,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"
 l2,oco2_L2StdND_15574a_170605_B10206r_200720165223.h5,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.8r/2015/173/
 lt,,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r/2015/
@@ -14,27 +19,24 @@ imap,,,,,,,
 co2prior,oco2_L2CPrND_07794a_151219_B10003r_191121015231.h5,,,,,,
 sol,solar.txt,,,,,,# Location of solar file
 ,,,,,,,
-absorption information,,,,,,,
+# absorption information,,,,,,,
+footprint,1,,,,,,# 1 to 8
+ils_min,0.05,,,,,,# minimum relative ils weight for calculating absorbance
 nx,10,,,,,,# number of transmittance interval
 Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
 abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
+g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
-simulator information,,,,,,,
-#pathsim,/Users/schmidt/rtm/ocosim/dat/new/,,,,,,
-pathsim,/Users/schmidt/rtm/er3toco/oco/,,,,,,
+# output information,,,,,,,
+path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
 o2,,,,,,,
 wco2,,,,,,,
 sco2,,,,,,,
 ,,,,,,,
-full physics retrieval information,,,,,,,
-python,/data/hong/soft/python3/anaconda/envs/oco/bin/python,,,,,,# python that is used for retrieval sub-process
+# full physics retrieval information,,,,,,,
+retrieval,B10.04,,,,,,
 ,,,,,,,
-domain info,,,,,,,
-png,20170718.png,,,,,,# PNG file
-pngwesn,-67.1991,-66.2404,-0.0047,1.097,,,# PNG file extent
-subdomain,-67.1991,-66.2404,-0.0047,1.097,,,# sub-domain to zoom into (this is processed by the OCO simulator)
-,,,,,,,
-simulation parameters,,,,,,,
+# simulation parameters,,,,,,,
 ref_threshold,0.09,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
 oco_N_photons,1.00E+09,,,,,,

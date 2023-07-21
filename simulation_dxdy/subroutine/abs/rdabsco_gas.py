@@ -26,11 +26,6 @@ def rdabsco_species(filnm,
     jj:  pressure index
 
     """
-    if iout:
-        original_stdout = sys.stdout # Save a reference to the original standard output
-        f = open("log.txt", "a")
-        sys.stdout = f
-
     # ********
     # Open the hdf5 file
     h5data = h5py.File(filnm, 'r')

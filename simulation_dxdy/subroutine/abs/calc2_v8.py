@@ -1,10 +1,8 @@
 
 import sys
 import numpy as np
-import h5py
-import time
 
-def calc2(denf,
+def calc_ext(denf,
           iz,zen,muzen,
           nwav,wcmdat,wavedat,
           absco, trns,):
@@ -18,6 +16,5 @@ def calc2(denf,
 
     conv = 1.0e5 * denf[iz]
     ext = (conv*absco).flatten() 
-
  
     return ext

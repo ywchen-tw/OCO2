@@ -14,13 +14,6 @@ def getiijj(tkobs, pobs, tk, hpa, trilinear=True, iout=True):
     jj:  pressure index
 
     """
-    if iout:
-        original_stdout = sys.stdout # Save a reference to the original standard output
-        f = open("log.txt", "a")
-        sys.stdout = f
-
-    # *********
-    
 
     # *********
     # hpa values range from small to large
