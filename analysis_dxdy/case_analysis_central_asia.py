@@ -7,12 +7,10 @@ import matplotlib.image as mpimg
 import matplotlib
 from glob import glob
 import numpy as np
-from sys import exit as ext
 import copy
 from bisect import bisect_left
 from oco_post_class_ywc import OCOSIM
 from matplotlib import cm
-from scipy.interpolate import interpn
 from scipy import interpolate
 from scipy import stats
 from scipy.ndimage import uniform_filter
@@ -62,189 +60,65 @@ def output_h5_info(cfg, index):
             return cfg_file[index]
     else:
         return False
-
-def near_rad_calc(OCO_class):
-    rad_mca_ipa0 = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_ipa  = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_3d   = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-
-    rad_mca_ipa0_std = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_ipa_std  = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_3d_std   = np.zeros((OCO_class.lat.shape[0], OCO_class.lat.shape[1], OCO_class.lam.size), dtype=np.float64)
-
-    rad_mca_ipa0[...] = np.nan
-    rad_mca_ipa[...] = np.nan
-    rad_mca_3d[...] = np.nan
-
-    rad_mca_ipa0_std[...] = np.nan
-    rad_mca_ipa_std[...] = np.nan
-    rad_mca_3d_std[...] = np.nan
-
-    rad_mca_ipa0_25 = rad_mca_ipa0.copy()
-    rad_mca_ipa_25 = rad_mca_ipa0.copy()
-    rad_mca_3d_25 = rad_mca_ipa0.copy()
-
-    rad_mca_ipa0_std_25 = rad_mca_ipa0.copy()
-    rad_mca_ipa_std_25 = rad_mca_ipa0.copy()
-    rad_mca_3d_std_25 = rad_mca_ipa0.copy()
-
-    for i in range(OCO_class.lat.shape[0]):
-        for j in range(OCO_class.lat.shape[1]):
-            lon0 = OCO_class.lon[i, j]
-            lat0 = OCO_class.lat[i, j]      
-            index_lon = np.argmin(np.abs(OCO_class.lon2d[:, 0]-lon0))
-            index_lat = np.argmin(np.abs(OCO_class.lat2d[0, :]-lat0))
-
-            center = (lat0, lon0)
-            tmp_clr, tmp_c1d, tmp_c3d = [], [], []
-            tmp_clrs, tmp_c1ds, tmp_c3ds = [], [], []
-            test_range = (np.arange(-4, 4+1))
-            for x in test_range:
-                for y in test_range:
-                    try:
-                        interest_loc = (OCO_class.lat2d[0, index_lat+y], OCO_class.lon2d[index_lon+x, 0])
-                        if geopy.distance.distance(center, interest_loc).km <= 0.5:
-
-                            tmp_clr.append(OCO_class.rad_clr[index_lon+x, index_lat+y])
-                            tmp_c1d.append(OCO_class.rad_c1d[index_lon+x, index_lat+y])
-                            tmp_c3d.append(OCO_class.rad_c3d[index_lon+x, index_lat+y])
-                            tmp_clrs.append(OCO_class.rad_clrs[index_lon+x, index_lat+y])
-                            tmp_c1ds.append(OCO_class.rad_c1ds[index_lon+x, index_lat+y])
-                            tmp_c3ds.append(OCO_class.rad_c3ds[index_lon+x, index_lat+y])
-                            count += 1
-                    except:
-                        None
-            
-            rad_mca_ipa0[i, j, :] = np.nanmean(np.array(tmp_clr), axis=0)
-            rad_mca_ipa[i, j, :]  = np.nanmean(np.array(tmp_c1d), axis=0)
-            rad_mca_3d[i, j, :]   = np.nanmean(np.array(tmp_c3d), axis=0)
-
-            rad_mca_ipa0_std[i, j, :] = (np.nanstd(np.array(tmp_clr), axis=0))
-            rad_mca_ipa_std[i, j, :]  = (np.nanstd(np.array(tmp_c1d), axis=0))
-            rad_mca_3d_std[i, j, :]   = (np.nanstd(np.array(tmp_c3d), axis=0))
-
-
-            rad_mca_ipa0_25[i, j, :] = np.nanmean(OCO_class.rad_clr[index_lon-2:index_lon+3, 
-                                                                index_lat-2:index_lat+3], 
-                                                    axis=(0, 1))
-            rad_mca_ipa_25[i, j, :]  = np.nanmean(OCO_class.rad_c1d[index_lon-2:index_lon+3, 
-                                                                index_lat-2:index_lat+3], 
-                                                    axis=(0, 1))
-            rad_mca_3d_25[i, j, :]   = np.nanmean(OCO_class.rad_c3d[index_lon-2:index_lon+3, 
-                                                                index_lat-2:index_lat+3], 
-                                                    axis=(0, 1))
-            
-            rad_mca_ipa0_std_25[i, j, :] = (np.nanstd(OCO_class.rad_clr[index_lon-2:index_lon+3,
-                                                                    index_lat-2:index_lat+3],
-                                                        axis=(0, 1)))
-            rad_mca_ipa_std_25[i, j, :]  = (np.nanstd(OCO_class.rad_c1d[index_lon-2:index_lon+3,
-                                                                    index_lat-2:index_lat+3],
-                                                        axis=(0, 1)))
-            rad_mca_3d_std_25[i, j, :]   = (np.nanstd(OCO_class.rad_c3d[index_lon-2:index_lon+3,
-                                                                    index_lat-2:index_lat+3],
-                                                        axis=(0, 1)))
-    OCO_class.rad_1km_clr = rad_mca_ipa0
-    OCO_class.rad_1km_c1d = rad_mca_ipa
-    OCO_class.rad_1km_c3d = rad_mca_3d
-
-    OCO_class.rad_1km_clrs = rad_mca_ipa0_std
-    OCO_class.rad_1km_c1ds = rad_mca_ipa_std
-    OCO_class.rad_1km_c3ds = rad_mca_3d_std
-
-    OCO_class.rad_25p_clr = rad_mca_ipa0_25
-    OCO_class.rad_25p_c1d = rad_mca_ipa_25
-    OCO_class.rad_25p_c3d = rad_mca_3d_25
-
-    OCO_class.rad_25p_clrs = rad_mca_ipa0_std_25
-    OCO_class.rad_25p_c1ds = rad_mca_ipa_std_25
-    OCO_class.rad_25p_c3ds = rad_mca_3d_std_25
     
-    OCO_class.sl_1km  = (OCO_class.rad_1km_c3d-OCO_class.rad_1km_clr) / OCO_class.rad_1km_clr        # S_lamda
-    OCO_class.sls_1km = (OCO_class.rad_1km_c3ds/OCO_class.rad_1km_clr + OCO_class.rad_1km_clrs/OCO_class.rad_1km_clr)
-    OCO_class.sl_25p  = (OCO_class.rad_25p_c3d-OCO_class.rad_25p_clr) / OCO_class.rad_25p_clr        # S_lamda
-    OCO_class.sls_25p = (OCO_class.rad_25p_c3ds/OCO_class.rad_25p_clr + OCO_class.rad_25p_clrs/OCO_class.rad_25p_clr)
-
-
-    
+def nan_array(shape, dtype):
+    tmp = np.zeros(shape, dtype=dtype)
+    tmp[...] = np.nan
+    return tmp
 
 def near_rad_calc_all(OCO_class):
-    rad_mca_ipa0_5 = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_ipa_5  = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_3d_5   = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
+    array_size = (OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size)
+    rad_mca_ipa0_5 = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_5   = nan_array(array_size, dtype=np.float64)
+    rad_mca_ipa0_5_std =  nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_5_std   =  nan_array(array_size, dtype=np.float64)
 
-    rad_mca_ipa0_5_std = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_ipa_5_std  = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
-    rad_mca_3d_5_std   = np.zeros((OCO_class.lat2d.shape[0], OCO_class.lat2d.shape[1], OCO_class.lam.size), dtype=np.float64)
+    rad_mca_ipa0_9 = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_9 = nan_array(array_size, dtype=np.float64)
+    rad_mca_ipa0_9_std = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_9_std = nan_array(array_size, dtype=np.float64)
 
-    print(rad_mca_ipa0_5.shape)
-    rad_mca_ipa0_5[...] = np.nan
-    rad_mca_ipa_5[...] = np.nan
-    rad_mca_3d_5[...] = np.nan
-    rad_mca_ipa0_5_std[...] = np.nan
-    rad_mca_ipa_5_std[...] = np.nan
-    rad_mca_3d_5_std[...] = np.nan
+    rad_mca_ipa0_13 = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_13 = nan_array(array_size, dtype=np.float64)
+    rad_mca_ipa0_13_std = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_13_std = nan_array(array_size, dtype=np.float64)
 
-    rad_mca_ipa0_9 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_9 = rad_mca_ipa0_5.copy()
-    rad_mca_3d_9 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa0_9_std = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_9_std = rad_mca_ipa0_5.copy()
-    rad_mca_3d_9_std = rad_mca_ipa0_5.copy()
+    rad_mca_ipa0_41 = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_41 = nan_array(array_size, dtype=np.float64)
+    rad_mca_ipa0_41_std = nan_array(array_size, dtype=np.float64)
+    rad_mca_3d_41_std = nan_array(array_size, dtype=np.float64)
 
-    rad_mca_ipa0_13 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_13 = rad_mca_ipa0_5.copy()
-    rad_mca_3d_13 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa0_13_std = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_13_std = rad_mca_ipa0_5.copy()
-    rad_mca_3d_13_std = rad_mca_ipa0_5.copy()
-
-    rad_mca_ipa0_41 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_41 = rad_mca_ipa0_5.copy()
-    rad_mca_3d_41 = rad_mca_ipa0_5.copy()
-    rad_mca_ipa0_41_std = rad_mca_ipa0_5.copy()
-    rad_mca_ipa_41_std = rad_mca_ipa0_5.copy()
-    rad_mca_3d_41_std = rad_mca_ipa0_5.copy()
-
-
-
-    rad_mca_ipa0_5, rad_mca_ipa_5, rad_mca_3d_5,\
-    rad_mca_ipa0_5_std, rad_mca_ipa_5_std, rad_mca_3d_5_std  = coarsening(OCO_class, size=5)
+    rad_mca_ipa0_5, rad_mca_3d_5,\
+    rad_mca_ipa0_5_std, rad_mca_3d_5_std  = coarsening(OCO_class, size=5)
     
-    rad_mca_ipa0_9, rad_mca_ipa_9, rad_mca_3d_9,\
-    rad_mca_ipa0_9_std, rad_mca_ipa_9_std, rad_mca_3d_9_std = coarsening(OCO_class, size=9)
+    rad_mca_ipa0_9, rad_mca_3d_9,\
+    rad_mca_ipa0_9_std, rad_mca_3d_9_std = coarsening(OCO_class, size=9)
     
-    rad_mca_ipa0_13, rad_mca_ipa_13, rad_mca_3d_13,\
-    rad_mca_ipa0_13_std, rad_mca_ipa_13_std, rad_mca_3d_13_std = coarsening(OCO_class, size=13)
+    rad_mca_ipa0_13, rad_mca_3d_13,\
+    rad_mca_ipa0_13_std, rad_mca_3d_13_std = coarsening(OCO_class, size=13)
     
-    rad_mca_ipa0_41, rad_mca_ipa_41, rad_mca_3d_41,\
-    rad_mca_ipa0_41_std, rad_mca_ipa_41_std, rad_mca_3d_41_std = coarsening(OCO_class, size=41)
+    rad_mca_ipa0_41, rad_mca_3d_41,\
+    rad_mca_ipa0_41_std, rad_mca_3d_41_std = coarsening(OCO_class, size=41)
+
 
     OCO_class.rad_clr_5 = rad_mca_ipa0_5
-    OCO_class.rad_c1d_5 = rad_mca_ipa_5
     OCO_class.rad_c3d_5 = rad_mca_3d_5
     OCO_class.rad_clrs_5 = rad_mca_ipa0_5_std
-    OCO_class.ra_c1ds_5 = rad_mca_ipa_5_std
     OCO_class.rad_c3ds_5 = rad_mca_3d_5_std
 
     OCO_class.rad_clr_9 = rad_mca_ipa0_9
-    OCO_class.rad_c1d_9 = rad_mca_ipa_9
     OCO_class.rad_c3d_9 = rad_mca_3d_9
     OCO_class.rad_clrs_9 = rad_mca_ipa0_9_std
-    OCO_class.ra_c1ds_9 = rad_mca_ipa_9_std
     OCO_class.rad_c3ds_9 = rad_mca_3d_9_std
 
     OCO_class.rad_clr_13 = rad_mca_ipa0_13
-    OCO_class.rad_c1d_13 = rad_mca_ipa_13
     OCO_class.rad_c3d_13 = rad_mca_3d_13
     OCO_class.rad_clrs_13 = rad_mca_ipa0_13_std
-    OCO_class.ra_c1ds_13 = rad_mca_ipa_13_std
     OCO_class.rad_c3ds_13 = rad_mca_3d_13_std
 
     OCO_class.rad_clr_41 = rad_mca_ipa0_41
-    OCO_class.rad_c1d_41 = rad_mca_ipa_41
     OCO_class.rad_c3d_41 = rad_mca_3d_41
     OCO_class.rad_clrs_41 = rad_mca_ipa0_41_std
-    OCO_class.ra_c1ds_41 = rad_mca_ipa_41_std
     OCO_class.rad_c3ds_41 = rad_mca_3d_41_std
     
     OCO_class.H_index_11 = coarsening_subfunction(OCO_class.rad_c3d[:,:,-1], OCO_class.cld_location, 11, H_index=True)
@@ -265,13 +139,12 @@ def near_rad_calc_all(OCO_class):
 
 def coarsening(OCO_class, size=3):
     ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size)
-    ipa  = coarsening_subfunction(OCO_class.rad_c1d, OCO_class.cld_location, size)
     c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size)
     ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size)
-    ipa_std  = coarsening_subfunction(OCO_class.rad_c1ds, OCO_class.cld_location, size)
     c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size)
     
-    return ipa0, ipa, c3d, ipa0_std, ipa_std, c3d_std
+    # return ipa0, ipa, c3d, ipa0_std, ipa_std, c3d_std
+    return ipa0, c3d, ipa0_std, c3d_std
 
 
 def coarsening_subfunction(rad_mca, cld_position, size, H_index=False):
@@ -323,54 +196,7 @@ def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unp
         slope=np.nan; slopestd=np.nan; intercept=np.nan; interceptstd=np.nan
     return(slope,slopestd,intercept,interceptstd)
 
-def get_slope_1km(OCO_class,fp,z, points=11, mode='unperturb'):
-    nwl=OCO_class.sls_1km[z,fp,:].shape[0]
-    flt=np.where(OCO_class.sls_1km[z,fp,:]>1e-6)
-    #flt=np.where(~np.isnan(sls[:]))
-    use=len(flt[0])
-    if use==nwl:
-        w=1./OCO_class.sls_1km[z,fp,:]    
-        if mode=='unperturb':
-            x=OCO_class.rad_1km_c3d[z,fp,:]/OCO_class.toa[:]*np.pi
-        else:
-            x=OCO_class.rad_1km_clr[z,fp,:]/OCO_class.toa[:]*np.pi
-        x_len = len(x)
-        mask = np.argsort(x)[x_len-points:]
-        mask = np.argsort(x)[5:]
-        res=np.polyfit(x[mask],OCO_class.sl_1km[z,fp,:][mask],1,w=w[mask],cov=True) # now get covariance as well!
-        slope,intercept=res[0]
-        slopestd=np.sqrt(res[1][0][0])
-        interceptstd=np.sqrt(res[1][1][1])
-    else:
-        slope=np.nan; slopestd=np.nan; intercept=np.nan; interceptstd=np.nan
-    return(slope,slopestd,intercept,interceptstd)
-
-def get_slope_25p(OCO_class, fp, z, points=11, mode='unperturb'):
-    nwl=OCO_class.sls_25p[z,fp,:].shape[0]
-    flt=np.where(OCO_class.sls_25p[z,fp,:]>1e-6)
-    #flt=np.where(~np.isnan(sls[:]))
-    use=len(flt[0])
-    if use==nwl:
-        w=1./OCO_class.sls_25p[z,fp,:]
-        if mode=='unperturb':
-            x=OCO_class.rad_25p_c3d[z,fp,:]/OCO_class.toa[:]*np.pi
-        else:
-            x=OCO_class.rad_25p_clr[z,fp,:]/OCO_class.toa[:]*np.pi   
-        x_len = len(x)
-        mask = np.argsort(x)[x_len-points:]
-        res=np.polyfit(x[mask],OCO_class.sl_25p[z,fp,:][mask],1,w=w[mask],cov=True) # now get covariance as well!
-        slope,intercept=res[0]
-        slopestd=np.sqrt(res[1][0][0])
-        interceptstd=np.sqrt(res[1][1][1])
-    else:
-        slope=np.nan; slopestd=np.nan; intercept=np.nan; interceptstd=np.nan
-    return(slope,slopestd,intercept,interceptstd)
-
 def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line for a given footprint fp
-    # OCO_class.slope_1km = np.zeros([OCO_class.nz,OCO_class.nf,2])
-    # OCO_class.inter_1km = np.zeros([OCO_class.nz,OCO_class.nf,2])
-    # OCO_class.slope_25p = np.zeros([OCO_class.nz,OCO_class.nf,2])
-    # OCO_class.inter_25p = np.zeros([OCO_class.nz,OCO_class.nf,2])
     OCO_class.slope_5avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
     OCO_class.inter_5avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
     OCO_class.slope_9avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
@@ -379,18 +205,6 @@ def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line 
     OCO_class.inter_13avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
     OCO_class.slope_41avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
     OCO_class.inter_41avg = np.zeros([OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2])
-    # for z in range(OCO_class.nz):
-    #     for fp in range(OCO_class.nf):
-    #         if 1:#~ np.isnan(OCO_class.co2[z,fp,]):
-    #             slope,slopestd,inter,interstd=OCO_class.get_slope(fp,z,mode='unperturb')
-    #             OCO_class.slope[z,fp,:]=[slope,slopestd]
-    #             OCO_class.inter[z,fp,:]=[inter,interstd]
-    #             slope,slopestd,inter,interstd=get_slope_1km(OCO_class, fp,z,mode='unperturb')
-    #             OCO_class.slope_1km[z,fp,:]=[slope,slopestd]
-    #             OCO_class.inter_1km[z,fp,:]=[inter,interstd]  
-    #             slope,slopestd,inter,interstd=get_slope_25p(OCO_class, fp,z,mode='unperturb')
-    #             OCO_class.slope_25p[z,fp,:]=[slope,slopestd]
-    #             OCO_class.inter_25p[z,fp,:]=[inter,interstd]  
 
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
@@ -411,16 +225,12 @@ def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line 
             OCO_class.inter_41avg[z,fp,:]=[inter,interstd]
 
 class sat_tmp:
-
     def __init__(self, data):
-
         self.data = data
-         
 
-def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
+def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
 
     cfg_dir = '../simulation_dxdy/cfg'
-
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     print(cfg_info.keys())
@@ -432,17 +242,17 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     print(id_num)
     subdomain = cfg_info['subdomain']
 
-    compare_num = 5
+    compare_num = 41
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test2_o2a.pkl'):
+        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl'):
             # filename = '../simulation_dxdy/data_all_20181018_{}_{}_test_3.h5'
             # filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
-            filename = '../simulation_dxdy/data_all_20181018_{}_{}.h5'
+            filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl.h5'
             #filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
             # filename = '../simulation_dxdy/data_all_20181018_{}_{}_CURC_test_1e7.h5'
             #filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_2e8_no_aod.h5'
@@ -471,24 +281,24 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
                 near_rad_calc_all(var)
                 slopes_propagation(var)
             
-            file_o1 = open(f'20181018_central_asia_2_470cloud_test2_o2a.pkl', 'wb') 
+            file_o1 = open(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl', 'wb') 
             pickle.dump(o1, file_o1)
 
-            file_o2 = open(f'20181018_central_asia_2_470cloud_test2_wco2.pkl', 'wb')
+            file_o2 = open(f'20181018_central_asia_2_470cloud_test3_wco2_lbl.pkl', 'wb')
             pickle.dump(o2, file_o2)
 
-            file_o3 = open(f'20181018_central_asia_2_470cloud_test2_sco2.pkl', 'wb') 
+            file_o3 = open(f'20181018_central_asia_2_470cloud_test3_sco2_lbl.pkl', 'wb') 
             pickle.dump(o3, file_o3)
 
             file_o1.close()
             file_o2.close()
             file_o3.close()
         else:
-            with open(f'20181018_central_asia_2_470cloud_test2_o2a.pkl', 'rb') as f:
+            with open(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl', 'rb') as f:
                 o1 = pickle.load(f)
-            with open(f'20181018_central_asia_2_470cloud_test2_wco2.pkl', 'rb') as f:
+            with open(f'20181018_central_asia_2_470cloud_test3_wco2_lbl.pkl', 'rb') as f:
                 o2 = pickle.load(f)
-            with open(f'20181018_central_asia_2_470cloud_test2_sco2.pkl', 'rb') as f:
+            with open(f'20181018_central_asia_2_470cloud_test3_sco2_lbl.pkl', 'rb') as f:
                 o3 = pickle.load(f)
         print('rad_clr_5:', getattr(o1, 'rad_clr_5').shape)
         print(getattr(o1, rad_c3d_compare).shape)
@@ -610,21 +420,21 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     
         # out_o2a = pd.DataFrame(np.array([alb_list, sza_list, o2a_slope_a_list, o2a_slope_b_list, o2a_inter_a_list, o2a_inter_b_list]).T,
         #                 columns=['albedo', 'sza', 'o2a_slope_a', 'o2a_slope_b', 'o2a_inter_a', 'o2a_inter_b'])
-        # out_o2a.to_csv(f'o2a_para_{compare_num}_dryden.csv')
+        # out_o2a.to_csv(f'o2a_para_{compare_num}_central_asia_lbl.csv')
 
         # out_wco2 = pd.DataFrame(np.array([alb_list, sza_list, wco2_slope_a_list, wco2_slope_b_list, wco2_inter_a_list, wco2_inter_b_list]).T,
         #                 columns=['albedo', 'sza', 'wco2_slope_a', 'wco2_slope_b', 'wco2_inter_a', 'wco2_inter_b'])
-        # out_wco2.to_csv(f'wco2_para_{compare_num}_dryden.csv')
+        # out_wco2.to_csv(f'wco2_para_{compare_num}_central_asia_lbl.csv')
 
         # out_sco2 = pd.DataFrame(np.array([alb_list, sza_list, sco2_slope_a_list, sco2_slope_b_list, sco2_inter_a_list, sco2_inter_b_list]).T,
         #                 columns=['albedo', 'sza', 'sco2_slope_a', 'sco2_slope_b', 'sco2_inter_a', 'sco2_inter_b'])
-        # out_sco2.to_csv(f'sco2_para_{compare_num}_dryden.csv')
+        # out_sco2.to_csv(f'sco2_para_{compare_num}_central_asia_lbl.csv')
         # print(out_wco2)
     else:
         None
-        # out_o2a = pd.read_csv(f'o2a_para_{compare_num}_dryden.csv')
-        # out_wco2 = pd.read_csv(f'wco2_para_{compare_num}_dryden.csv')
-        # out_sco2 = pd.read_csv(f'sco2_para_{compare_num}_dryden.csv')
+        # out_o2a = pd.read_csv(f'o2a_para_{compare_num}_central_asia_lbl.csv')
+        # out_wco2 = pd.read_csv(f'wco2_para_{compare_num}_central_asia_lbl.csv')
+        # out_sco2 = pd.read_csv(f'sco2_para_{compare_num}_central_asia_lbl.csv')
 
     cld_lon, cld_lat, cld_location = cld_position(cfg_name)
     date   = datetime.datetime(int(cfg_info['date'][:4]),    # year
@@ -662,7 +472,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
 
     f, ax=plt.subplots(figsize=(8, 8))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]
@@ -695,7 +505,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     f.savefig(f'central_asia_2_surface_altitude.png', dpi=300)
 
     f, ax=plt.subplots(figsize=(8, 8))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]
@@ -730,7 +540,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
 
     f, ax=plt.subplots(figsize=(8, 8))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]
@@ -766,7 +576,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     # plt.show()
 
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]
@@ -818,7 +628,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
     f.savefig(f'central_asia_2_o2a_{slope_compare}.png', dpi=300)
 
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]
@@ -867,7 +677,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test2.csv'):
 
 
     f, (ax1, ax2, ax3)=plt.subplots(1, 3, figsize=(24, 7.5))
-    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
+    png       = ['../simulation_dxdy/data/20181018_central_asia_2_470cloud_test2_20181018/aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png',
              [55.00, 55.60, 33.70, 34.45]]
     img = png[0]
     wesn= png[1]

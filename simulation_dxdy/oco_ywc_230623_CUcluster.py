@@ -63,7 +63,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     # =================================================================================
     with h5py.File(zpt_file, 'r') as oco_zpt:
         levels = oco_zpt['h_edge'][...]
-
     fname_atm = '%s/atm.pk' % fdir
     atm0      = atm_atmmod(zpt_file=zpt_file, fname=fname_atm, overwrite=overwrite)
     # =================================================================================
@@ -80,7 +79,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
         data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
                 'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
                 'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
-    print(sfc_alb_abs)
     
     if sfc_alb_abs is not None:
         print('sfc_alb_abs is not None')
@@ -398,7 +396,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=True, photons=float(cfg_info['oco_N_photons']))
+                                            overwrite=False, photons=float(cfg_info['oco_N_photons']))
     # ===============================================================
     #"""
 
@@ -414,7 +412,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     # run_case_modis_650(cfg_info, preprocess_info)
-    # """
+    """
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)
@@ -422,12 +420,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    """"
+    #""""
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)

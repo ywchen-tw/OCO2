@@ -22,10 +22,10 @@ class OCOSIM:
         # calculations mapped onto OCO soundings
         self.lam  = h1['wvl_mca'][...]
         self.clr  = h1['rad_mca_ipa0'][...] # no clouds
-        self.c1d  = h1['rad_mca_ipa'][...] # clouds, but 1D
+        #self.c1d  = h1['rad_mca_ipa'][...] # clouds, but 1D
         self.c3d  = h1['rad_mca_3d'][...] # clouds, 3D
         self.clrs = h1['rad_mca_ipa0_std'][...] # same as above, but standard deviation
-        self.c1ds = h1['rad_mca_ipa_std'][...] 
+        # self.c1ds = h1['rad_mca_ipa_std'][...] 
         self.c3ds = h1['rad_mca_3d_std'][...]
         # radiance field for full domain
         self.rad  = h1['rad_mca_3d_domain'][...]
@@ -40,14 +40,14 @@ class OCOSIM:
             self.psur = h1['sfc_pres'][...]
         else:
             self.psur = np.zeros([self.nz,8])
-        if 'rad_mca_ipa_domain' in h1.keys():
+        if 'rad_mca_ipa0_domain' in h1.keys():
             self.lon2d = h1['lon2d'][...]
             self.lat2d = h1['lat2d'][...]
             self.rad_clr = h1['rad_mca_ipa0_domain'][...]
-            self.rad_c1d = h1['rad_mca_ipa_domain'][...]
+            #self.rad_c1d = h1['rad_mca_ipa_domain'][...]
             self.rad_c3d = h1['rad_mca_3d_domain'][...]
             self.rad_clrs = h1['rad_mca_ipa0_domain_std'][...]
-            self.rad_c1ds = h1['rad_mca_ipa_domain_std'][...]
+            # self.rad_c1ds = h1['rad_mca_ipa_domain_std'][...]
             self.rad_c3ds = h1['rad_mca_3d_domain_std'][...]
             self.cld_position = h1['rad_mca_ipa0_domain'][...]
             self.cld_position[...] = np.nan
