@@ -29,9 +29,9 @@ g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
-wco2,data_all_20181018_wco2_6170_6209_sfc_alb_0.376_sza_48.5.h5,,,,,,
-sco2,data_all_20181018_sco2_6170_6209_sfc_alb_0.357_sza_48.5.h5,,,,,,
+o2,,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
+wco2,,,,,,,
+sco2,,,,,,,
 ,,,,,,,
 # full physics retrieval information,,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
