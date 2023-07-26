@@ -228,6 +228,17 @@ class sat_tmp:
     def __init__(self, data):
         self.data = data
 
+def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location, ):
+    h5_file  = filename.format(band_tag, id_num)
+    OCO_class = OCOSIM(h5_file)
+    OCO_class.cld_location = cld_location
+    near_rad_calc_all(OCO_class)
+    slopes_propagation(OCO_class)
+    with open(pkl_filename.format(band_tag), 'wb') as pkl_file
+        pickle.dump(OCO_class, pkl_file)
+    return OCO_class
+
+
 def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
 
     cfg_dir = '../simulation_dxdy/cfg'
@@ -249,7 +260,9 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     inter_compare = f'inter_{compare_num}avg'
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        if not os.path.isfile(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl'):
+        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl.h5'
+        pkl_filename = '20181018_central_asia_2_470cloud_test3_{}_lbl.pkl'
+        if not os.path.isfile(pkl_filename.format('o2a')):
             # filename = '../simulation_dxdy/data_all_20181018_{}_{}_test_3.h5'
             # filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
             filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl.h5'
@@ -262,43 +275,16 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
             
             cld_lon, cld_lat, cld_location = cld_position(cfg_name)
 
-            o2a_file  = filename.format('o2a', id_num)
-            o1 = OCOSIM(o2a_file)
-            o1.cld_location = cld_location
-
-            wco2_file  = filename.format('wco2', id_num)
-            o2 = OCOSIM(wco2_file)
-            o2.cld_location = cld_location
-
-            sco2_file  = filename.format('sco2', id_num)
-            o3 = OCOSIM(sco2_file)
-            o3.cld_location = cld_location
-
-            for var in [o1, o2, o3]:#, ('o2', wco2_file), ('o3', sco2_file)]:
-                # for j in range(8):
-                #     var.slopes(j)
-                # near_rad_calc(var)
-                near_rad_calc_all(var)
-                slopes_propagation(var)
+            o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
+            o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
+            o3 = cld_rad_slope_calc('sco2', id_num, filename, pkl_filename, cld_location)
             
-            file_o1 = open(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl', 'wb') 
-            pickle.dump(o1, file_o1)
-
-            file_o2 = open(f'20181018_central_asia_2_470cloud_test3_wco2_lbl.pkl', 'wb')
-            pickle.dump(o2, file_o2)
-
-            file_o3 = open(f'20181018_central_asia_2_470cloud_test3_sco2_lbl.pkl', 'wb') 
-            pickle.dump(o3, file_o3)
-
-            file_o1.close()
-            file_o2.close()
-            file_o3.close()
         else:
-            with open(f'20181018_central_asia_2_470cloud_test3_o2a_lbl.pkl', 'rb') as f:
+            with open(pkl_filename.format('o2a'), 'rb') as f:
                 o1 = pickle.load(f)
-            with open(f'20181018_central_asia_2_470cloud_test3_wco2_lbl.pkl', 'rb') as f:
+            with open(pkl_filename.format('wco2'), 'rb') as f:
                 o2 = pickle.load(f)
-            with open(f'20181018_central_asia_2_470cloud_test3_sco2_lbl.pkl', 'rb') as f:
+            with open(pkl_filename.format('sco2'), 'rb') as f:
                 o3 = pickle.load(f)
         print('rad_clr_5:', getattr(o1, 'rad_clr_5').shape)
         print(getattr(o1, rad_c3d_compare).shape)
