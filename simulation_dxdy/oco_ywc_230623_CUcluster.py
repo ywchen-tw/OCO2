@@ -35,16 +35,16 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca # newly added for phase function
 
-from subroutine.oco_create_atm import create_oco_atm
-from subroutine.oco_satellite import satellite_download
-from subroutine.oco_cfg import grab_cfg, save_h5_info
-from subroutine.oco_abs_snd_sat import oco_abs
-from subroutine.oco_raw_collect import cdata_sat_raw
-from subroutine.oco_cloud import cdata_cld_ipa
-from subroutine.oco_post_process import cdata_all
-from subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
-from subroutine.oco_utils import path_dir, sat_tmp, timing, plot_mca_simulation
-from subroutine.oco_atm_atmmod import atm_atmmod
+from utils.create_atm import create_oco_atm
+from utils.sat_download import satellite_download
+from utils.oco_cfg import grab_cfg, save_h5_info
+from utils.abs_coeff import oco_abs
+from utils.oco_raw_collect import cdata_sat_raw
+from utils.oco_cloud import cdata_cld_ipa
+from utils.post_process import cdata_all
+from utils.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
+from utils.oco_utils import path_dir, sat_tmp, timing, plot_mca_simulation
+from utils.oco_atm_atmmod import atm_atmmod
 
 plt.rcParams["font.family"] = "Arial"
 

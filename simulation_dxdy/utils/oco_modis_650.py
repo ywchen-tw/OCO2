@@ -18,8 +18,8 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca
 
-from subroutine.oco_atm_atmmod import atm_atmmod
-from subroutine.oco_utils import sat_tmp
+from utils.oco_atm_atmmod import atm_atmmod
+from utils.oco_utils import sat_tmp
 
 
 def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', solver='3D', case_name_tag='default', overwrite=False):

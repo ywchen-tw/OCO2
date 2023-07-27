@@ -411,7 +411,7 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
                                int(cfg_info['date'][6:])     # day
                               )
     
-
+    cfg_name = cfg_info['cfg_name']
     case_name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     extent_png = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
@@ -441,45 +441,60 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     lon_dom = extent_analysis[:2]
     lat_dom = extent_analysis[2:]
 
-    f, ax=plt.subplots(figsize=(8, 8))
-    ax.imshow(img, extent=wesn)
-    ax.vlines(lon_dom, ymin=lat_dom[0], ymax=lat_dom[1], color='k', linewidth=1)
-    ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
-    mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
-    c = ax.contourf(lon_2d,lat_2d, sfh_2d*1000,
-                   cmap='terrain', levels=201, vmin=0, vmax=2000)
-    
-    cbar = f.colorbar(c, ax=ax, extend='both')
-    cbar.set_label('Surface altitude (m)', fontsize=label_size)
-    ax.tick_params(axis='both', labelsize=tick_size)
 
+    slope_intercept_compare_plot(o1, 'O_2-A', 'o2a', cfg_name,
+                                img, wesn, lon_dom, lat_dom, 
+                                lon_2d, lat_2d, cth0, 
+                                slope_compare, inter_compare)
+    
+    slope_intercept_compare_plot(o3, 'SCO_2', 'sco2', cfg_name,
+                                img, wesn, lon_dom, lat_dom, 
+                                lon_2d, lat_2d, cth0, 
+                                slope_compare, inter_compare)
+
+
+def ax_lon_lat_label(ax, label_size=14, tick_size=12):
     ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
     ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
-    f.tight_layout()
-    f.savefig(f'central_asia_2_surface_altitude.png', dpi=300)
+    ax.tick_params(axis='both', labelsize=tick_size)
 
-
-
+def sfc_alt_plt(cfg_name,
+                img, wesn, lon_dom, lat_dom, 
+                lon_2d, lat_2d, sfh_2d, label_size=14):
     f, ax=plt.subplots(figsize=(8, 8))
     ax.imshow(img, extent=wesn)
     ax.vlines(lon_dom, ymin=lat_dom[0], ymax=lat_dom[1], color='k', linewidth=1)
     ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
-    mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
-    print(mask.sum())
+    c = ax.contourf(lon_2d,lat_2d, sfh_2d*1000,
+                   cmap='terrain', levels=201, vmin=0, vmax=2000)
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('Surface altitude (m)', fontsize=label_size)
+    ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    f.tight_layout()
+    f.savefig(f'{cfg_name}_surface_altitude.png', dpi=300)
+
+
+def cld_dist_plot(o1, cfg_name,
+                  img, wesn, lon_dom, lat_dom, 
+                  lon_2d, lat_2d, cth0, cld_dist, label_size=14):
+    f, ax=plt.subplots(figsize=(8, 8))
+    ax.imshow(img, extent=wesn)
+    ax.vlines(lon_dom, ymin=lat_dom[0], ymax=lat_dom[1], color='k', linewidth=1)
+    ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
     c = ax.scatter(o1.lon2d, o1.lat2d, 
                    c=cld_dist, s=5,
                    cmap='Reds', vmin=0, vmax=20)
     ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='b')
     cbar = f.colorbar(c, ax=ax, extend='both')
     cbar.set_label('Cloud distance (km)', fontsize=label_size)
-    ax.tick_params(axis='both', labelsize=tick_size)
-    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
-    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'central_asia_2_cloud_distance.png', dpi=300)
+    f.savefig(f'{cfg_name}_cloud_distance.png', dpi=300)
 
 
-
+def o2a_conti_plot(o1, rad_c3d_compare, cfg_name,
+                   img, wesn, lon_dom, lat_dom, 
+                   lon_2d, lat_2d, cth0, label_size=14):
     f, ax=plt.subplots(figsize=(8, 8))
     ax.imshow(img, extent=wesn)
     ax.vlines(lon_dom, ymin=lat_dom[0], ymax=lat_dom[1], color='k', linewidth=1)
@@ -487,80 +502,40 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
     print(mask.sum())
     c = ax.scatter(o1.lon2d, o1.lat2d, 
-                   c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5,
-                   cmap='Reds')
+                   c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5, cmap='Reds')
     ax.scatter(o1.lon2d[mask], o1.lat2d[mask], 
-                   c='grey', s=5,
-                   cmap='Reds')
+                   c='grey', s=5, cmap='Reds')
     cbar = f.colorbar(c, ax=ax, extend='both')
     cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
-    ax.tick_params(axis='both', labelsize=tick_size)
-    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
-    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'central_asia_2_o2a_conti_{rad_c3d_compare}.png', dpi=300)
+    f.savefig(f'{cfg_name}_o2a_conti_{rad_c3d_compare}.png', dpi=300)
 
-
-
-    f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
-    
-    for ax in [ax1, ax2]:
-        ax.imshow(img, extent=wesn)
-        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
-        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
-        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
-        ax.tick_params(axis='both', labelsize=tick_size)
-        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
-        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
-    mask = ~(cth0>0)
-    c1 = ax1.scatter(o1.lon2d[mask], o1.lat2d[mask], 
-                   c=getattr(o1, slope_compare)[:,:,0][mask], s=10,
-                   cmap='RdBu_r', vmin=-0.3, vmax=0.3)
-    cbar1 = f.colorbar(c1, ax=ax1, extend='both')
-    cbar1.set_label('$\mathrm{O_2-A}$ slope', fontsize=label_size)
-
-    fp_mask = o1.co2>0
-    
-    c2 = ax2.scatter(o1.lon2d[mask], o1.lat2d[mask], 
-                   c=getattr(o1, inter_compare)[:,:,0][mask], s=10,
-                   cmap='RdBu_r', vmin=-0.15, vmax=0.15)
-    cbar2 = f.colorbar(c2, ax=ax2, extend='both')
-    cbar2.set_label('$\mathrm{O_2-A}$ intercept', fontsize=label_size)
-    
-    xmin, xmax = ax1.get_xlim()
-    ymin, ymax = ax1.get_ylim()
-    ax1.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(a)', fontsize=label_size+4, color='k')
-
-    xmin, xmax = ax2.get_xlim()
-    ymin, ymax = ax2.get_ylim()
-    ax2.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(b)', fontsize=label_size+4, color='k')
-
-    f.tight_layout()
-    f.savefig(f'central_asia_2_o2a_{slope_compare}.png', dpi=300)
-
-
-
+def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, cfg_name,
+                                img, wesn, lon_dom, lat_dom, 
+                                lon_2d, lat_2d, cth0, 
+                                slope_compare, inter_compare):
+    tick_size=12
+    label_size=14
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(16, 9))
     for ax in [ax1, ax2]:
         ax.imshow(img, extent=wesn)
         ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
         ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
         ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
-        ax.tick_params(axis='both', labelsize=tick_size)
-        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
-        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+        ax_lon_lat_label(ax, label_size=14, tick_size=12)
     mask = ~(cth0>0)
-    c1 = ax1.scatter(o3.lon2d[mask], o3.lat2d[mask], 
-                   c=getattr(o3, slope_compare)[:,:,0][mask], s=10,
+    c1 = ax1.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
+                   c=getattr(OCO_class, slope_compare)[:,:,0][mask], s=10,
                    cmap='RdBu_r', vmin=-0.3, vmax=0.3)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
-    cbar1.set_label('$\mathrm{SCO_2}$ slope', fontsize=label_size)
+    cbar1.set_label(f'$\mathrm{label_tag}$ slope', fontsize=label_size)
 
-    c2 = ax2.scatter(o1.lon2d[mask], o1.lat2d[mask], 
-                   c=getattr(o1, inter_compare)[:,:,0][mask], s=10,
+    c2 = ax2.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
+                   c=getattr(OCO_class, inter_compare)[:,:,0][mask], s=10,
                    cmap='RdBu_r', vmin=-0.15, vmax=0.15)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
-    cbar2.set_label('$\mathrm{SCO_2}$ intercept', fontsize=label_size)
+    cbar2.set_label(f'$\mathrm{label_tag}$ intercept', fontsize=label_size)
     xmin, xmax = ax1.get_xlim()
     ymin, ymax = ax1.get_ylim()
     ax1.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(a)', fontsize=label_size+4, color='k')
@@ -570,19 +545,20 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     ax2.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(b)', fontsize=label_size+4, color='k')
     
     f.tight_layout()
-    f.savefig(f'central_asia_2_sco2_{slope_compare}.png', dpi=300)
+    f.savefig(f'{cfg_name}_{file_tag}_{slope_compare}.png', dpi=300)
 
 
-
+def continuum_fp_compare_plot(o1, o2, o3, cfg_name,
+                              img, wesn, lon_dom, lat_dom, 
+                              lon_2d, lat_2d, cth0, 
+                              tick_size=12, label_size=14):
     f, (ax1, ax2, ax3)=plt.subplots(1, 3, figsize=(24, 7.5))
     for ax in [ax1, ax2, ax3]:
         ax.imshow(img, extent=wesn)
         ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
         ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
         ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
-        ax.tick_params(axis='both', labelsize=tick_size)
-        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
-        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+        ax_lon_lat_label(ax, label_size=14, tick_size=12)
 
     # ax1
     vmin, vmax = 0.03, 0.13
@@ -598,14 +574,12 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
             l1b_continuum.append(o1.l1b[i, j, np.argmin(np.abs(o1.wvl[i, j, :]-o1.lam[10]))])
     cc1 = ax1.contourf(o1.lon2d, o1.lat2d, rad_to_plot, lev, cmap='jet',
                     vmin=vmin, vmax=vmax, extend='both', alpha=1)
-
+    scatter_arg = {'s': 60, 'cmap': 'jet', 'marker': 'o', 'edgecolors': 'k'}
     mask = (o1.lat.flatten()*1e6)>0
     ax1.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                s=60,
-                cmap='jet',
                 vmin=vmin, vmax=vmax,
-                marker='o', edgecolors='k')
+                **scatter_arg)
 
     cbar1 = f.colorbar(cc1, ax=ax1)#, extend='both')
     cbar1.set_label('3D radiance', fontsize=16)
@@ -629,10 +603,8 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     mask = (o2.lat.flatten()*1e6)>0
     ax2.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                s=60,
-                cmap='jet',
                 vmin=vmin, vmax=vmax,
-                marker='o', edgecolors='k')
+                **scatter_arg)
     cbar2 = f.colorbar(cc2, ax=ax2)#, extend='both')
     cbar2.set_label('3D radiance', fontsize=16)
     ax2.set_title(f'{o2.lam[10]:.3f}nm')
@@ -655,15 +627,13 @@ def main(cfg_name='20181018_central_asia_2_470cloud_test3.csv'):
     mask = (o3.lat.flatten()*1e6)>0
     ax3.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                s=60,
-                cmap='jet',
                 vmin=vmin, vmax=vmax,
-                marker='o', edgecolors='k')
+                **scatter_arg)
     cbar3 = f.colorbar(cc3, ax=ax3)#, extend='both')
     cbar3.set_label('3D radiance', fontsize=16)
     ax3.set_title(f'{o3.lam[10]:.3f}nm')
     f.tight_layout()
-    f.savefig(f'central_asia_2_continuum_fp_compare.png', dpi=300)
+    f.savefig(f'{cfg_name,}_continuum_fp_compare.png', dpi=300)
 
     # plt.show()
 
@@ -782,33 +752,18 @@ def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slop
     fig.savefig(f'all_bands_slope_alb_{point_avg}avg.png', dpi=150)
 
     
-
 def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, band_tag, point_avg):
     fig, ((ax1, ax2),
         (ax21, ax22)) = plt.subplots(2, 2, figsize=(12, 10), sharex=False)
     fig.tight_layout(pad=5.0)
     label_size = 16
-    tick_size = 12
 
-
-    ax1.scatter(sfc_alb[sza==30], slope_a_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
-    ax1.scatter(sfc_alb[sza==45], slope_a_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
-    ax1.scatter(sfc_alb[sza==60], slope_a_list[sza==60], s=50, label='sza=60', alpha=0.65)
-
-    ax2.scatter(sfc_alb[sza==30], inter_a_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
-    ax2.scatter(sfc_alb[sza==45], inter_a_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
-    ax2.scatter(sfc_alb[sza==60], inter_a_list[sza==60], s=50, label='sza=60', alpha=0.65)
-
-
-    ax21.scatter(sfc_alb[sza==30], slope_e_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
-    ax21.scatter(sfc_alb[sza==45], slope_e_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
-    ax21.scatter(sfc_alb[sza==60], slope_e_list[sza==60], s=50, label='sza=60', alpha=0.65)
-
-    ax22.scatter(sfc_alb[sza==30], inter_e_list[sza==30], s=50, label='sza=30', marker='X', alpha=0.65)
-    ax22.scatter(sfc_alb[sza==45], inter_e_list[sza==45], s=50, label='sza=45', marker='p', alpha=0.65)
-    ax22.scatter(sfc_alb[sza==60], inter_e_list[sza==60], s=50, label='sza=60', alpha=0.65)
-
-    
+    for sza_val, marker in zip([30, 45, 60], ['X', 'p', 'o']):
+        ax1.scatter(sfc_alb[sza==sza_val], slope_a_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
+        ax2.scatter(sfc_alb[sza==sza_val], inter_a_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
+        ax21.scatter(sfc_alb[sza==sza_val], slope_e_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
+        ax22.scatter(sfc_alb[sza==sza_val], inter_e_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
+   
     xx = sfc_alb[sza==30]
     yy = np.nanmean(np.array([slope_a_list[sza==30], slope_a_list[sza==45], slope_a_list[sza==60]]), axis=0)
     mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
@@ -829,15 +784,11 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     ax1.plot(plot_xx, func_with_intercept(plot_xx, *popt), '--', color='r', 
               label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
     
-    
     xx = sfc_alb[sza==30]
     yy = np.array([inter_a_list[sza==30], inter_a_list[sza==45], inter_a_list[sza==60]]).mean(axis=0)
     popt, pcov = curve_fit(func_with_intercept, xx, yy, bounds=([-5, 0., 0], [5, 50, 0.3]),
                         #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
+                        maxfev=3000,)
     residuals = yy - func_with_intercept(xx, *popt)
     ss_res = np.sum(residuals**2)
     ss_tot = np.sum((yy-np.mean(yy))**2)
@@ -913,7 +864,6 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     ax22.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
 
 
-
     ax21.set_ylim(0, 10)
 
     ax1.set_ylabel('a', fontsize=label_size)
@@ -933,10 +883,6 @@ def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_
     fig.savefig(f'{band_tag}_slope_inter_cld_distance_{point_avg}avg.png', dpi=150)
     plt.show()
     
-class sat_tmp:
-        def __init__(self, data):
-            self.data = data
-
 
 def cld_position(cfg_name):
     cldfile = f'../simulation_dxdy/data/{cfg_name[:-4]}_{cfg_name[:8]}/pre-data.h5'
@@ -952,8 +898,6 @@ def cld_dist_calc(cfg_name, o1, slope_compare):
 
     cldfile = f'../simulation_dxdy/data/{cfg_name[:-4]}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
-        lon_cld = f['lon'][...]
-        lat_cld = f['lat'][...]
         cth = f[f'mod/cld/cth_ipa'][...]
 
     cld_list = cth>0
@@ -970,19 +914,15 @@ def cld_dist_calc(cfg_name, o1, slope_compare):
                 cloud_dist[i, j] = 0
             else:
                 min_ind = np.argmin(np.sqrt(np.sum((cld_position-np.array([i, j]))**2, axis=1)))
-                #print(min_ind)
-                #print(cld_position[min_ind])
-                cld_x, cld_y = cld_position[min_ind]#[0], cld_position[min_ind][1]
+                cld_x, cld_y = cld_position[min_ind]
                 if cld_x==cloud_dist.shape[0] or cld_y==cloud_dist.shape[1]:
                     print(cld_x, cld_y)
                 dist = geopy.distance.distance((o1.lat2d[cld_x, cld_y], o1.lon2d[cld_x, cld_y]), (o1.lat2d[i, j], o1.lon2d[i, j])).km
-                #print(dist)
                 cloud_dist[i, j] = dist
     
     output = np.array([o1.lon2d, o1.lat2d, cloud_dist, ])
     cld_slope_inter = pd.DataFrame(output.reshape(output.shape[0], output.shape[1]*output.shape[2]).T,
                                 columns=['lon', 'lat', 'cld_dis', ])
-
     cld_slope_inter.to_pickle(f'{cfg_name[:-4]}_cld_distance.pkl')
 
     

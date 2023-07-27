@@ -40,21 +40,19 @@ plt.rcParams["font.family"] = "Arial"
 #  - implement H2O broadening
 #  - bi/trilinear interpolation in {T,p,(h)} - can re-use Odele's code
 #---------------------------------------------------------------------------
-from subroutine.abs.read_atm import read_oco_zpt
-# from oco_subroutine.abs.rho_air import rho_air  # density of air
-from subroutine.abs.rdabs_gas import rdabs_species
-from subroutine.abs.findi1i2_v7 import findi1i2 # get wavenumber indices.initialize()import abs/getiijj_v7.pro  # find levels in absco files that are closest to the atmosphere
-from subroutine.abs.getiijj_v7 import getiijj  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
-from subroutine.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
-from subroutine.abs.calc2_v8 import calc_ext   # calculates extinction profiles & layer transmittance from oco_subroutine.absorption coefficients & density profiles (CO2, O2)
-from subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
-from subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
-from subroutine.abs.solar import solar   # read solar file
-from subroutine.abs.oco_convolve import oco_conv
-from subroutine.abs.oco_abs_g_mode import oco_wv_select
-from subroutine.oco_utils import timing
-from subroutine.oco_cfg import grab_cfg
-
+from utils.abs.read_atm import read_oco_zpt
+from utils.abs.rdabs_gas import rdabs_species
+from utils.abs.find_bound import find_boundary # get wavenumber indices.initialize()import abs/get_index  # find levels in absco files that are closest to the atmosphere
+from utils.abs.get_index import get_PT_index  # find levels in absco files that are closest to the atmosphere.initialize()import abs/rdabscoo2.pro   # read absorption coefficients O2
+from utils.abs.rdabsco_gas import rdabsco_species   # read absorption coefficients O2.initialize()import abs/rdabscoco2.pro  # read absorption coefficients CO2
+from utils.abs.calc_ext import calc_ext   # calculates extinction profiles & layer transmittance from oco_utils.absorption coefficients & density profiles (CO2, O2)
+from utils.abs.oco_wl import oco_wv      # reads OCO wavelengths
+from utils.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
+from utils.abs.solar import solar   # read solar file
+from utils.abs.oco_convolve import oco_conv
+from utils.abs.oco_abs_g_mode import oco_wv_select
+from utils.oco_utils import timing
+from utils.oco_cfg import grab_cfg
 
 
 @timing
@@ -70,14 +68,13 @@ def oco_abs(cfg, sat, zpt_file,
         print('iband should be either 0 (O2), 1 (weak CO2), or 2 (Strong CO2), set to the default 0.')
         iband   = 0
 
-    pathinp = './subroutine/abs/'
+    pathinp = './utils/abs/'
     if pathout == None:
         pathout = './'
 
-    pl_ils  = 1       # plot ils, else result of convolution
     all_r   = 0       # 0: use T-sampling >0: full range & percentage of transmittance
     if nx < 0:
-        nx = 5       # # of representative wavelengths @ native resolution of Vivienne's data base
+        nx = 5       # of representative wavelengths @ native resolution of Vivienne's data base
     pdmax       = 100   # max difference between requested & available atmospheric pressure level
     tdmax       = 10    # max difference between requested & available atmospheric temp value
     sol         = pathinp+'sol/solar.txt' # high spectral resolution solar file at 1 AU
@@ -94,8 +91,6 @@ def oco_abs(cfg, sat, zpt_file,
         # sonde instead
     # *************************************************************
   
-    o2mix     = 0.20935       # See oco2-atbd pg 17 (pg 10 of doc, Version 2.0 Rev 3)
-    #gmao      = '/Users/schmidt/rtm/ocosim/dat/160829/oco2_L2MetND_11496a_160829_B8000r_170710205752.h5_profile.h5'
     atminp     = pathinp+'../atm.h5'
 
     # *************************************************************
@@ -121,10 +116,10 @@ def oco_abs(cfg, sat, zpt_file,
 
 
     # Files that contain the ABSCO coefficients
-    files = ['o2_v51.hdf',         # O2
+    files = ['o2_v51.hdf',    # O2
              'co2_v51.hdf',   # CO2 weak
              'co2_v51.hdf',   # CO2 strong
-             'h2o_v51.hdf',               # H2O
+             'h2o_v51.hdf',   # H2O
             ]
     files = [pathinp + i for i in files]
     h2o = files[3]
@@ -147,7 +142,7 @@ def oco_abs(cfg, sat, zpt_file,
     wlsol0, fsol0 = solar(sol)
 
     # ******************************************************************************************************
-    # Extract information from oco_subroutine.absCOF files (native resolution).
+    # Extract information from oco_utils.absCOF files (native resolution).
     # Check whether this was previously extracted.
     savpkl = f'{pathout}/{lb_dict[iband]}_abs.pkl'
     if not os.path.isfile(savpkl) or reextract==True:
@@ -162,35 +157,14 @@ def oco_abs(cfg, sat, zpt_file,
      
         nlay=len(lay)
         
-        # absco hdf5 file for target band
-        filnm=files[iband] 
+        
+        filnm = files[iband]  # absco hdf5 file for target band
 
         # *********
         # Specify the wavelength (wavenumber) range to work with
-        #   refl is the surface reflectance (ignore)
-        #   jbroado2 is the broadening index that is used
-        wavel1, wavel2 = xr[0], xr[1]
-        if (iband == 0) :
-            refl = alb_o2a
-            jbroado2=1
-            
-        # Weak CO2 band
-        if (iband == 1) :
-            refl = alb_wco2
-            jbroadco2=1
-            
-        # Strong CO2 band
-        if (iband == 2):
-            refl = alb_sco2
-            jbroadco2=1
-
-        # no H2O broadening for single interpolation option
-        jbroadh2o=0
-        
-        # *********
-        # Calculate the wavenumbers for the two wavelengths
-        wcm2 = 1.0e4/wavel1
-        wcm1 = 1.0e4/wavel2
+        wavel1, wavel2 = xr # (micron)
+        wcm2, wcm1 = 1.0e4/wavel1, 1.0e4/wavel2 # (cm-1)
+        refl = [alb_o2a, alb_wco2, alb_sco2][iband] #s urface reflectance
 
         # *********
         # Calculate the 1/cos factors for solzen & obszen geometry
@@ -199,56 +173,41 @@ def oco_abs(cfg, sat, zpt_file,
         muobszen = 1.0/(np.cos(obszen*convr))
 
         # *********
-        # Read in O2 absco atmosphere information
-        if iband == 0 :
+        if iband == 0:
+            rdabs_gas = 'o2'
+            rdabs_gas_den = o2den
+        elif ((iband == 1) | (iband == 2)):
+            rdabs_gas = 'co2'
+            rdabs_gas_den = co2den
 
-            # Find out the pressure,temperature,boadening,wavenumber(wavelength) grid within
-            # the O2 absco file (do not read absorption yet)
-            npo2, ntko2, nbroado2, nwcmo2, wcmo2, po2, tko2, \
-            broado2, hpao2, wavelo2, nunits, unitso2 = rdabs_species(filnm=filnm, species='o2', iout=True)
-                    
-            # *********
-            # Obtain the wavenumber indices to work with for O2
-            # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
-            # from O2 ABSCO file, based on wavelength interval as specified by the user
-            iwcm1, iwcm2, nwav, wcmdat, wavedat = findi1i2(wcm1, wcm2, wcmo2, iout=True)
+        # Read target gas absco atmosphere information
+        # Find out the P, T, boadening, wavenumber(wavelength) grid within
+        # the target gas's absco file 
+        wcm_gas, p_gas, tk_gas, broad_gas, hpa_gas, units_gas = rdabs_species(filnm=filnm, species=rdabs_gas)
         
         # *********
-        # Read in CO2 atmosphere information
-        if ((iband == 1) | (iband == 2)) :
-             
-            # Find out the pressure,temperature,broadening,wavenumber info
-            # species names for wco2 and sco2 are same
-            npco2,ntkco2,nbroadco2,nwcmco2, wcmco2,pco2,tkco2, \
-            broadco2, hpaco2,wavelco2, nunits,unitsco2 = rdabs_species(filnm=filnm, species='co2', iout=True)
-                    
-            # *********
-            # Obtain the wavenumber indices to work with target gas
-            # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
-            # from ABSCO file, based on wavelength interval as specified by the user
-            iwcm1, iwcm2, nwav, wcmdat, wavedat = findi1i2(wcm1, wcm2, wcmco2, iout=True)
+        # Obtain the wavenumber indices to work with target gas
+        # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
+        # from ABSCO file, based on wavelength interval as specified by the user
+        iwcm1, iwcm2, nwav, wcmdat, wavedat = find_boundary(wcm1, wcm2, wcm_gas)
 
         # *********
         # Read in H2O atmosphere information
-
         # Find out the pressure,temperature,boadening,wavenumber(wavelength) grid within
-        # the H2O absco file (do not read absorption yet)
-        nph2o, ntkh2o, nbroadh2o, nwcmh2o, wcmh2o, ph2o, tkh2o, \
-        broadh2o, hpah2o, wavelh2o, nunitsh2o, unitsh2o = rdabs_species(filnm=h2o, species='h2o', iout=True)
+        # the H2O absco file 
+        wcmh2o, ph2o, tkh2o, broadh2o, hpah2o, unitsh2o = rdabs_species(filnm=h2o, species='h2o')
         
         # *********
         # Obtain the wavenumber indices to work with for H2O
         # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
         # from H2O ABSCO file, based on wavelength interval as specified by the user
-        iwcm1h2o,iwcm2h2o, nwavh2o,wcmdath2o,wavedath2o = findi1i2(wcm1, wcm2, wcmh2o, iout=True)
+        iwcm1h2o, iwcm2h2o, nwavh2o, wcmdath2o, wavedath2o = findi1i2(wcm1, wcm2, wcmh2o)
             
         if nwav != nwavh2o: 
             print('[Warning] Wavenumber gridding of O2 & H2O ABSCO files do not match.')                
 
         # *********
-        # Now that the {p,T,vH2O,wl} grid is set up, based on ABSCO data base
-        # & on user specifications, read out that actual absorption
-        # information from the data base
+        # Read out that actual absorption information from the data base
 
         # *********
         # Initialize
@@ -256,165 +215,81 @@ def oco_abs(cfg, sat, zpt_file,
         ext = np.empty((nwav,nlay))
         tau_in = np.zeros(nwav)
         tau_out = np.zeros(nwav)
-        trns = np.zeros(nwav) 
 
         # *********
         # Start at top of atmosphere & go to the surface
         for iz in range(nlay)[::-1]: 
         # ADD FUNCTIONALITY    print,'  iz ',iz
-            print(f'  iz  {iz}')
             tkobs, pobs = tprf[iz], pprf[iz]
-
             ext0  = np.zeros(nwav) # absorption coef for O2 or CO2
             ext1  = np.zeros(nwav) # absorption coef for H2O
             ext0[...] = np.nan
             ext1[...] = np.nan
 
             # *********
-            # First find the indices ii & jj (ii pressure, jj temperature)
+            # First find the indices T_ind & P_ind (P_ind pressure, T_ind temperature)
             # that are closest to tkobs & pobs (with pobs ij hPa)
 
             trilinear_opt = abs_inter=='trilinear'
-            # For o2
-            if (iband == 0) :
-                
-                # (1) get {p,T} indices within O2 ABSCO grid
-                ii, jj = getiijj(tkobs, pobs, tko2, hpao2, trilinear=trilinear_opt, iout=True)
 
-                if np.abs(pobs-hpao2[jj]) > pdmax: 
-                    print('[Warning] O2 pressure grid too coarse - interpolate?')
-                if np.abs(tkobs-tko2[jj, ii]) > tdmax: 
-                    print('[Warning] O2 Temperature grid too coarse - interpolate?')
+            # (1) get {p,T} indices within target gas ABSCO grid
+            T_ind, P_ind = get_PT_index(tkobs, pobs, tk_gas, hpa_gas, trilinear_opt)
 
-                # (2) get {p,T} indices within H2O ABSCO grid
-                iih2o,jjh2o = getiijj(tkobs, pobs, tkh2o, hpah2o, trilinear=trilinear_opt, iout=True)
+            if np.abs(pobs-hpa_gas[P_ind]) > pdmax: 
+                print(f'[Warning] {rdabs_gas.upper()} pressure grid too coarse - interpolate?')
+            if np.abs(tkobs-tk_gas[P_ind, T_ind]) > tdmax: 
+                print(f'[Warning] {rdabs_gas.upper()} Temperature grid too coarse - interpolate?')
 
-                if np.abs(pobs-hpah2o[jjh2o]) > pdmax: 
-                    print('[Warning] H2O pressure grid too coarse - interpolate?')
-                if np.abs(tkobs-tkh2o[jjh2o, iih2o]) > tdmax: 
-                    print('[Warning] H2O temperature grid too coarse - interpolate?')
-                print(f'p (O2, H2O) : {pobs:.2f} hPa, {hpao2[jj]:.2f} hPa, {hpah2o[jjh2o]:.2f} hPa')
-                print(f'T (O2, H2O) : {tkobs:.2f} K, {tko2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K')
-                
-            # For co2
-            if ((iband == 1) | (iband == 2)) :
-                # (1) get {p,T} indices within WCO2 or SCO2 ABSCO grid
-                ii, jj = getiijj(tkobs, pobs, tkco2, hpaco2, trilinear=trilinear_opt, iout=True)
+            # (2) get {p,T} indices within H2O ABSCO grid
+            T_ind_h2o,P_ind_h2o = get_PT_index(tkobs, pobs, tkh2o, hpah2o, trilinear_opt)
 
-                # (2) get {p,T} indices within H2O ABSCO grid
-                iih2o,jjh2o = getiijj(tkobs, pobs, tkh2o, hpah2o, trilinear=trilinear_opt, iout=True)
+            if np.abs(pobs-hpah2o[P_ind_h2o]) > pdmax: 
+                print('[Warning] H2O pressure grid too coarse - interpolate?')
+            if np.abs(tkobs-tkh2o[P_ind_h2o, T_ind_h2o]) > tdmax: 
+                print('[Warning] H2O temperature grid too coarse - interpolate?')
+            # ----- for check P, T fields only -----
+            # print(f'p ({rdabs_gas.upper()}, H2O) : {pobs:.2f} hPa, {hpa_gas[P_ind]:.2f} hPa, {hpah2o[P_indh2o]:.2f} hPa')
+            # print(f'T ({rdabs_gas.upper()}, H2O) : {tkobs:.2f} K, {tk_gas[P_ind, T_ind]:.2f} K, {tkh2o[P_ind_h2o, T_ind_h2o]:.2f} K')
+            # -------------------------------------- 
 
-                if np.abs(pobs-hpah2o[jjh2o]) > pdmax: 
-                    print('[Warning] H2O pressure grid too coarse - interpolate?')
-                if np.abs(tkobs-tkh2o[jjh2o, iih2o]) > tdmax: 
-                    print('[Warning] H2O temperature grid too coarse - interpolate?')
-                print(f'p (CO2, H2O) : {pobs:.2f} hPa, {hpaco2[jj]:.2f} hPa, {hpah2o[jjh2o]:.2f} hPa',file=sys.stderr)
-                print(f'T (CO2, H2O) : {tkobs:.2f} K, {tkco2[jj, ii]:.2f} K, {tkh2o[jjh2o, iih2o]:.2f} K')                    
-            
-            # *********
-            # Specify the absorption coefficients - here is where we actually read
-            #                                       them!!!
+            # Specify the absorption coefficients - here is where we actually read them!!!
             # (An accurate calculation would use Lagrange interpolation
             # amongst three temperature & three pressure sets of absco vectors)
 
-            # For o2
-            if (iband == 0):
-                absco = rdabsco_species(filnm,
-                                        wcmo2, po2, tko2,broado2,
-                                        hpao2, wavelo2,
-                                        tkobs,pobs,jbroado2,
-                                        ii,jj,h2o_vmr[iz],
-                                        nwav,wcmdat,wavedat,
-                                        wavel1,wavel2,wcm1,wcm2,iwcm1,iwcm2,
-                                        nunits,unitso2,
-                                        species='o2', 
-                                        VarName='Gas_07_Absorption',
-                                        mode=abs_inter,
-                                        iout=True)
-            # For CO2
-            elif ((iband == 1) | (iband == 2)):
-                absco = rdabsco_species(filnm,
-                                        wcmco2,pco2,tkco2,broadco2,
-                                        hpaco2, wavelco2,
-                                        tkobs,pobs,jbroadco2,
-                                        ii,jj,h2o_vmr[iz],
-                                        nwav,wcmdat,wavedat,
-                                        wavel1,wavel2,wcm1,wcm2,iwcm1,iwcm2,
-                                        nunits,unitsco2,
-                                        species='co2', 
-                                        VarName='Gas_02_Absorption',
-                                        mode=abs_inter,
-                                        iout=True)
+            # For O2 or CO2
+            absco = rdabsco_species(filnm, p_gas, tk_gas, broad_gas,
+                                    hpa_gas, tkobs, pobs, 
+                                    T_ind, P_ind, h2o_vmr[iz], iwcm1, iwcm2,
+                                    species=rdabs_gas, mode=abs_inter,)
+
             # For H2O  
-            abscoh2o = rdabsco_species(h2o,
-                                        wcmh2o,ph2o,tkh2o,broadh2o,
-                                        hpah2o,wavelh2o,
-                                        tkobs,pobs,jbroadh2o,
-                                        iih2o,jjh2o,h2o_vmr[iz],
-                                        nwavh2o,wcmdath2o,wavedath2o,
-                                        wavel1,wavel2,wcm1,wcm2,iwcm1h2o,iwcm2h2o,
-                                        nunitsh2o,unitsh2o,
-                                        species='h2o', 
-                                        VarName='Gas_01_Absorption',
-                                        mode=abs_inter,
-                                        iout=True)
+            abscoh2o = rdabsco_species(h2o, ph2o, tkh2o, broadh2o,
+                                       hpah2o, tkobs, pobs,
+                                       T_ind_h2o, P_ind_h2o, h2o_vmr[iz], iwcm1h2o, iwcm2h2o,
+                                       species='h2o', mode=abs_inter,)
             
             # *********
             # Use the absco coefficients
             # Note that absco coefficients are cm-2 per molecule
+            # and that the density profiles are in molecules per cm3
+            # so that the extinction coefficients are in cm-1 but converted to km-1
 
-            if iband == 0:
-                # For O2
-                ext0 = calc_ext(o2den,
-                             iz,solzen,musolzen,
-                             nwav,wcmdat,wavedat,
-                             absco, trns)
-            elif ((iband == 1) | (iband == 2)) :
-                # For CO2
-                ext0 = calc_ext(co2den,
-                             iz,solzen,musolzen,
-                             nwav,wcmdat,wavedat,
-                             absco, trns)
-            # For H2O
-            ext1 = calc_ext(h2oden,
-                            iz,solzen,musolzen,
-                            nwavh2o,wcmdath2o,wavedath2o,
-                            abscoh2o, trns)   
+            ext0 = calc_ext(rdabs_gas_den, iz, absco) # For O2 or CO2
+            ext1 = calc_ext(h2oden, iz, abscoh2o)     # For H2O
 
             # Store the results in ext
             ext[:,iz] = ext0 + ext1 # ext0: O2/CO2, ext1: H2O
-            tau_in += ext[:,iz] * dzf[iz] * musolzen
+            tau_in  += ext[:,iz] * dzf[iz] * musolzen
             tau_out += ext[:,iz] * dzf[iz] * muobszen
 
             # End of loop down to the surface     
-        trns = np.exp(-(tau_in+tau_out))#*refl
+        trns = np.exp(-(tau_in+tau_out))
         # *********
         # End of loop over all layers
 
- 
         wloco = oco_wv(iband, sat, footprint=fp) # (micron)
         xx, yy = oco_ils(iband, sat, footprint=fp)
         trnsc, trnsc0, indlr, ils = oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=fp)
-
-        # (4) plots
-        if plot and pl_ils:
-            fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
-            fig.tight_layout(pad=5.0)
-            title_size = 18
-            label_size = 16
-            legend_size = 16
-            tick_size = 14
-
-            x = xx.mean(axis=0)*1000
-            ax.plot(x, yy.mean(axis=0), color='k')
-            ax.vlines([x[ils[0]], x[ils[-1]]], ils0, 1, 'r')
-
-            ax.tick_params(axis='both', labelsize=tick_size)
-
-            ax.set_xlabel('$\mathrm{\Delta}$ Wavelength (nm)', fontsize=label_size)
-            ax.set_ylabel('response', fontsize=label_size)
-            ax.set_title('# ILS terms', fontsize=title_size)
-            fig.savefig(f'{pathout}/band{iband}_4_ILS_mean.png', dpi=150, bbox_inches='tight')
 
         # read solar file
         wlsol0, fsol0 = solar(sol) # obtain irradiance [W m-2 nm-1]
@@ -437,7 +312,7 @@ def oco_abs(cfg, sat, zpt_file,
         with open(savpkl, 'rb') as f:
             (wcmdat, tprf, pprf, trnsc, ext, tau_in, tau_out, wloco, 
              indlr, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl) = pickle.load(f)
-    # End: Extract information from oco_subroutine.absCOF file (native resolution)
+    # End: Extract information from oco_utils.absCOF file (native resolution)
 
 
     # *********
@@ -501,7 +376,7 @@ def oco_abs(cfg, sat, zpt_file,
         tick_size = 14
 
         plt.clf()
-        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5))
         fig.tight_layout(pad=5.0)
         ax.plot(wlc, trnsc*refl, color='k')
         ax.tick_params(axis='both', labelsize=tick_size)
@@ -517,7 +392,7 @@ def oco_abs(cfg, sat, zpt_file,
         plt.clf()
         norm = colors.Normalize(vmin=0.0, vmax=255.0, clip=True)
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.rainbow)
-        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5), sharex=False)
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5))
         fig.tight_layout(pad=5.0)
         ax.scatter(np.arange(nfc), trnsx[sx]*refl, color='k', s=3)
         ax.tick_params(axis='both', labelsize=tick_size)
@@ -532,6 +407,18 @@ def oco_abs(cfg, sat, zpt_file,
             cl = 30*(i+1)
             ax.plot([wli0, wli0], [0, transmittance], linestyle='dashed', color=mapper.to_rgba(cl), linewidth=2)        
         fig.savefig(f'{pathout}/band{iband}_2-wavelength_selection.png', dpi=150, bbox_inches='tight')
+
+        plt.clf()
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3.5))
+        fig.tight_layout(pad=5.0)
+        x = xx.mean(axis=0)*1000
+        ax.plot(x, yy.mean(axis=0), color='k')
+        ax.vlines([x[ils[0]], x[ils[-1]]], ils0, 1, 'r')
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('$\mathrm{\Delta}$ Wavelength (nm)', fontsize=label_size)
+        ax.set_ylabel('response', fontsize=label_size)
+        ax.set_title('# ILS terms', fontsize=title_size)
+        fig.savefig(f'{pathout}/band{iband}_3_ILS_mean.png', dpi=150, bbox_inches='tight')
 
     # ** assign values / profiles for atm/abs file (final output)
     nlg       = np.max(indlr[:,2])  # max # of individual absco wl for each oco wl (within ILS)
@@ -582,7 +469,7 @@ def oco_abs(cfg, sat, zpt_file,
                 ax.set_xlabel('Wavelength ($\mathrm{\mu m}$)', fontsize=label_size)
                 ax.set_ylabel('normalized # photons/nm', fontsize=label_size)
                 ax.set_title(f'# ILS terms {absgn[l]}', fontsize=title_size)
-                fig.savefig(f'{pathout}/band{iband}_3-individual_line_at_wvl_{wx[l]:.5f}nm.png', dpi=150, bbox_inches='tight')
+                fig.savefig(f'{pathout}/band{iband}_4-individual_line_at_wvl_{wx[l]:.5f}nm.png', dpi=150, bbox_inches='tight')
                     
             extcheck[l,z] = np.sum(absgl[z,l,0:absgn[l]-1]*absgy[l,0:absgn[l]-1])/np.sum(absgy[l,0:absgn[l]-1])
 

@@ -1,11 +1,7 @@
 
 import sys
-import numpy as np
 
-def calc_ext(denf,
-          iz,zen,muzen,
-          nwav,wcmdat,wavedat,
-          absco, trns,):
+def calc_ext(denf, iz, absco):
 
     # *********
     # The absco coefficients are cm2 per molecule
