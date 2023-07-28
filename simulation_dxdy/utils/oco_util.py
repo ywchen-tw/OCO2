@@ -1,12 +1,8 @@
 import os
 import time
 from functools import wraps
-import matplotlib as mpl
-#mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.image as mpl_img
-from matplotlib import rcParams
-
 plt.rcParams["font.family"] = "Arial"
 
 def path_dir(path_dir):

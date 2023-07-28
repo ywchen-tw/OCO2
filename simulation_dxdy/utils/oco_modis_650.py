@@ -64,13 +64,12 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
         if solver.lower() == 'ipa':
-            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa0_650'][...])
-            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa0_650'][...])
-            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f['mod/cld/cth_ipa0_650'][...])
+            suffix = 'ipa0'     # with wind correction only
         elif solver.lower() == '3d':
-            data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f['mod/cld/cot_ipa'][...])
-            data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f['mod/cld/cer_ipa'][...])
-            data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f['mod/cld/cth_ipa'][...])
+            suffix = 'ipa'      # with parallex and wind correction
+        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data[f'mod/cld/cot_{suffix}'][...])
+        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data[f'mod/cld/cer_{suffix}'][...])
+        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data[f'mod/cld/cth_{suffix}'][...])
 
     modl1b    =  sat_tmp(data)
     fname_cld = '%s/cld.pk' % fdir
@@ -91,12 +90,10 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     sca  = mca_sca(pha_obj=pha0, fname='%s/mca_sca.bin' % fdir, overwrite=overwrite)
     # =================================================================================
 
-
     # mca_cld object
     # =================================================================================
     atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, pha_obj=pha0, fname='%s/mca_atm_3d.bin' % fdir)
-    #atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
-
+   
     # homogeneous 1d mcarats "atmosphere"
     # =================================================================================
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
@@ -115,12 +112,6 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
         print('aod 650nm mean:', aod)
         print('ssa 650nm mean:', ssa)
     print('cth mode:', cth_mode.mode[0])
-    #hist_result = plt.hist(cth0[cth0>0].flatten(), bins=25)
-    #print(hist_result)
-    #plt.vlines(cth_mode, 0, 100, 'r')
-    #plt.show()
-    #aod    = 0.4 # aerosol optical depth
-    #ssa    = 0.9 # aerosol single scattering albedo
     asy    = 0.6 # aerosol asymmetry parameter
     z_bot  = levels.min() # altitude of layer bottom in km
     z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
@@ -159,7 +150,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     # =================================================================================
     # cpu number used
     if platform.system() in ['Windows', 'Darwin']:
-        Ncpu=os.cpu_count()-2
+        Ncpu=os.cpu_count()-1
     else:
         Ncpu=32
     temp_dir = '%s/%.4fnm/rad_%s' % (fdir, wavelength, solver.lower())
@@ -218,7 +209,6 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
             cth_mod = f['mod/cld/cth_ipa'][...]
     # ==================================================================================================
 
-
     # read in EaR3T simulations (3D)
     # ==================================================================================================
     fname = '%s/mca-out-rad-modis-%s_%.4fnm.h5' % (fdir, solver.lower(), 650)
@@ -227,7 +217,6 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
         rad_rtm_3d_std = f['mean/rad_std'][...]
         toa = f['mean/toa'][...]
     # ==================================================================================================
-
 
     # save data
     # ==================================================================================================
@@ -242,11 +231,9 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
     # ==================================================================================================
 
     if plot:
-
         # ==================================================================================================
         fig = plt.figure(figsize=(15, 10))
         ax1 = fig.add_subplot(234)
-        #ax1.imshow(rad_mod.T, cmap='Greys_r', extent=extent, origin='lower', vmin=0.0, vmax=0.5)
         ax1.imshow(mod_img, extent=mod_img_wesn)
         ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
         ax1.set_xlabel('Longititude [$^\circ$]')
@@ -271,7 +258,6 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
                                  np.arange(1000.0, 10001.0, 5000.0)))
         
         ax3 = fig.add_subplot(232)
-        #ax3.imshow(rad_rtm_3d.T, cmap='Greys_r', extent=extent, origin='lower', vmin=0.0, vmax=0.5)
         ax3.imshow(mod_img, extent=mod_img_wesn)
         ax3.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
         ax3.set_xlabel('Longititude [$^\circ$]')
@@ -316,7 +302,6 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
         ax4.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax4.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax4.set_title('EaR$^3$T CTH')
-
 
         for ax in [ax1, ax3, ax13, ax22, ax4]:
             ax.set_xlim(extent_list[0]+0.15, extent_list[1]-0.15)

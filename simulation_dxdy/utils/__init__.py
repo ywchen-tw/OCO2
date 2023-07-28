@@ -5,6 +5,7 @@ from .oco_cloud import *
 from .oco_modis_650 import *
 from .oco_modis_time import *
 from .oco_raw_collect import *
+from .oco_util import *
 from .sat_download import *
 from .sfc_alb import *
 from .post_process import *
