@@ -70,7 +70,7 @@ class satellite_download:
 
         self.fnames = {}
 
-        self.fnames['mod_rgb'] = [download_modis_rgb(self.date, self.extent, fdir=self.fdir_out, which='aqua', coastline=True)]
+        self.fnames['mod_rgb'] = [download_modis_rgb(self.date, self.extent, fdir=self.fdir_pre_data, which='aqua', coastline=True)]
 
         # MODIS Level 2 Cloud Product and MODIS 03 geo file
         self.fnames['mod_l2'] = []
