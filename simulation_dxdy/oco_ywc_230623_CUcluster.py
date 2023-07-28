@@ -374,13 +374,14 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     #"""
     # run calculations for each wavelength
     # ===============================================================
+    Nphotons = float(cfg_info['oco_N_photons']) if sza is None else 1e8
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
             alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=float(cfg_info['oco_N_photons']))
+                                            overwrite=False, photons=Nphotons)
     # ===============================================================
     #"""
 
@@ -396,7 +397,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     # run_case_modis_650(cfg_info, preprocess_info)
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)
@@ -427,44 +428,19 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg) #done
+    #run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45) #done
-    # run_simulation(cfg, sfc_alb=0.5, sza=45)
-    # run_simulation(cfg, sfc_alb=0.2, sza=45)
-    # run_simulation(cfg, sfc_alb=0.1, sza=45)
-    # run_simulation(cfg, sfc_alb=0.05, sza=45)
-
-
-    # run_simulation(cfg, sfc_alb=0.3, sza=30)
-    # run_simulation(cfg, sfc_alb=0.5, sza=30)
-    # run_simulation(cfg, sfc_alb=0.2, sza=30)
-    # run_simulation(cfg, sfc_alb=0.1, sza=30)
-    # run_simulation(cfg, sfc_alb=0.05, sza=30)
-
-    # run_simulation(cfg, sfc_alb=0.3, sza=60)
-    # run_simulation(cfg, sfc_alb=0.5, sza=60)
-    # run_simulation(cfg, sfc_alb=0.2, sza=60)
-    # run_simulation(cfg, sfc_alb=0.1, sza=60)
-    # run_simulation(cfg, sfc_alb=0.05, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.15, sza=30)
-    # run_simulation(cfg, sfc_alb=0.15, sza=45)
-    # run_simulation(cfg, sfc_alb=0.15, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.25, sza=30)
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
-    # run_simulation(cfg, sfc_alb=0.25, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.4, sza=30)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
-    # run_simulation(cfg, sfc_alb=0.4, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.025, sza=30)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
-    # run_simulation(cfg, sfc_alb=0.025, sza=60)
+    run_simulation(cfg, sfc_alb=0.5, sza=45)
+    run_simulation(cfg, sfc_alb=0.4, sza=45)
+    run_simulation(cfg, sfc_alb=0.3, sza=45)
+    run_simulation(cfg, sfc_alb=0.25, sza=45)
+    run_simulation(cfg, sfc_alb=0.2, sza=45)
+    run_simulation(cfg, sfc_alb=0.15, sza=45)
+    run_simulation(cfg, sfc_alb=0.1, sza=45)
+    run_simulation(cfg, sfc_alb=0.05, sza=45)
+    run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     
     # run_simulation(cfg, sfc_alb=0.5, sza=15)
