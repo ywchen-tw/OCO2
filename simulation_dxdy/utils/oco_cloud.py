@@ -6,29 +6,20 @@ import sys
 import h5py
 import numpy as np
 import datetime
-
 from scipy import interpolate
-
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
 
 import matplotlib.pyplot as plt
-
 from matplotlib import rcParams
-import er3t
-from er3t.pre.atm import atm_atmmod
-from er3t.pre.abs import abs_16g
-from er3t.pre.cld import cld_sat
-from er3t.pre.pha import pha_mie_wc as pha_mie # newly added for phase function
-from er3t.util import  cal_ext
 
-from er3t.rtm.mca import mca_atm_1d, mca_atm_3d
-from er3t.rtm.mca import mcarats_ng
-from er3t.rtm.mca import mca_out_ng
-from er3t.rtm.mca import mca_sca # newly added for phase function
+from er3t.util import cal_geodesic_lonlat
+from er3t.util import move_correlate
+from er3t.util import find_nearest
+from er3t.rtm.mca import func_ref_vs_cot_multi_pixel
 
-from subroutine.oco_atm_atmmod import atm_atmmod
-from subroutine.oco_utils import path_dir, sat_tmp
+from utils.oco_atm_atmmod import atm_atmmod
+from utils.oco_util import path_dir
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -59,7 +50,7 @@ def para_corr(lon0, lat0, vza, vaa, cld_h, sfc_h, R_earth=6378000.0, verbose=Tru
     # lon = lon0 + delta_lon
     # lat = lat0 + delta_lat
 
-    lon, lat = er3t.util.cal_geodesic_lonlat(lon0, lat0, dist, vaa)
+    lon, lat = cal_geodesic_lonlat(lon0, lat0, dist, vaa)
 
     return lon, lat
 
@@ -112,21 +103,10 @@ def create_sfc_alb_2d(x_ref, y_ref, data_ref, x_bkg_2d, y_bkg_2d, data_bkg_2d, s
 
     return data_2d
 
-def cloud_mask_rgb(
-        rgb,
-        extent,
-        lon_2d,
-        lat_2d,
-        ref_470_2d,
-        alb_470,
-        ref_threshold,
-        frac=0.5,
-        a_r=1.06,
-        a_g=1.06,
-        a_b=1.06,
-
-        logic_good=None
-        ):
+def cloud_mask_rgb(rgb, extent, lon_2d, lat_2d,
+                   ref_470_2d, alb_470, ref_threshold,
+                   frac=0.5, a_r=1.06, a_g=1.06, a_b=1.06,
+                   logic_good=None):
 
     # Find cloudy pixels based on MODIS RGB imagery and upscale/downscale to 250m resolution
     #/----------------------------------------------------------------------------\#
@@ -155,30 +135,14 @@ def cloud_mask_rgb(
     indices_x = np.int_(np.round((lon_2d-x0_rgb)/dx_rgb, decimals=0))
     indices_y = np.int_(np.round((lat_2d-y0_rgb)/dy_rgb, decimals=0))
 
-    print('indices_x:', indices_x)
 
-    """
-    print('indices_x shape:', indices_x.shape)
-
-    logic_ref_nan = (ref_470_2d-alb_470) < ref_threshold
-    indices    = np.where(logic_ref_nan!=1)
-    print(logic_ref_nan.shape)
-    print('indices[0] shape:', indices[0].shape)
-    indices_x  = np.unique(np.concatenate((indices_x, indices[0])))
-    indices_y  = np.unique(np.concatenate((indices_y, indices[1])))"""
     logic_ref_nan0 = (ref_470_2d-alb_470) < ref_threshold
     logic_ref_nan0[0, :] = True
     logic_ref_nan0[-1, :] = True
     logic_ref_nan0[:, 0] = True
     logic_ref_nan0[:, -1] = True 
-    # plt.scatter(lon_2d[~logic_ref_nan0], lat_2d[~logic_ref_nan0], s=1, c='r')
-    # plt.show()
     
     # logic_ref_nan = np.logical_and(logic_rgb_nan[indices_x, indices_y], logic_ref_nan0)
-    # plt.clf()
-    # plt.scatter(lon_2d[~logic_ref_nan], lat_2d[~logic_ref_nan], s=1, c='r')
-    # plt.show()
-    # sys.exit()
     logic_ref_nan = logic_ref_nan0
 
     indices    = np.where(logic_ref_nan!=1)
@@ -186,31 +150,6 @@ def cloud_mask_rgb(
 
     return indices[0], indices[1]
 
-
-def rgb2hsv(rgb):
-    """ 
-    convert RGB to HSV color space
-
-    :param rgb: np.ndarray
-    :return: np.ndarray
-    """
-
-    rgb = rgb.astype('float')
-    maxv = np.amax(rgb, axis=2)
-    maxc = np.argmax(rgb, axis=2)
-    minv = np.amin(rgb, axis=2)
-    minc = np.argmin(rgb, axis=2)
-
-    hsv = np.zeros(rgb.shape, dtype='float')
-    hsv[maxc == minc, 0] = np.zeros(hsv[maxc == minc, 0].shape)
-    hsv[maxc == 0, 0] = (((rgb[..., 1] - rgb[..., 2]) * 60.0 / (maxv - minv + np.spacing(1))) % 360.0)[maxc == 0]
-    hsv[maxc == 1, 0] = (((rgb[..., 2] - rgb[..., 0]) * 60.0 / (maxv - minv + np.spacing(1))) + 120.0)[maxc == 1]
-    hsv[maxc == 2, 0] = (((rgb[..., 0] - rgb[..., 1]) * 60.0 / (maxv - minv + np.spacing(1))) + 240.0)[maxc == 2]
-    hsv[maxv == 0, 1] = np.zeros(hsv[maxv == 0, 1].shape)
-    hsv[maxv != 0, 1] = (1 - minv / (maxv + np.spacing(1)))[maxv != 0]
-    hsv[..., 2] = maxv
-
-    return hsv
 
 def crack_adjustment(indices_x, indices_y, Nx, Ny, cot_ipa, cer_ipa, cth_ipa, cld_msk, cot_ipa_,
                      Npixel=2, percent_a=0.7, percent_b=0.7):
@@ -259,30 +198,6 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     # read in data
     #/----------------------------------------------------------------------------\#
-    # f0 = h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r')
-    # extent = f0['extent'][...]
-    # ref_2d = f0['mod/rad/ref_650'][...]
-    # rad_2d = f0['mod/rad/rad_650'][...]
-    # ref_470_2d = f0['mod/rad/ref_470'][...]
-    # ref_550_2d = f0['mod/rad/ref_555'][...]
-    # rgb    = f0['mod/rgb'][...]
-    # cot_l2 = f0['mod/cld/cot_l2'][...]
-    # cer_l2 = f0['mod/cld/cer_l2'][...]
-    # lon_2d = f0['lon'][...]
-    # lat_2d = f0['lat'][...]
-    # cth = f0['mod/cld/cth_l2'][...]
-    # sfh = f0['mod/geo/sfh'][...]
-    # sza = f0['mod/geo/sza'][...]
-    # saa = f0['mod/geo/saa'][...]
-    # vza = f0['mod/geo/vza'][...]
-    # vaa = f0['mod/geo/vaa'][...]
-    # alb = f0['mod/sfc/alb_43_%d' % wvl_sfc][...]
-    # alb_470 = f0['mod/sfc/alb_43_470'][...]
-    # alb_oco = f0['oco/sfc/alb_%s_2d' % oco_band.lower()][...]
-    # u_10m = f0['oco/met/u_10m'][...]
-    # v_10m = f0['oco/met/v_10m'][...]
-    # delta_t = f0['oco/met/delta_t'][...]
-    # f0.close()
     with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r') as f0:
         extent, ref_2d, ref_470_2d, rgb, cot_l2, cer_l2, lon_2d, lat_2d, cth, sfh, sza, saa, vza, vaa, alb_650, alb_470, u_10m, v_10m, delta_t = \
             [np.array(f0[k][...]) for k in ['extent', 'mod/rad/ref_650', 'mod/rad/ref_470', 'mod/rgb', 'mod/cld/cot_l2', 'mod/cld/cer_l2', 
@@ -357,19 +272,18 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     data = np.zeros_like(cth)
     data[cth>0.0] = 1
-    dx = 250
-    dy = 250 
-    offset_nx, offset_ny = er3t.util.move_correlate(data0, data)
+    dx, dy = 250, 250 # in meter
+    offset_nx, offset_ny = move_correlate(data0, data)
     if offset_nx > 0:
         dist_x = dx * offset_nx
-        lon_2d_, _ = er3t.util.cal_geodesic_lonlat(lon_2d, lat_2d, dist_x, 90.0)
+        lon_2d_, _ = cal_geodesic_lonlat(lon_2d, lat_2d, dist_x, 90.0)
         lon_2d_ = lon_2d_.reshape(lon_2d.shape)
     else:
         lon_2d_ = lon_2d.copy()
 
     if offset_ny > 0:
         dist_y = dy * offset_ny
-        _, lat_2d_ = er3t.util.cal_geodesic_lonlat(lon_2d, lat_2d, dist_y, 0.0)
+        _, lat_2d_ = cal_geodesic_lonlat(lon_2d, lat_2d, dist_y, 0.0)
         lat_2d_ = lat_2d_.reshape(lat_2d.shape)
     else:
         lat_2d_ = lat_2d.copy()
@@ -379,16 +293,14 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
     cth_[cth_==0.0] = np.nan
 
     cth_ipa0 = np.zeros_like(ref_2d)
-    cth_ipa0[indices_x, indices_y] = er3t.util.find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
+    cth_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
     cth_ipa0[np.isnan(cth_ipa0)] = 0.0
-    ### ? from 02 example
-    ### cth_ipa0[np.isnan(cth_ipa0)] = np.nanmean(cth_ipa0[indices_x, indices_y])
     #\--------------------------------------------------------------/#
 
     # cer_ipa0
     #/--------------------------------------------------------------\#
     cer_ipa0 = np.zeros_like(ref_2d)
-    cer_ipa0[indices_x, indices_y] = er3t.util.find_nearest(lon_cld, lat_cld, cer_l2, lon_2d_, lat_2d_)
+    cer_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cer_l2, lon_2d_, lat_2d_)
     #\--------------------------------------------------------------/#
 
     # cot_ipa0
@@ -400,19 +312,18 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     fdir  = path_dir('%s/ipa-%06.1fnm_thick' % (fdir_cot, 650))
 
-    cot_ipa = np.concatenate((       \
-               np.arange(0.0, 2.0, 0.5),     \
-               np.arange(2.0, 30.0, 2.0),    \
-               np.arange(30.0, 60.0, 5.0),   \
-               np.arange(60.0, 100.0, 10.0), \
-               np.arange(100.0, 201.0, 50.0) \
-               ))
+    cot_ipa = np.concatenate((np.arange(0.0, 2.0, 0.5),     \
+                              np.arange(2.0, 30.0, 2.0),    \
+                              np.arange(30.0, 60.0, 5.0),   \
+                              np.arange(60.0, 100.0, 10.0), \
+                              np.arange(100.0, 201.0, 50.0) \
+                            ))
     print('cot_ipa shape:', cot_ipa.shape)
 
     fname_atm = '%s/atm.pk' % fdir
     atm0      = atm_atmmod(zpt_file=zpt_file, fname=fname_atm, overwrite=True)
 
-    f_mca_thick = er3t.rtm.mca.func_ref_vs_cot_multi_pixel(
+    f_mca_thick = func_ref_vs_cot_multi_pixel(
                     cot_ipa,
                     cer0=25.0,
                     dx=0.25, #in km
@@ -434,7 +345,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                     )
 
     fdir  = path_dir('%s/ipa-%06.1fnm_thin' % (fdir_cot, 650))
-    f_mca_thin= er3t.rtm.mca.func_ref_vs_cot_multi_pixel(
+    f_mca_thin= func_ref_vs_cot_multi_pixel(
                     cot_ipa,
                     cer0=10.0,
                     dx=0.25, #in km
@@ -459,8 +370,6 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
 
     logic_thick = (cth_ipa0[indices_x, indices_y] > 4.0)
     logic_thin  = (cth_ipa0[indices_x, indices_y] <= 4.0)
-    # logic_thick = (cth_ipa0[indices_x, indices_y] > 12.0)
-    # logic_thin  = (cth_ipa0[indices_x, indices_y] <= 12.0)
 
     cot_ipa0 = np.zeros_like(ref_2d)
 
@@ -685,13 +594,11 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
     #\----------------------------------------------------------------------------/#
 
     if plot:
-
         # figure
         #/----------------------------------------------------------------------------\#
         plt.close('all')
         rcParams['font.size'] = 12
         fig = plt.figure(figsize=(16, 16))
-
         fig.suptitle('MODIS Cloud Re-Processing')
 
         # RGB
@@ -879,8 +786,6 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
         plt.savefig('%s/<%s>.png' % (sat0.fdir_pre_data, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
         #\--------------------------------------------------------------/#
         #\----------------------------------------------------------------------------/#
-
-
 
 
 if __name__ == '__main__':

@@ -15,39 +15,28 @@ import sys
 import platform
 import h5py
 import numpy as np
-import time
 from datetime import datetime
 from scipy import stats
-import matplotlib as mpl
-#mpl.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.image as mpl_img
-from matplotlib import rcParams
-
-# from er3t.pre.atm import atm_atmmod
 from er3t.pre.abs import abs_oco_h5
 from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
-from er3t.pre.pha import pha_mie_wc # newly added for phase function
+from er3t.pre.pha import pha_mie_wc
 from er3t.util.oco2 import oco2_std
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
 from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
-from er3t.rtm.mca import mca_sca # newly added for phase function
+from er3t.rtm.mca import mca_sca
 
-from subroutine.oco_create_atm import create_oco_atm
-from subroutine.oco_satellite import satellite_download
-from subroutine.oco_cfg import grab_cfg, save_h5_info
-from subroutine.oco_abs_snd_sat import oco_abs
-from subroutine.oco_raw_collect import cdata_sat_raw
-from subroutine.oco_cloud import cdata_cld_ipa
-from subroutine.oco_post_process import cdata_all
-from subroutine.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
-from subroutine.oco_utils import path_dir, sat_tmp, timing, plot_mca_simulation
-from subroutine.oco_atm_atmmod import atm_atmmod
-
-plt.rcParams["font.family"] = "Arial"
-
+from utils.create_atm import create_oco_atm
+from utils.sat_download import satellite_download
+from utils.oco_cfg import grab_cfg, save_h5_info
+from utils.abs_coeff import oco_abs
+from utils.oco_raw_collect import cdata_sat_raw
+from utils.oco_cloud import cdata_cld_ipa
+from utils.post_process import cdata_all
+from utils.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
+from utils.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
+from utils.oco_atm_atmmod import atm_atmmod
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, cth=None, 
@@ -111,11 +100,9 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
         if solver.lower() == 'ipa':
-            # with wind correction only
-            suffix = 'ipa0'
+            suffix = 'ipa0'     # with wind correction only
         elif solver.lower() == '3d':
-            # with parallex and wind correction
-            suffix = 'ipa'
+            suffix = 'ipa'      # with parallex and wind correction
         data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data[f'mod/cld/cot_{suffix}'][...])
         data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data[f'mod/cld/cer_{suffix}'][...])
         data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data[f'mod/cld/cth_{suffix}'][...])
@@ -138,7 +125,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
         cld0 = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
                        overwrite=overwrite)
     # =================================================================================
-
 
     # mca_cld object
     # =================================================================================
@@ -182,8 +168,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     if sza_abs is not None:
         sza = sza_abs
     
-    if simulated_sfc_alb <= 0.2:
-        photons = photons*2
     print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
     # cpu number used
     if platform.system() in ['Windows', 'Darwin']:
@@ -376,7 +360,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     zpt_file  = preprocess_info[5]
     # ======================================================================
     if sfc_alb != None:
-        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_saz_{sza:.1f}/{band_tag}')
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
     
@@ -390,19 +374,20 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     #"""
     # run calculations for each wavelength
     # ===============================================================
+    Nphotons = float(cfg_info['oco_N_photons']) if sza is None else 1e8
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
-            sfc_alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
+            alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=float(cfg_info['oco_N_photons']))
+                                            overwrite=False, photons=Nphotons)
     # ===============================================================
     #"""
 
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, sfc_alb_sim, sza_sim)
+    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim)
     # ===============================================================
     
     return collect_data
@@ -420,12 +405,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    """"
+    #""""
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -443,44 +428,19 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg) #done
+    #run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45) #done
-    # run_simulation(cfg, sfc_alb=0.5, sza=45)
-    # run_simulation(cfg, sfc_alb=0.2, sza=45)
-    # run_simulation(cfg, sfc_alb=0.1, sza=45)
-    # run_simulation(cfg, sfc_alb=0.05, sza=45)
-
-
-    # run_simulation(cfg, sfc_alb=0.3, sza=30)
-    # run_simulation(cfg, sfc_alb=0.5, sza=30)
-    # run_simulation(cfg, sfc_alb=0.2, sza=30)
-    # run_simulation(cfg, sfc_alb=0.1, sza=30)
-    # run_simulation(cfg, sfc_alb=0.05, sza=30)
-
-    # run_simulation(cfg, sfc_alb=0.3, sza=60)
-    # run_simulation(cfg, sfc_alb=0.5, sza=60)
-    # run_simulation(cfg, sfc_alb=0.2, sza=60)
-    # run_simulation(cfg, sfc_alb=0.1, sza=60)
-    # run_simulation(cfg, sfc_alb=0.05, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.15, sza=30)
-    # run_simulation(cfg, sfc_alb=0.15, sza=45)
-    # run_simulation(cfg, sfc_alb=0.15, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.25, sza=30)
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
-    # run_simulation(cfg, sfc_alb=0.25, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.4, sza=30)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
-    # run_simulation(cfg, sfc_alb=0.4, sza=60)
-
-    # run_simulation(cfg, sfc_alb=0.025, sza=30)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
-    # run_simulation(cfg, sfc_alb=0.025, sza=60)
+    run_simulation(cfg, sfc_alb=0.5, sza=45)
+    run_simulation(cfg, sfc_alb=0.4, sza=45)
+    run_simulation(cfg, sfc_alb=0.3, sza=45)
+    run_simulation(cfg, sfc_alb=0.25, sza=45)
+    run_simulation(cfg, sfc_alb=0.2, sza=45)
+    run_simulation(cfg, sfc_alb=0.15, sza=45)
+    run_simulation(cfg, sfc_alb=0.1, sza=45)
+    run_simulation(cfg, sfc_alb=0.05, sza=45)
+    run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     
     # run_simulation(cfg, sfc_alb=0.5, sza=15)

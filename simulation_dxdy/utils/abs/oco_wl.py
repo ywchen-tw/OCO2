@@ -14,13 +14,15 @@ def oco_wv(iband, sat, footprint=1):
 
     # Get dispersion coefficients from l1b data
     with h5py.File(sat.fnames['oco_l1b'][0], 'r') as f:
-        dis = f["InstrumentHeader/dispersion_coef_samp"][...]
-        
+        wvl_coef = f["InstrumentHeader/dispersion_coef_samp"][...]
+    
+    Nspec, Nfoot, Ncoef = wvl_coef.shape
     lam = np.zeros([8, 1016, 3])
-    wli = np.arange(1,1017,dtype=float)
-    for i in range(8): 
-        for j in range(3):
-            for k in range(5):
-                lam[i,:,j]=lam[i,:,j] + dis[j,i,k]*wli**k  
+    wli = np.arange(1, 1017, dtype=float)
+
+    for i in range(Nfoot): 
+        for j in range(Nspec):
+            for k in range(Ncoef):
+                lam[i, :, j] = lam[i,:,j] + wvl_coef[j,i,k]*wli**k  
 
     return lam[footprint, :, iband]

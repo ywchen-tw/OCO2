@@ -1,8 +1,7 @@
 import sys
 import numpy as np
-import h5py
-from subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
-from subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
+from util.abs.oco_wl import oco_wv      # reads OCO wavelengths
+from util.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 
 
 def oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=1):
@@ -20,13 +19,10 @@ def oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=1):
     nlo = len(wloco)
     # (2) read instrument line shape
     xx, yy = oco_ils(iband, sat, footprint=fp) # xx: relative wl shift (micron)# yy: normalized ILS
-    #xx  = xx*0.001 # convert xx into micron
-    nils= len(xx)
+
     # (3) convolute tau & trns across entire wavelength range -- & how about kval
     
-
     trnsc = np.empty(nlo)
-    # tauc  = np.empty(nlo)
     trnsc0 = np.empty(nlo) 
     indlr = np.empty((nlo, 3), dtype=int) # left & right index for cropped ILS (in ABSCO gridding) + total #
 
@@ -56,6 +52,5 @@ def oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=1):
         ilg0 = np.interp(wavedat[ir0:il0], xx[l, ils]+wloco[l], yy[l, ils])   # partial slit function within valid range
         trnsc[l] = np.sum(trns[ir:il]*ilg)/np.sum(ilg)                  # ir:il because it is descending in wl
         trnsc0[l] = np.sum(trns[ir0:il0]*ilg0)/np.sum(ilg0)
-        # tauc[l] = np.sum(tau[ir:il]*ilg)/np.sum(ilg)
 
     return trnsc, trnsc0, indlr, ils

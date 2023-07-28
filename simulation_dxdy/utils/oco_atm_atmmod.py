@@ -13,6 +13,9 @@ __all__ = ['atm_atmmod']
 class atm_atmmod:
 
     """
+    This class is modified from the original version in the er3t/pre/atm/atm_atmmod.py
+    It reads the zpt file to get the gas number densities for the given levels and layers.
+
     Input:
 
         levels=      : keyword argument, numpy array, height in km
