@@ -9,14 +9,14 @@ import datetime
 from scipy import interpolate
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
-
+import platform
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from er3t.util import cal_geodesic_lonlat
 from er3t.util import move_correlate
 from er3t.util import find_nearest
-from er3t.rtm.mca import func_ref_vs_cot_multi_pixel
+from er3t.rtm.mca import func_ref_vs_cot
 
 from utils.oco_atm_atmmod import atm_atmmod
 from utils.oco_util import path_dir
@@ -323,11 +323,15 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
     fname_atm = '%s/atm.pk' % fdir
     atm0      = atm_atmmod(zpt_file=zpt_file, fname=fname_atm, overwrite=True)
 
-    f_mca_thick = func_ref_vs_cot_multi_pixel(
+    # cpu number used
+    if platform.system() in ['Windows', 'Darwin']:
+        Ncpu=os.cpu_count()-1
+    else:
+        Ncpu=32
+
+    f_mca_thick = func_ref_vs_cot(
                     cot_ipa,
                     cer0=25.0,
-                    dx=0.25, #in km
-                    dy=0.25, #in km
                     fdir=fdir,
                     date=sat0.date,
                     wavelength=650,
@@ -342,14 +346,13 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                     solver='3d',
                     overwrite=False,
                     atm0=atm0,
+                    Ncpu=Ncpu,
                     )
 
     fdir  = path_dir('%s/ipa-%06.1fnm_thin' % (fdir_cot, 650))
-    f_mca_thin= func_ref_vs_cot_multi_pixel(
+    f_mca_thin= func_ref_vs_cot(
                     cot_ipa,
                     cer0=10.0,
-                    dx=0.25, #in km
-                    dy=0.25, #in km
                     fdir=fdir,
                     date=sat0.date,
                     wavelength=650,
@@ -364,6 +367,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                     solver='3d',
                     overwrite=False,
                     atm0=atm0,
+                    Ncpu=Ncpu,
                     )
 
     ref_cld_norm = ref_2d[indices_x, indices_y]/np.cos(np.deg2rad(sza.mean()))

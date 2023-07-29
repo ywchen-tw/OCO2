@@ -1,7 +1,7 @@
 import sys
 import numpy as np
-from util.abs.oco_wl import oco_wv      # reads OCO wavelengths
-from util.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
+from utils.abs.oco_wl import oco_wv      # reads OCO wavelengths
+from utils.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 
 
 def oco_conv(iband, sat, ils0, wavedat, nwav, trns, fp=1):

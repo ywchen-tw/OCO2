@@ -1,8 +1,8 @@
 import sys
 import numpy as np
 import h5py
-from subroutine.abs.oco_wl import oco_wv      # reads OCO wavelengths
-from subroutine.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
+from utils.abs.oco_wl import oco_wv      # reads OCO wavelengths
+from utils.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function")    
 
 
 def oco_wv_select(trnsx, Trn_min, refl, nlay, nx, all_r, 

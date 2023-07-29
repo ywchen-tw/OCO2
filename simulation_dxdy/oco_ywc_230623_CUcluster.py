@@ -326,7 +326,7 @@ def preprocess(cfg_info):
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
+        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
     # ===============================================================
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
@@ -345,7 +345,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
+                        overwrite=True, case_name_tag=name_tag, photons=1e7)#float(cfg_info['modis_650_N_photons']))
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -396,7 +396,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    # run_case_modis_650(cfg_info, preprocess_info)
+    #run_case_modis_650(cfg_info, preprocess_info)
     #"""
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
@@ -405,12 +405,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    #""""
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -428,19 +428,19 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    #run_simulation(cfg) #done
+    run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 
-    run_simulation(cfg, sfc_alb=0.5, sza=45)
-    run_simulation(cfg, sfc_alb=0.4, sza=45)
-    run_simulation(cfg, sfc_alb=0.3, sza=45)
-    run_simulation(cfg, sfc_alb=0.25, sza=45)
-    run_simulation(cfg, sfc_alb=0.2, sza=45)
-    run_simulation(cfg, sfc_alb=0.15, sza=45)
-    run_simulation(cfg, sfc_alb=0.1, sza=45)
-    run_simulation(cfg, sfc_alb=0.05, sza=45)
-    run_simulation(cfg, sfc_alb=0.025, sza=45)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45)
+    # run_simulation(cfg, sfc_alb=0.4, sza=45)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45)
+    # run_simulation(cfg, sfc_alb=0.25, sza=45)
+    # run_simulation(cfg, sfc_alb=0.2, sza=45)
+    # run_simulation(cfg, sfc_alb=0.15, sza=45)
+    # run_simulation(cfg, sfc_alb=0.1, sza=45)
+    # run_simulation(cfg, sfc_alb=0.05, sza=45)
+    # run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     
     # run_simulation(cfg, sfc_alb=0.5, sza=15)

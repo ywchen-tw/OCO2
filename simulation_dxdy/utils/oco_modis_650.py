@@ -2,8 +2,6 @@ import os, sys
 import h5py
 import numpy as np
 from scipy import stats as st
-import matplotlib as mpl
-#mpl.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 from matplotlib import ticker
@@ -19,7 +17,7 @@ from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca
 
 from utils.oco_atm_atmmod import atm_atmmod
-from utils.oco_utils import sat_tmp
+from utils.oco_util import sat_tmp
 
 
 def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', solver='3D', case_name_tag='default', overwrite=False):
@@ -59,10 +57,10 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     # cld object
     # =================================================================================
     data = {}
-    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
-        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f['lon'][...])
-        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f['lat'][...])
-        data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f[f'mod/rad/rad_650'][...])
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
+        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f_pre_data['lon'][...])
+        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
+        data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
         if solver.lower() == 'ipa':
             suffix = 'ipa0'     # with wind correction only
         elif solver.lower() == '3d':

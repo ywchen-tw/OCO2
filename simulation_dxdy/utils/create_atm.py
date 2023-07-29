@@ -19,39 +19,38 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5'):
         sys.exit("[Error] sat information must be provided!")
     elif sat != None:
         # Get reanalysis from met and CO2 prior sounding data
-        oco_met = h5py.File(sat.fnames['oco_met'][0], 'r')
-        lon_oco_l1b = oco_met['SoundingGeometry/sounding_longitude'][...]
-        lat_oco_l1b = oco_met['SoundingGeometry/sounding_latitude'][...]
-        logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
+        with h5py.File(sat.fnames['oco_met'][0], 'r') as oco_met:
+            lon_oco_l1b = oco_met['SoundingGeometry/sounding_longitude'][...]
+            lat_oco_l1b = oco_met['SoundingGeometry/sounding_latitude'][...]
+            logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) &\
+                    (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
+            hprf_l = oco_met['Meteorology/height_profile_met'][...][logic][:, ::-1]
+            qprf_l = oco_met['Meteorology/specific_humidity_profile_met'][...][logic][:, ::-1]      # specific humidity mid grid
+            sfc_p = oco_met['Meteorology/surface_pressure_met'][...][logic]
+            tprf_l = oco_met['Meteorology/temperature_profile_met'][...][logic][:, ::-1]          # temperature mid grid in K
+            pprf_l = oco_met['Meteorology/vector_pressure_levels_met'][...][logic][:, ::-1]      # pressure mid grid in Pa
+            o3mrprf_l = oco_met['Meteorology/ozone_profile_met'][...][logic][:, ::-1] # kg kg-1
+            uprf_l = oco_met['Meteorology/wind_u_profile_met'][...][logic][:, ::-1]
+            vprf_l = oco_met['Meteorology/wind_v_profile_met'][...][logic][:, ::-1]
+            sfc_gph = oco_met['Meteorology/gph_met'][...][logic]
 
-        hprf_l = oco_met['Meteorology/height_profile_met'][...][logic][:, ::-1]
-        qprf_l = oco_met['Meteorology/specific_humidity_profile_met'][...][logic][:, ::-1]      # specific humidity mid grid
-        sfc_p = oco_met['Meteorology/surface_pressure_met'][...][logic]
-        tprf_l = oco_met['Meteorology/temperature_profile_met'][...][logic][:, ::-1]          # temperature mid grid in K
-        pprf_l = oco_met['Meteorology/vector_pressure_levels_met'][...][logic][:, ::-1]      # pressure mid grid in Pa
-        o3mrprf_l = oco_met['Meteorology/ozone_profile_met'][...][logic][:, ::-1] # kg kg-1
-        uprf_l = oco_met['Meteorology/wind_u_profile_met'][...][logic][:, ::-1]
-        vprf_l = oco_met['Meteorology/wind_v_profile_met'][...][logic][:, ::-1]
-        sfc_gph = oco_met['Meteorology/gph_met'][...][logic]
-        oco_met.close()
+        with h5py.File(sat.fnames['oco_co2prior'][0], 'r') as oco_co2_aprior:
+            lon_oco_l1b = oco_co2_aprior['SoundingGeometry/sounding_longitude'][...]
+            lat_oco_l1b = oco_co2_aprior['SoundingGeometry/sounding_latitude'][...]
+            logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
+            co2_prf_l = oco_co2_aprior['CO2Prior/co2_prior_profile_cpr'][...][logic][:, ::-1]
 
-        oco_co2_aprior = h5py.File(sat.fnames['oco_co2prior'][0], 'r')
-        lon_oco_l1b = oco_co2_aprior['SoundingGeometry/sounding_longitude'][...]
-        lat_oco_l1b = oco_co2_aprior['SoundingGeometry/sounding_latitude'][...]
-        logic = (lon_oco_l1b>=sat.extent[0]) & (lon_oco_l1b<=sat.extent[1]) & (lat_oco_l1b>=sat.extent[2]) & (lat_oco_l1b<=sat.extent[3])
-        co2_prf_l = oco_co2_aprior['CO2Prior/co2_prior_profile_cpr'][...][logic][:, ::-1]
-        oco_co2_aprior.close()
+        with h5py.File(sat.fnames['oco_lite'][0], 'r') as oco_lite:
+            lon_oco_lite = oco_lite['longitude'][...]
+            lat_oco_lite = oco_lite['latitude'][...]
+            logic = (lon_oco_lite>=sat.extent[0]) & (lon_oco_lite<=sat.extent[1]) &\
+                    (lat_oco_lite>=sat.extent[2]) & (lat_oco_lite<=sat.extent[3])
+            alb_o2a = np.nanmean(oco_lite["Retrieval"]['albedo_o2a'][...][logic])
+            alb_wco2 = np.nanmean(oco_lite["Retrieval"]['albedo_wco2'][...][logic])
+            alb_sco2 = np.nanmean(oco_lite["Retrieval"]['albedo_sco2'][...][logic])
+            sza = np.nanmean(oco_lite["solar_zenith_angle"][...][logic])
+            vza = np.nanmean(oco_lite["sensor_zenith_angle"][...][logic])
 
-        oco_lite = h5py.File(sat.fnames['oco_lite'][0], 'r')
-        lon_oco_lite = oco_lite['longitude'][...]
-        lat_oco_lite = oco_lite['latitude'][...]
-        logic = (lon_oco_lite>=sat.extent[0]) & (lon_oco_lite<=sat.extent[1]) & (lat_oco_lite>=sat.extent[2]) & (lat_oco_lite<=sat.extent[3])
-        alb_o2a = np.nanmean(oco_lite["Retrieval"]['albedo_o2a'][...][logic])
-        alb_wco2 = np.nanmean(oco_lite["Retrieval"]['albedo_wco2'][...][logic])
-        alb_sco2 = np.nanmean(oco_lite["Retrieval"]['albedo_sco2'][...][logic])
-        sza = np.nanmean(oco_lite["solar_zenith_angle"][...][logic])
-        vza = np.nanmean(oco_lite["sensor_zenith_angle"][...][logic])
-        oco_lite.close()
 
 
         # convert invalid value -999999 to NaN

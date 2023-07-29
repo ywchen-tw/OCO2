@@ -51,7 +51,7 @@ from utils.abs.oco_ils import oco_ils    # reads OCO line shape ("slit function"
 from utils.abs.solar import solar   # read solar file
 from utils.abs.oco_convolve import oco_conv
 from utils.abs.oco_abs_g_mode import oco_wv_select
-from utils.oco_utils import timing
+from utils.oco_util import timing
 from utils.oco_cfg import grab_cfg
 
 
@@ -201,7 +201,7 @@ def oco_abs(cfg, sat, zpt_file,
         # Obtain the wavenumber indices to work with for H2O
         # define subset of wavenumber (wcmdat) & wavelength grid (wavedat)
         # from H2O ABSCO file, based on wavelength interval as specified by the user
-        iwcm1h2o, iwcm2h2o, nwavh2o, wcmdath2o, wavedath2o = findi1i2(wcm1, wcm2, wcmh2o)
+        iwcm1h2o, iwcm2h2o, nwavh2o, wcmdath2o, wavedath2o = find_boundary(wcm1, wcm2, wcmh2o)
             
         if nwav != nwavh2o: 
             print('[Warning] Wavenumber gridding of O2 & H2O ABSCO files do not match.')                
@@ -305,13 +305,13 @@ def oco_abs(cfg, sat, zpt_file,
         print('Save absorption data to pickle save file: ' + savpkl)
         with open(savpkl, 'wb') as f:  # Python 3: open(..., 'wb')
             pickle.dump([wcmdat, tprf, pprf, trnsc, ext, tau_in, tau_out, wloco, 
-                         indlr, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl], f)
+                         indlr, ils, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl], f)
 
     else: # if no previous hdf5 save file exists of this band
         print('Restore absorption data from IDL save file: '+savpkl)
         with open(savpkl, 'rb') as f:
             (wcmdat, tprf, pprf, trnsc, ext, tau_in, tau_out, wloco, 
-             indlr, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl) = pickle.load(f)
+             indlr, ils, xx, yy, fsol, lay, nlay, pintf, dzf, intf, refl) = pickle.load(f)
     # End: Extract information from oco_utils.absCOF file (native resolution)
 
 
@@ -394,7 +394,7 @@ def oco_abs(cfg, sat, zpt_file,
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.rainbow)
         fig, ax = plt.subplots(1, 1, figsize=(8, 3.5))
         fig.tight_layout(pad=5.0)
-        ax.scatter(np.arange(nfc), trnsx[sx]*refl, color='k', s=3)
+        ax.scatter(np.arange(nfc), trnsx*refl, color='k', s=3)
         ax.tick_params(axis='both', labelsize=tick_size)
         ax.set_xlabel('Wavelength index', fontsize=label_size)
         ax.set_ylabel('Transmittance', fontsize=label_size)

@@ -29,7 +29,7 @@ g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
+o2,data_all_20181018_o2a_6170_6209_lbl.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
 wco2,,,,,,,
 sco2,,,,,,,
 ,,,,,,,
