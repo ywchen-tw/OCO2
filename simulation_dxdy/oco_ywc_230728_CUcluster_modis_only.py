@@ -28,10 +28,10 @@ from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca
 
 from utils.create_atm import create_oco_atm
-from utils.sat_download import satellite_download
+from utils.modis_download import modis_download
 from utils.oco_cfg import grab_cfg, save_h5_info
 from utils.abs_coeff import oco_abs
-from utils.oco_raw_collect import cdata_sat_raw
+from utils.modis_raw_collect import cdata_sat_raw
 from utils.oco_cloud import cdata_cld_ipa
 from utils.post_process import cdata_all
 from utils.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
@@ -283,7 +283,7 @@ def preprocess(cfg_info):
     fname_sat = '/'.join([fdir_data, 'sat.pk'])
     print(f'fname_sat: {fname_sat}')
 
-    sat0 = satellite_download(date=date, 
+    sat0 = modis_download(date=date, 
                               fdir_out=cfg_info['path_sat_data'], 
                               fdir_pre_data=fdir_data,
                               extent=extent,
@@ -291,44 +291,12 @@ def preprocess(cfg_info):
                               fname=fname_sat, overwrite=False)
 
     # ===============================================================
-    if not ('l2' in cfg_info.keys()):
-        oco_data_dict = {'l2': 'oco_std',
-                         'met': 'oco_met',
-                         'l1b': 'oco_l1b',
-                         'lt': 'oco_lite',
-                         'dia': 'oco_dia',
-                         'imap': 'oco_imap',
-                         'co2prior': 'oco_co2prior'}
-        for key, value in oco_data_dict.items():
-            save_h5_info(cfg_info['cfg_path'], key, sat0.fnames[value][0].split('/')[-1])
-    # create tmp-data/{name_tag} directory if it does not exist
-    # ===============================================================
-    fdir_cot_tmp = path_dir('tmp-data/%s/cot' % (name_tag))
-    # ===============================================================
-
-    # create atmosphere based on OCO-Met and CO2_prior
-    # ===============================================================
-    zpt_file = os.path.abspath('/'.join([fdir_data, 'zpt.h5']))
-    if not os.path.isfile(zpt_file):
-        create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
-    # ===============================================================
-
-    # read out wavelength information from absorption file
-    # ===============================================================
-    nx = int(cfg_info['nx'])
-    Trn_min = float(cfg_info['Trn_min'])
-    for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
-        fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
-        if not os.path.isfile(fname_abs):
-            oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
-                    nx=nx, Trn_min=Trn_min, pathout=fdir_data,
-                    reextract=False, plot=True)
-    
+        
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
+        #cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
     # ===============================================================
-    return date, extent, name_tag, fdir_data, sat0, zpt_file
+    return date, extent, name_tag, fdir_data, sat0, 
 
 @timing
 def run_case_modis_650(cfg_info, preprocess_info):
@@ -345,7 +313,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
+                        overwrite=True, case_name_tag=name_tag, photons=1e7)#float(cfg_info['modis_650_N_photons']))
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -397,7 +365,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     #run_case_modis_650(cfg_info, preprocess_info)
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)
@@ -420,7 +388,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 if __name__ == '__main__':
     
     #cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
-    cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    cfg = 'cfg/20150918_central_asia_modis.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
