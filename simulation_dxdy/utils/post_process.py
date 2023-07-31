@@ -111,6 +111,7 @@ class oco2_rad_nadir:
             self.lat_l1b_sco2 = f['FootprintGeometry/footprint_latitude'][...][index_s:index_e, ..., 2]
             self.snd_id_l1b  = f['SoundingGeometry/sounding_id'][...][index_s:index_e, ...]
 
+        
         shape    = self.lon_l1b.shape
 
         with h5py.File(self.fname_std, 'r') as f:
@@ -121,7 +122,8 @@ class oco2_rad_nadir:
             self.sfc_pres_std = f['RetrievalResults/surface_pressure_fph'][...]
 
         self.logic_l1b = np.in1d(self.snd_id_l1b, self.snd_id_l1b).reshape(shape)
-
+        self.snd_id    = self.snd_id_l1b
+        
         xco2      = np.zeros_like(self.lon_l1b); xco2[...] = np.nan
         sfc_pres  = np.zeros_like(self.lon_l1b); sfc_pres[...] = np.nan
 
