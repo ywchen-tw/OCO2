@@ -388,7 +388,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 if __name__ == '__main__':
     
     #cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
-    cfg = 'cfg/20150918_central_asia_modis.csv'
+    cfg = 'cfg/20160514_central_asia_modis.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
