@@ -1,8 +1,8 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --ntasks-per-node=32
+#SBATCH --ntasks=16
+#SBATCH --ntasks-per-node=16
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -173,7 +173,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     if platform.system() in ['Windows', 'Darwin']:
         Ncpu=os.cpu_count()-1
     else:
-        Ncpu=32
+        Ncpu=16
 
     if solver.lower()=='3d':
         # output filename
