@@ -307,4 +307,64 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}.png', bbox_inches='tight')
+        
+        # ==================================================================================================
+        label_size = 16
+        tick_size = 12
+        fig = plt.figure(figsize=(15, 6))
+        ax1 = fig.add_subplot(131)
+        ax1.imshow(mod_img, extent=mod_img_wesn)
+        ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
+        ax1.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
+        ax1.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
+        ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
+        ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
+        ax1.set_title('MODIS Measured Radiance', fontsize=label_size)
+
+        logic = (lon_mod>=extent_analysis[0]) &\
+                (lon_mod<=extent_analysis[1]) &\
+                (lat_mod>=extent_analysis[2]) &\
+                (lat_mod<=extent_analysis[3])
+
+        
+        
+        ax2 = fig.add_subplot(132)
+        ax2.imshow(mod_img, extent=mod_img_wesn)
+        ax2.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
+        ax2.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
+        ax2.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
+        ax2.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
+        ax2.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
+        ax2.set_title(f'EaR$^3$T Simulated {solver} Radiance', fontsize=label_size)
+        
+        xedges = np.arange(-0.01, 0.61, 0.005)
+        yedges = np.arange(-0.01, 0.61, 0.005)
+        heatmap, xedges, yedges = np.histogram2d(rad_mod[logic], rad_rtm_3d[logic], bins=(xedges, yedges))
+        YY, XX = np.meshgrid((yedges[:-1]+yedges[1:])/2.0, (xedges[:-1]+xedges[1:])/2.0)
+
+        levels = np.concatenate((np.arange(1.0, 10.0, 1.0),
+                                 np.arange(10.0, 200.0, 10.0),
+                                 np.arange(200.0, 1000.0, 100.0),
+                                 np.arange(1000.0, 10001.0, 5000.0)))
+
+        ax3 = fig.add_subplot(133)
+        cs = ax3.contourf(XX, YY, heatmap, levels, extend='both', locator=ticker.LogLocator(), cmap='jet')
+        ax3.plot([0.0, 1.0], [0.0, 1.0], lw=1.0, ls='--', color='gray', zorder=3)
+        ax3.set_xlim(0.0, 0.6)
+        ax3.set_ylim(0.0, 0.6)
+        ax3.set_xlabel('MODIS Measured Radiance', fontsize=label_size)
+        ax3.set_ylabel(f'Simulated {solver} Radiance', fontsize=label_size)
+
+        for ax, label_ord in zip([ax1, ax2, ax3], ['a', 'b', 'c']):
+            ax.set_xlim(extent_analysis[0], extent_analysis[1])
+            ax.set_ylim(extent_analysis[2], extent_analysis[3])
+            xmin, xmax = ax.get_xlim()
+            ymin, ymax = ax.get_ylim()
+            ax.tick_params(axis='both', labelsize=tick_size)
+            ax.text(xmin+0.0*(xmax-xmin), ymin+1.05*(ymax-ymin), 
+                    label_ord, fontsize=label_size, color='k')
+
+
+        plt.subplots_adjust(hspace=0.4, wspace=0.4)
+        plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}_comparison.png', bbox_inches='tight')
         # ==================================================================================================

@@ -258,11 +258,14 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
        
     with h5py.File(output_file, 'w') as f:
-        f.create_dataset('lon',    data=oco.lon_l1b)
-        f.create_dataset('lat',    data=oco.lat_l1b)
-        f.create_dataset('logic',  data=oco.logic_l1b)
-        f.create_dataset('toa',    data=toa)
-        f.create_dataset('Np',     data=Np)
+        f.create_dataset('lon',     data=oco.lon_l1b)
+        f.create_dataset('lat',     data=oco.lat_l1b)
+        f.create_dataset('logic',   data=oco.logic_l1b)
+        f.create_dataset('toa',     data=toa)
+        f.create_dataset('Np',      data=Np)
+        f.create_dataset('sfc_alb', data=sfc_alb)
+        f.create_dataset('sza',     data=sza)
+
 
         if tag == 'o2a':
             f.create_dataset('lon_fp',    data=oco.lon_l1b_o2a)
