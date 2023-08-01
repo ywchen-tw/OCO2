@@ -428,19 +428,19 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg) #done
+    #run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 
-    # run_simulation(cfg, sfc_alb=0.5, sza=45)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
-    # run_simulation(cfg, sfc_alb=0.3, sza=45)
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
-    # run_simulation(cfg, sfc_alb=0.2, sza=45)
-    # run_simulation(cfg, sfc_alb=0.15, sza=45)
-    # run_simulation(cfg, sfc_alb=0.1, sza=45)
-    # run_simulation(cfg, sfc_alb=0.05, sza=45)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
+    run_simulation(cfg, sfc_alb=0.5, sza=45)
+    run_simulation(cfg, sfc_alb=0.4, sza=45)
+    run_simulation(cfg, sfc_alb=0.3, sza=45)
+    run_simulation(cfg, sfc_alb=0.25, sza=45)
+    run_simulation(cfg, sfc_alb=0.2, sza=45)
+    run_simulation(cfg, sfc_alb=0.15, sza=45)
+    run_simulation(cfg, sfc_alb=0.1, sza=45)
+    run_simulation(cfg, sfc_alb=0.05, sza=45)
+    run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     
     # run_simulation(cfg, sfc_alb=0.5, sza=15)
