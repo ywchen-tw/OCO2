@@ -18,7 +18,6 @@ import numpy as np
 from datetime import datetime
 from scipy import stats
 from er3t.pre.abs import abs_oco_h5
-from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc
 from er3t.util.oco2 import oco2_std
@@ -37,6 +36,7 @@ from utils.post_process import cdata_all
 from utils.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
 from utils.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
 from utils.oco_atm_atmmod import atm_atmmod
+from utils.oco_cld_sat import cld_sat
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, cth=None, 
@@ -122,7 +122,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
         cgt0 = np.zeros_like(cth0)
         cgt0[cth0>0.0] = 1.0                  # all clouds have geometrical thickness of 1 km
         cgt0[cth0>4.0] = cth0[cth0>4.0]-3.0   # high clouds (cth>4km) has cloud base at 3 km
-        cld0 = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
+        cld0 = cld_sat(zpt_file=zpt_file, fname_atm=fname_atm, sat_info=sat,
+                       sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
                        overwrite=overwrite)
     # =================================================================================
 
@@ -345,7 +346,7 @@ def run_case_modis_650(cfg_info, preprocess_info):
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
         cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
+                        overwrite=False, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
         modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
     # ======================================================================
 
@@ -381,7 +382,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=Nphotons)
+                                            overwrite=True, photons=Nphotons)
     # ===============================================================
     #"""
 
@@ -405,12 +406,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         # time.sleep(120)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    #""""
+    """"
     #time.sleep(120)
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -428,19 +429,19 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    #run_simulation(cfg) #done
+    run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 
-    run_simulation(cfg, sfc_alb=0.5, sza=45)
-    run_simulation(cfg, sfc_alb=0.4, sza=45)
-    run_simulation(cfg, sfc_alb=0.3, sza=45)
-    run_simulation(cfg, sfc_alb=0.25, sza=45)
-    run_simulation(cfg, sfc_alb=0.2, sza=45)
-    run_simulation(cfg, sfc_alb=0.15, sza=45)
-    run_simulation(cfg, sfc_alb=0.1, sza=45)
-    run_simulation(cfg, sfc_alb=0.05, sza=45)
-    run_simulation(cfg, sfc_alb=0.025, sza=45)
+    # run_simulation(cfg, sfc_alb=0.5, sza=45)
+    # run_simulation(cfg, sfc_alb=0.4, sza=45)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45)
+    # run_simulation(cfg, sfc_alb=0.25, sza=45)
+    # run_simulation(cfg, sfc_alb=0.2, sza=45)
+    # run_simulation(cfg, sfc_alb=0.15, sza=45)
+    # run_simulation(cfg, sfc_alb=0.1, sza=45)
+    # run_simulation(cfg, sfc_alb=0.05, sza=45)
+    # run_simulation(cfg, sfc_alb=0.025, sza=45)
 
     
     # run_simulation(cfg, sfc_alb=0.5, sza=15)

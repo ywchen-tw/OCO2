@@ -264,6 +264,7 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         f.create_dataset('toa',     data=toa)
         f.create_dataset('Np',      data=Np)
         f.create_dataset('sfc_alb', data=sfc_alb)
+        f.create_dataset('sza_avg', data=sza)
 
 
         if tag == 'o2a':

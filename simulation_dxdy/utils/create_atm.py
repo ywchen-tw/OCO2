@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import bisect as bs
 
-def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5'):
+def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5', new_h_edge=None):
     """
     
     """
@@ -129,8 +129,12 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5'):
         pprf_lev_mean   = np.nanmean(P_edge, axis=0)/100        # pressure edge in hPa
 
     # new height edge
-    h_edge    = np.concatenate((np.linspace(hprf_lev_mean[0], 5, 11), 
-                                np.array([5.5,  6. ,  6.5,  7. ,  7.5,  8. ,  8.5,  9. ,  9.5, 10. , 11. , 12. , 13. , 14. , 20. , 25. , 30. , 35. , 40. ])))
+    if new_h_edge is None:
+        h_edge    = np.concatenate((np.linspace(hprf_lev_mean[0], 5, 11), 
+                                    np.array([5.5,  6. ,  6.5,  7. ,  7.5,  8. ,  8.5,  9. ,  9.5, 10. , 11. , 12. , 13. , 14. , 20. , 25. , 30. , 35. , 40. ])))
+    else:
+        h_edge = new_h_edge
+    print(h_edge)
     h_lay = np.mean([h_edge[1:], h_edge[:-1]], axis=0)              # height mid grid in km
     dz = h_edge[1:] - h_edge[:-1]
 

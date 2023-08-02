@@ -8,7 +8,7 @@ from matplotlib import ticker
 import matplotlib.image as mpl_img
 import platform
 from er3t.pre.abs import abs_16g
-from er3t.pre.cld import cld_sat
+#from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc 
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
@@ -18,6 +18,7 @@ from er3t.rtm.mca import mca_sca
 
 from utils.oco_atm_atmmod import atm_atmmod
 from utils.oco_util import sat_tmp
+from utils.oco_cld_sat import cld_sat
 
 
 def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', solver='3D', case_name_tag='default', overwrite=False):
@@ -77,7 +78,8 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     cgt0 = np.zeros_like(cth0)
     cgt0[cth0>0.0] = 1.0                  # all clouds have geometrical thickness of 1 km
     cgt0[cth0>4.0] = cth0[cth0>4.0]-3.0   # high clouds (cth>4km) has cloud base at 3 km
-    cld0      = cld_sat(sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
+    cld0      = cld_sat(zpt_file=zpt_file, fname_atm=fname_atm, sat_info=sat,
+                        sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
                         overwrite=overwrite)
     # =================================================================================
 
