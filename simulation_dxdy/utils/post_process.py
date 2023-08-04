@@ -154,7 +154,7 @@ class oco2_rad_nadir:
                 self.rad_co2_strong[:, i, :] = convert_photon_unit(self.rad_co2_strong[:, i, :], self.get_wvl_co2_strong(i))
 
 
-def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
+def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, fdir_out=None, aod_550=None):
     """
     Post-processing - combine the all the calculations into one dataset
     """
@@ -256,7 +256,9 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza, aod_550=None):
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza)
     else:
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod500_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
-       
+    if fdir_out is not None:
+        output_file = '/'.join([fdir_out, output_file])
+    
     with h5py.File(output_file, 'w') as f:
         f.create_dataset('lon',     data=oco.lon_l1b)
         f.create_dataset('lat',     data=oco.lat_l1b)

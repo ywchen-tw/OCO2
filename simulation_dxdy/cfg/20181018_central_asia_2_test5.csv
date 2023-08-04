@@ -31,7 +31,7 @@ abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
 g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
 # aerosol setting,,,,,,,
-_aerosol,TRUE,,,,,,# TRUE or FALSE
+_aerosol,FALSE,,,,,,# TRUE or FALSE
 asy,0.6,,,,,,# aerosol asymmetry parameter
 ,,,,,,,
 ,,,,,,,

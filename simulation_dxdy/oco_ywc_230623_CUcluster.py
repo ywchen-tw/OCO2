@@ -386,7 +386,7 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim)
+    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim, fdir_out=fdir_data)
     # ===============================================================
     
     return collect_data
