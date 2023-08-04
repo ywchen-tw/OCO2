@@ -188,11 +188,11 @@ def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unp
     return(slope,slopestd,intercept,interceptstd)
 
 def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line for a given footprint fp
-    array_size = [OCO_class.rad_clr_5.shape[0],OCO_class.rad_clr_5.shape[1], 2]
-    OCO_class.slope_5avg, OCO_class.inter_5avg = (nan_array(array_size, dtype=np.float64),)*2
-    OCO_class.slope_9avg, OCO_class.inter_9avg = (nan_array(array_size, dtype=np.float64),)*2
-    OCO_class.slope_13avg, OCO_class.inter_13avg = (nan_array(array_size, dtype=np.float64),)*2
-    OCO_class.slope_41avg, OCO_class.inter_41avg = (nan_array(array_size, dtype=np.float64),)*2
+    array_size = [OCO_class.rad_clr_5.shape[0], OCO_class.rad_clr_5.shape[1], 2]
+    OCO_class.slope_5avg, OCO_class.inter_5avg = (nan_array(array_size, dtype=np.float64) for _ in range(2))
+    OCO_class.slope_9avg, OCO_class.inter_9avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
+    OCO_class.slope_13avg, OCO_class.inter_13avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
+    OCO_class.slope_41avg, OCO_class.inter_41avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
 
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
@@ -242,14 +242,14 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     inter_compare = f'inter_{compare_num}avg'
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl_3.h5'
+        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl.h5'
 
         # filename = '../simulation_dxdy/data_all_20181018_{}_{}_test_3.h5'
         # filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
         #filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
         
-        pkl_filename = '20181018_central_asia_2_test4_{}_lbl_3.pkl'
-        if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+        pkl_filename = '20181018_central_asia_2_test4_{}_lbl.pkl'
+        if not os.path.isfile(pkl_filename.format('o2a')):
             _, _, cld_location = cld_position(cfg_name)
             o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
             o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -270,14 +270,14 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
         # weighted_cld_dist_calc
         #--------------------------------------
-        """
-        if not os.path.isfile(f'{cfg_name[:-4]}_weighted_cld_distance.pkl'):
+        #"""
+        if 1:#not os.path.isfile(f'{cfg_name[:-4]}_weighted_cld_distance.pkl'):
             weighted_cld_dist_calc(cfg_name, o2, slope_compare)
-        cld_data = pd.read_pickle(f'{cfg_name[:-4]}_weighted_cld_distance.pkl')
-        cld_dist = cld_data['cld_dis']
-        plt.scatter(cld_data['lon'], cld_data['lat'], c=cld_dist)
-        plt.colorbar()
-        plt.show()
+        weighted_cld_data = pd.read_pickle(f'{cfg_name[:-4]}_weighted_cld_distance.pkl')
+        weighted_cld_dist = weighted_cld_data['cld_dis']
+        # plt.scatter(cld_data['lon'], cld_data['lat'], c=cld_dist)
+        # plt.colorbar()
+        # plt.show()
         print(cld_dist)
         print(cld_dist[cld_dist>0].min(), cld_dist.max())
         #"""
@@ -435,6 +435,10 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                   img, wesn, lon_dom, lat_dom, 
                   lon_2d, lat_2d, cth0, cld_dist)
     
+    weighted_cld_dist_plot(o1, cfg_name,
+                  img, wesn, lon_dom, lat_dom, 
+                  lon_2d, lat_2d, cth0, weighted_cld_dist)
+    
     slope_intercept_compare_plot(o1, 'O_2-A', 'o2a', cfg_name,
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
@@ -492,6 +496,23 @@ def cld_dist_plot(o1, cfg_name,
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
     f.savefig(f'{cfg_name}_cloud_distance.png', dpi=300)
+
+def weighted_cld_dist_plot(o1, cfg_name,
+                  img, wesn, lon_dom, lat_dom, 
+                  lon_2d, lat_2d, cth0, weighted_cld_dist, label_size=14):
+    f, ax=plt.subplots(figsize=(8, 8))
+    ax.imshow(img, extent=wesn)
+    ax.vlines(lon_dom, ymin=lat_dom[0], ymax=lat_dom[1], color='k', linewidth=1)
+    ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
+    c = ax.scatter(o1.lon2d, o1.lat2d, 
+                   c=weighted_cld_dist, s=5,
+                   cmap='Reds', vmin=0, vmax=20)
+    ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='b')
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('Cloud distance (km)', fontsize=label_size)
+    ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    f.tight_layout()
+    f.savefig(f'{cfg_name}_weighted_cloud_distance.png', dpi=300)
 
 
 def o2a_conti_plot(o1, rad_c3d_compare, cfg_name,
@@ -633,7 +654,7 @@ def continuum_fp_compare_plot(o1, o2, o3, cfg_name,
     cbar3.set_label('3D radiance', fontsize=16)
     ax3.set_title(f'{o3.lam[10]:.3f}nm')
     f.tight_layout()
-    f.savefig(f'{cfg_name,}_continuum_fp_compare.png', dpi=300)
+    f.savefig(f'{cfg_name}_continuum_fp_compare.png', dpi=300)
 
     # plt.show()
 
@@ -961,7 +982,8 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
                 distances = haversine_vector(point, cld_latlon, unit=Unit.KILOMETERS, comb=True)
                 # Calculate the inverse distance weights
                 
-                weights = 1 / distances**3 #np.exp(-distances)
+                weights = 1 / distances**2 #np.exp(-distances)
+                #weights = 1 / distances                
                 
                 # Calculate the weighted average distance
                 weighted_avg_distance = np.sum(distances * weights) / np.sum(weights)
@@ -987,7 +1009,7 @@ def heatmap_xy_3(x, y, ax):
     ax.scatter(x[x>=start], y[x>=start], s=1, color='k')
     sns.kdeplot(x=x, y=y, cmap='hot_r', n_levels=20, fill=True, ax=ax, alpha=0.65)
     
-    cld_levels = np.arange(start, 18, interval)
+    cld_levels = np.arange(start, 30, interval)
     value_avg, value_std = np.zeros(len(cld_levels)-1), np.zeros(len(cld_levels)-1)
     for i in range(len(cld_levels)-1):
         select = np.logical_and(x>=cld_levels[i], x < cld_levels[i+1])
@@ -1000,18 +1022,19 @@ def heatmap_xy_3(x, y, ax):
     cld_list = (cld_levels[:-1] + cld_levels[1:])/2
     
     ax.errorbar(cld_list, value_avg, yerr=value_std, 
-                marker='s', color='r', linewidth=2, linestyle='', ecolor='skyblue')
+                marker='s', markersize=3,
+                color='r', linewidth=2, linestyle='', ecolor='skyblue')
     
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
     cld_min_list = [1, 1.25, 1.5, 1.75] if cld_val.min()<=2 else [cld_val.min().round(0)-0.25, cld_val.min().round(0)-0.5, cld_val.min().round(0), cld_val.min().round(0)+0.25, cld_val.min().round(0)+0.5] 
     for cld_min in cld_min_list:
-        for cld_max in np.arange(10, 18, 0.5):
+        for cld_max in np.arange(10, 30, 0.5):
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
-            popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [5, 15,]),
+            popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
                                 p0=(0.1, 0.7),
                                 maxfev=3000,
                                 #sigma=value_std[val_mask], 
@@ -1110,9 +1133,9 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
         return_list.append((slope_a, slope_b, inter_a, inter_b))
 
 
-    cld_low, cld_max = 0, 20
+    cld_low, cld_max = 0, 30
     limit_1 = 0.2
-    limit_2 = 0.08
+    limit_2 = 0.15
     for ax_l, ax_r in zip([ax11, ax21, ax31], [ax12, ax22, ax32]):
         ax_l.set_xlim(cld_low, cld_max)
         ax_l.set_ylim(-limit_1, limit_1)
@@ -1120,7 +1143,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
         ax_r.set_ylim(-limit_2, limit_2)
 
     ax11.set_ylim(-0.3, 0.3)
-    ax12.set_ylim(-0.12, 0.12)
+    ax12.set_ylim(-0.15, 0.15)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']
     ax_list = [ax11, ax12, ax21, ax31, ax22, ax32]
