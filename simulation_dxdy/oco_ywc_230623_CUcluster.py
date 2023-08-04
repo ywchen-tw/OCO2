@@ -39,14 +39,18 @@ from utils.oco_atm_atmmod import atm_atmmod
 from utils.oco_cld_sat import cld_sat
 
 
-def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, cth=None, 
-                     photons=1e6, scale_factor=1.0, 
-                     fdir='tmp-data', solver='3D', 
+def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
+                     fname_atm_abs=None, cth=None, 
+                     scale_factor=1.0, 
+                     fdir='tmp-data', solver='3D',
                      sfc_alb_abs=None, sza_abs=None, overwrite=True):
 
     """
     Calculate OCO2 radiance using cloud (MODIS level 1b) and surface properties (MOD09A1) from MODIS
     """
+
+    Nphotons = float(cfg_info['oco_N_photons']) if sza_abs is None else 1e8
+
 
     # atm object
     # =================================================================================
@@ -127,33 +131,25 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
                        overwrite=overwrite)
     # =================================================================================
 
-    # mca_cld object
+    # mca_atm object
     # =================================================================================
     atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, pha_obj=pha0, fname='%s/mca_atm_3d.bin' % fdir) # newly modified for phase function
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
-    aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
-    ssa = SSA_land_mean # aerosol single scattering albedo
-    cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
-    print(f'aod {wavelength:.2f} nm mean:', aod)
-    print('cth mode:', cth_mode.mode[0])
-    asy    = 0.6 # aerosol asymmetry parameter
-    z_bot  = np.min(levels) # altitude of layer bottom in km
-    z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
-    aer_ext = aod / (atm0.lay['thickness']['data'].sum()*1000.0)
+    if cfg_info['_aerosol'] == 'TRUE':
+        # add homogeneous 1d mcarats "atmosphere", aerosol layer
+        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
+        ssa = SSA_land_mean # aerosol single scattering albedo
+        cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
+        print(f'aod {wavelength:.2f} nm mean:', aod)
+        print('cth mode:', cth_mode.mode[0])
+        asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
+        z_bot  = np.min(levels)         # altitude of layer bottom in km
+        z_top  = cth_mode.mode[0]       # altitude of layer top in km
+        aer_ext = aod / (z_top-z_bot) / 1000
 
-    atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
-    # data can be accessed at
-    #     atm1d0.nml[ig]['Atm_zgrd0']['data']
-    #     atm1d0.nml[ig]['Atm_wkd0']['data']
-    #     atm1d0.nml[ig]['Atm_mtprof']['data']
-    #     atm1d0.nml[ig]['Atm_tmp1d']['data']
-    #     atm1d0.nml[ig]['Atm_nkd']['data']
-    #     atm1d0.nml[ig]['Atm_nz']['data']
-    #     atm1d0.nml[ig]['Atm_ext1d']['data']
-    #     atm1d0.nml[ig]['Atm_abs1d']['data']
-    #     atm1d0.nml[ig]['Atm_omg1d']['data']
-    #     atm1d0.nml[ig]['Atm_apf1d']['data']
+        atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
+
 
     atm_1ds = [atm1d0]
     atm_3ds = [atm3d0]
@@ -174,8 +170,9 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
     if platform.system() in ['Windows', 'Darwin']:
         Ncpu=os.cpu_count()-1
     else:
-        Ncpu=16
+        Ncpu=int(cfg_info['Ncpu'])
 
+    
     if solver.lower()=='3d':
         # output filename
         output_file = f'{fdir}/mca-out-rad-oco2-{solver.lower()}_{wavelength:.4f}nm.h5'
@@ -198,7 +195,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
                             fdir=temp_dir,
                             Nrun=3,
                             weights=abs0.coef['weight']['data'],
-                            photons=photons,
+                            photons=Nphotons,
                             solver=solver,
                             Ncpu=Ncpu,
                             mp_mode='py',
@@ -242,7 +239,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, c
                               fdir=temp_dir,
                               Nrun=3,
                               weights=abs0.coef['weight']['data'],
-                              photons=photons,
+                              photons=Nphotons,
                               solver=solver,
                               Ncpu=Ncpu,
                               mp_mode='py',
@@ -270,7 +267,6 @@ def preprocess(cfg_info):
     extent = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
     print(f'simulation extent: {extent}')
-    ref_threshold = float(cfg_info['ref_threshold'])
     name_tag = f"{cfg_info['cfg_name']}_{date.strftime('%Y%m%d')}"
     # ===============================================================
 
@@ -311,23 +307,24 @@ def preprocess(cfg_info):
     # ===============================================================
     zpt_file = os.path.abspath('/'.join([fdir_data, 'zpt.h5']))
     if not os.path.isfile(zpt_file):
-        create_oco_atm(sat=sat0, o2mix=0.20935, output=zpt_file)
+        create_oco_atm(sat=sat0, o2mix=float(cfg_info['o2mix']), output=zpt_file)
     # ===============================================================
 
     # read out wavelength information from absorption file
     # ===============================================================
     nx = int(cfg_info['nx'])
-    Trn_min = float(cfg_info['Trn_min'])
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
         if not os.path.isfile(fname_abs):
             oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
-                    nx=nx, Trn_min=Trn_min, pathout=fdir_data,
+                    nx=nx, 
+                    Trn_min=float(cfg_info['Trn_min']), 
+                    pathout=fdir_data,
                     reextract=False, plot=True)
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e7, plot=True)
+        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
@@ -342,12 +339,12 @@ def run_case_modis_650(cfg_info, preprocess_info):
 
     # run calculations for 650 nm
     # ======================================================================
-    ref_threshold = float(cfg_info['ref_threshold'])
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
-        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=False, case_name_tag=name_tag, photons=float(cfg_info['modis_650_N_photons']))
-        modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
+        cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
+                        overwrite=True, case_name_tag=name_tag)
+        modis_650_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_650,
+                                   solver=solver, wvl=650, plot=True)
     # ======================================================================
 
 @timing
@@ -378,11 +375,12 @@ def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     Nphotons = float(cfg_info['oco_N_photons']) if sza is None else 1e8
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
-            alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
+            alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength, 
+                                                cfg_info=cfg_info,
                                             fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=True, photons=Nphotons)
+                                            overwrite=True,)
     # ===============================================================
     #"""
 
@@ -405,12 +403,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         save_h5_info(cfg, 'o2', o2_h5)
     #""" 
     
-    #"""
+    """
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    #""""
+    """"
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'sco2', sco2_h5)
@@ -419,15 +417,15 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 if __name__ == '__main__':
     
     #cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
-    # cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     # cfg = 'cfg/20170605_amazon_2.csv'
-    cfg = 'cfg/20150622_amazon.csv'
+    # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    #run_simulation(cfg) #done
+    run_simulation(cfg) #done
     
     # cProfile.run('run_simulation(cfg)')
 

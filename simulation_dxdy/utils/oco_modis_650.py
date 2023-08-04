@@ -21,7 +21,7 @@ from utils.oco_util import sat_tmp
 from utils.oco_cld_sat import cld_sat
 
 
-def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', solver='3D', case_name_tag='default', overwrite=False):
+def cal_mca_rad_650(sat, zpt_file, wavelength, cfg_info, fdir='tmp-data', solver='3D', case_name_tag='default', overwrite=False):
 
     """
     Simulate MODIS radiance
@@ -98,37 +98,23 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     # =================================================================================
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
-    # add homogeneous 1d mcarats "atmosphere", aerosol layer
-    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
-        AOD_550_land_mean = f['mod/aod/AOD_550_land_mean'][...]
-        Angstrom_Exponent_land_mean = f['mod/aod/Angstrom_Exponent_land_mean'][...]
-        SSA_land_mean = f['mod/aod/SSA_660_land_mean'][...]
+    if cfg_info['_aerosol'] == 'TRUE':
+        # add homogeneous 1d mcarats "atmosphere", aerosol layer
+        with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
+            AOD_550_land_mean = f['mod/aod/AOD_550_land_mean'][...]
+            Angstrom_Exponent_land_mean = f['mod/aod/Angstrom_Exponent_land_mean'][...]
+            SSA_land_mean = f['mod/aod/SSA_660_land_mean'][...]
 
-        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
-        ssa = SSA_land_mean
-        cth_mode = st.mode(cth0[np.logical_and(cth0>0, cth0<4)])
-        print('Angstrom Exponent:', Angstrom_Exponent_land_mean)
-        print('aod 550nm mean:', AOD_550_land_mean)
-        print('aod 650nm mean:', aod)
-        print('ssa 650nm mean:', ssa)
-    print('cth mode:', cth_mode.mode[0])
-    asy    = 0.6 # aerosol asymmetry parameter
-    z_bot  = levels.min() # altitude of layer bottom in km
-    z_top  = cth_mode.mode[0]#8.0 # altitude of layer top in km
-    aer_ext = aod / (atm0.lay['thickness']['data'].sum()*1000.0)
+            aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
+            ssa = SSA_land_mean
+            cth_mode = st.mode(cth0[np.logical_and(cth0>0, cth0<4)])
+        
+        asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
+        z_bot  = np.min(levels)         # altitude of layer bottom in km
+        z_top  = cth_mode.mode[0]       # altitude of layer top in km
+        aer_ext = aod / (z_top-z_bot) / 1000
 
-    atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
-    # data can be accessed at
-    #     atm1d0.nml[ig]['Atm_zgrd0']['data']
-    #     atm1d0.nml[ig]['Atm_wkd0']['data']
-    #     atm1d0.nml[ig]['Atm_mtprof']['data']
-    #     atm1d0.nml[ig]['Atm_tmp1d']['data']
-    #     atm1d0.nml[ig]['Atm_nkd']['data']
-    #     atm1d0.nml[ig]['Atm_nz']['data']
-    #     atm1d0.nml[ig]['Atm_ext1d']['data']
-    #     atm1d0.nml[ig]['Atm_abs1d']['data']
-    #     atm1d0.nml[ig]['Atm_omg1d']['data']
-    #     atm1d0.nml[ig]['Atm_apf1d']['data']
+        atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
     # =================================================================================
 
     atm_1ds = [atm1d0]
@@ -143,7 +129,6 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
         saa = f['mod/geo/saa'][...].mean()
         vza = f['mod/geo/vza'][...].mean()
         vaa = f['mod/geo/vaa'][...].mean()
-        print('vza', vza, '; vaa', vaa)
     # =================================================================================
 
     # run mcarats
@@ -152,7 +137,8 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     if platform.system() in ['Windows', 'Darwin']:
         Ncpu=os.cpu_count()-1
     else:
-        Ncpu=32
+        Ncpu=int(cfg_info['Ncpu'])
+    Nphotons = float(cfg_info['modis_650_N_photons'])
     temp_dir = '%s/%.4fnm/rad_%s' % (fdir, wavelength, solver.lower())
     run = False if os.path.isdir(temp_dir) and overwrite==False else True
     mca0 = mcarats_ng(
@@ -170,7 +156,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
             fdir=temp_dir,
             Nrun=3,
             weights=abs0.coef['weight']['data'],
-            photons=photons,
+            photons=Nphotons,
             solver=solver,
             Ncpu=Ncpu,
             mp_mode='py',
@@ -181,7 +167,8 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, photons=1e7, fdir='tmp-data', sol
     out0 = mca_out_ng(fname='%s/mca-out-rad-modis-%s_%.4fnm.h5' % (fdir, solver.lower(), wavelength), mca_obj=mca0, abs_obj=abs0, mode='mean', squeeze=True, verbose=True, overwrite=overwrite)
     # =================================================================================
 
-def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='3D', wvl=650, ref_threshold=0.1, plot=False):
+def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp',
+                               solver='3D', wvl=650, plot=False):
 
     # create data directory (for storing data) if the directory does not exist
     # ==================================================================================================
@@ -191,6 +178,7 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
     extent_analysis = sat.extent_analysis
     mod_img = mpl_img.imread(sat.fnames['mod_rgb'][0])
     mod_img_wesn = sat.extent
+    ref_threshold = float(cfg_info['ref_threshold'])
     
     fdir_data = os.path.abspath('data/%s' % case_name_tag)
     # ==================================================================================================
@@ -228,6 +216,7 @@ def modis_650_simulation_plot(sat, case_name_tag='default', fdir='tmp', solver='
         f['rad_obs']        = rad_mod
         f['rad_sim_3d']     = rad_rtm_3d
         f['rad_sim_3d_std'] = rad_rtm_3d_std
+        f['ref_threshold']  = ref_threshold
     # ==================================================================================================
 
     if plot:

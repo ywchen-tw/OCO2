@@ -194,7 +194,7 @@ def crack_adjustment(indices_x, indices_y, Nx, Ny, cot_ipa, cer_ipa, cth_ipa, cl
                    cld_msk[ix, iy] = 1
 
 
-def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=True):
+def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
 
     # read in data
     #/----------------------------------------------------------------------------\#
@@ -204,6 +204,8 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                                             'lon', 'lat', 'mod/cld/cth_l2', 'mod/geo/sfh', 'mod/geo/sza', 'mod/geo/saa', 'mod/geo/vza', 
                                             'mod/geo/vaa', f"mod/sfc/alb_43_650", 'mod/sfc/alb_43_470', 
                                             'oco/met/u_10m', 'oco/met/v_10m', 'oco/met/delta_t']]
+    ref_threshold = float(cfg_info['ref_threshold'])
+    photons=float(cfg_info['cot_Nphotons'])
     #\----------------------------------------------------------------------------/#
 
 
@@ -340,8 +342,8 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                     solar_azimuth_angle=saa.mean(),
                     sensor_zenith_angle=vza.mean(),
                     sensor_azimuth_angle=vaa.mean(),
-                    cloud_top_height=10.0,
-                    cloud_geometrical_thickness=7.0,
+                    cloud_top_height=float(cfg_info['cth_thick']),
+                    cloud_geometrical_thickness=float(cfg_info['cgt_thick']),
                     Nphoton=photons,
                     solver='3d',
                     overwrite=False,
@@ -361,8 +363,8 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, ref_threshold, photons=1e6, plot=Tru
                     solar_azimuth_angle=saa.mean(),
                     sensor_zenith_angle=vza.mean(),
                     sensor_azimuth_angle=vaa.mean(),
-                    cloud_top_height=3.0,
-                    cloud_geometrical_thickness=1.0,
+                    cloud_top_height=float(cfg_info['cth_thin']),
+                    cloud_geometrical_thickness=float(cfg_info['cgt_thin']),
                     Nphoton=photons,
                     solver='3d',
                     overwrite=False,
