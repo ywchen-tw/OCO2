@@ -403,12 +403,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
         save_h5_info(cfg, 'o2', o2_h5)
     #""" 
     
-    """
+    #"""
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
     #"""
-    """"
+    #""""
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'sco2', sco2_h5)
