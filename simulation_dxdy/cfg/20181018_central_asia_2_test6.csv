@@ -28,10 +28,10 @@ ils_min,0.05,,,,,,# minimum relative ils weight for calculating absorbance
 nx,10,,,,,,# number of transmittance interval
 Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
 abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
-g_mode,FALSE,,,,,,# TRUE or FALSE
+g_mode,TRUE,,,,,,# TRUE or FALSE
 ,,,,,,,
 # aerosol setting,,,,,,,
-_aerosol,TRUE,,,,,,# TRUE or FALSE
+_aerosol,FALSE,,,,,,# TRUE or FALSE
 asy,0.6,,,,,,# aerosol asymmetry parameter
 ,,,,,,,
 ,,,,,,,
