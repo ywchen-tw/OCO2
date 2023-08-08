@@ -8,7 +8,6 @@ import matplotlib
 from glob import glob
 import numpy as np
 import copy
-from bisect import bisect_left
 from oco_post_class_ywc import OCOSIM
 from matplotlib import cm
 from scipy import interpolate
@@ -21,7 +20,6 @@ import seaborn as sns
 from tool_code import *
 import os, pickle 
 from matplotlib import font_manager
-from oco_satellite import satellite_download
 import matplotlib.image as mpl_img
 from haversine import haversine, Unit, haversine_vector
 from matplotlib import cm, colors
@@ -144,7 +142,6 @@ def coarsening(OCO_class, size=3):
     ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size)
     c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size)
     
-    # return ipa0, c3d, ipa0_std, c3d_std
     return ipa0, c3d, ipa0_std, c3d_std
 
 
@@ -243,10 +240,6 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
         filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl_with_aod.h5'
-
-        # filename = '../simulation_dxdy/data_all_20181018_{}_{}_test_3.h5'
-        # filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
-        #filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
         
         pkl_filename = '20181018_central_asia_2_test4_{}_lbl_with_aod.pkl'
         if not os.path.isfile(pkl_filename.format('o2a')):
@@ -275,9 +268,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
             weighted_cld_dist_calc(cfg_name, o2, slope_compare)
         weighted_cld_data = pd.read_pickle(f'{cfg_name[:-4]}_weighted_cld_distance.pkl')
         weighted_cld_dist = weighted_cld_data['cld_dis']
-        # plt.scatter(cld_data['lon'], cld_data['lat'], c=cld_dist)
-        # plt.colorbar()
-        # plt.show()
+
         print(cld_dist)
         print(cld_dist[cld_dist>0].min(), cld_dist.max())
         #"""
@@ -293,9 +284,9 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                               np.logical_and(o1.lat[xco2_valid] >= extent[2], o1.lat[xco2_valid] <= extent[3]))
 
 
-        f_cld_distance = interpolate.RegularGridInterpolator((np.array(cld_data['lon']).reshape(o1.lon2d.shape)[:, 0], 
-                                                              np.array(cld_data['lat']).reshape(o1.lon2d.shape)[0, :]),
-                                                             np.array(cld_data['cld_dis']).reshape(o1.lon2d.shape), method='linear')
+        f_cld_distance = interpolate.RegularGridInterpolator((np.array(weighted_cld_data['lon']).reshape(o1.lon2d.shape)[:, 0], 
+                                                              np.array(weighted_cld_data['lat']).reshape(o1.lon2d.shape)[0, :]),
+                                                             np.array(weighted_cld_data['cld_dis']).reshape(o1.lon2d.shape), method='linear')
         
         points_footprint = np.column_stack((o1.lon[xco2_valid][mask_fp].flatten(), o1.lat[xco2_valid][mask_fp].flatten()))
         oco_footprint_cld_distance = f_cld_distance(points_footprint)
@@ -306,7 +297,6 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                               np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
         mask = mask.flatten()
         parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
-        print(parameters_cld_distance_list)
         parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         
         # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
@@ -328,21 +318,14 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                    'LAT': o1.lat[xco2_valid][mask_fp].flatten(),
                                    'L2XCO2[ppm]': xco2[xco2_valid][mask_fp].flatten()*1e6,
                                    'L2PSUR[kPa]': psur[xco2_valid][mask_fp].flatten()/1000,
-                                   #'cld_distance': oco_footprint_cld_distance.flatten(),
                                    'i1': o2a_inter,
                                    's1': o2a_slope,
                                    'i2': wco2_inter,
                                    's2': wco2_slope,
                                    'i3': sco2_inter,
-                                   's3': sco2_slope
+                                   's3': sco2_slope,
+                                   'weighted_cld_distance': oco_footprint_cld_distance.flatten(),
                                    },)
-        output_csv['SND'] = output_csv['SND']#.apply(lambda x: f'SND{x:.0f}')
-        output_csv.to_csv(f'central_asia_2_footprint_cld_distance.csv', index=False)
-
-
-        #sys.exit()
-
-
         output_csv['SND'] = output_csv['SND'].apply(lambda x: f'SND{x:.0f}')
         output_csv.to_csv(f'central_asia_2_footprint_cld_distance.csv', index=False)
 
