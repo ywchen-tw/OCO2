@@ -242,13 +242,13 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     inter_compare = f'inter_{compare_num}avg'
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl.h5'
+        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl_with_aod.h5'
 
         # filename = '../simulation_dxdy/data_all_20181018_{}_{}_test_3.h5'
         # filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_5e8_no_aod.h5'
         #filename = '../simulation_dxdy/data_all_20181018_{}_{}_photon_1e9_with_aod.h5'
         
-        pkl_filename = '20181018_central_asia_2_test4_{}_lbl.pkl'
+        pkl_filename = '20181018_central_asia_2_test4_{}_lbl_with_aod.pkl'
         if not os.path.isfile(pkl_filename.format('o2a')):
             _, _, cld_location = cld_position(cfg_name)
             o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
@@ -271,7 +271,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
         # weighted_cld_dist_calc
         #--------------------------------------
         #"""
-        if 1:#not os.path.isfile(f'{cfg_name[:-4]}_weighted_cld_distance.pkl'):
+        if not os.path.isfile(f'{cfg_name[:-4]}_weighted_cld_distance.pkl'):
             weighted_cld_dist_calc(cfg_name, o2, slope_compare)
         weighted_cld_data = pd.read_pickle(f'{cfg_name[:-4]}_weighted_cld_distance.pkl')
         weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -282,7 +282,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
         print(cld_dist[cld_dist>0].min(), cld_dist.max())
         #"""
         #--------------------------------------
-        
+        #cld_dist = weighted_cld_dist
         xco2 = o1.co2
         psur = o1.psur
         snd = o1.snd
@@ -307,7 +307,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
         mask = mask.flatten()
         parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         print(parameters_cld_distance_list)
-
+        parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         
         # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 
@@ -455,6 +455,8 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     continuum_fp_compare_plot(o1, o2, o3, cfg_name,
                               img, wesn, lon_dom, lat_dom, 
                               lon_2d, lat_2d, cth0, )
+    
+    # o2a_wvl_select_slope_derivation(cfg_info, o1)
     
     
 
@@ -1009,7 +1011,7 @@ def heatmap_xy_3(x, y, ax):
     ax.scatter(x[x>=start], y[x>=start], s=1, color='k')
     sns.kdeplot(x=x, y=y, cmap='hot_r', n_levels=20, fill=True, ax=ax, alpha=0.65)
     
-    cld_levels = np.arange(start, 30, interval)
+    cld_levels = np.arange(start, 40, interval)
     value_avg, value_std = np.zeros(len(cld_levels)-1), np.zeros(len(cld_levels)-1)
     for i in range(len(cld_levels)-1):
         select = np.logical_and(x>=cld_levels[i], x < cld_levels[i+1])
@@ -1030,25 +1032,26 @@ def heatmap_xy_3(x, y, ax):
     cld_val = cld_list[val_mask]
     cld_min_list = [1, 1.25, 1.5, 1.75] if cld_val.min()<=2 else [cld_val.min().round(0)-0.25, cld_val.min().round(0)-0.5, cld_val.min().round(0), cld_val.min().round(0)+0.25, cld_val.min().round(0)+0.5] 
     for cld_min in cld_min_list:
-        for cld_max in np.arange(10, 30, 0.5):
+        for cld_max in np.arange(10, 40, 0.5):
             mask = np.logical_and(cld_val>=cld_min, cld_val<=cld_max)
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
-            popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
-                                p0=(0.1, 0.7),
-                                maxfev=3000,
-                                #sigma=value_std[val_mask], 
-                                #absolute_sigma=True,
-                                )
-            residuals = yy - exp_decay_func(xx, *popt)
-            ss_res = np.sum(residuals**2)
-            ss_tot = np.sum((yy-np.mean(yy))**2)
-            r_squared = 1 - (ss_res / ss_tot)
+            if len(yy) > 0:
+                popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
+                                    p0=(0.1, 0.7),
+                                    maxfev=3000,
+                                    #sigma=value_std[val_mask], 
+                                    #absolute_sigma=True,
+                                    )
+                residuals = yy - exp_decay_func(xx, *popt)
+                ss_res = np.sum(residuals**2)
+                ss_tot = np.sum((yy-np.mean(yy))**2)
+                r_squared = 1 - (ss_res / ss_tot)
 
-            if r_squared > temp_r2:
-                temp_r2 = r_squared
-            else:
-                break
+                if r_squared > temp_r2:
+                    temp_r2 = r_squared
+                else:
+                    break
     
     plot_xx = np.arange(0, cld_list.max()+0.75, 0.5)
     ax.plot(plot_xx, exp_decay_func(plot_xx, *popt), '--', color='limegreen', 
@@ -1133,7 +1136,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
         return_list.append((slope_a, slope_b, inter_a, inter_b))
 
 
-    cld_low, cld_max = 0, 30
+    cld_low, cld_max = 0, 40
     limit_1 = 0.2
     limit_2 = 0.15
     for ax_l, ax_r in zip([ax11, ax21, ax31], [ax12, ax22, ax32]):
@@ -1164,6 +1167,64 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
 
     return return_list
 
+def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
+
+    return_list = []
+    fig, ((ax11, ax12), 
+            (ax21, ax22),
+            (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
+    fig.tight_layout(pad=5.0)
+    label_size = 16
+    tick_size = 12
+
+    ax_list = [(ax11, ax12), 
+                (ax21, ax22),
+                (ax31, ax32)]
+    for i in range(3):
+        oco_band = [o1, o2, o3][i]
+        rad_3d = getattr(oco_band, rad_3d_compare)[:,:, -1].flatten()
+        rad_clr = getattr(oco_band, rad_clr_compare)[:,:, -1].flatten()
+        mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
+
+        slope = getattr(oco_band, slope_compare)[:,:,0].flatten()
+        inter = getattr(oco_band, inter_compare)[:,:,0].flatten()
+
+        ax1, ax2 = ax_list[i]
+        slope_a, slope_b = heatmap_xy_3(cloud_dist[mask], slope[mask], ax1)
+        inter_a, inter_b = heatmap_xy_3(cloud_dist[mask], inter[mask], ax2)
+        return_list.append((slope_a, slope_b, inter_a, inter_b))
+
+
+    cld_low, cld_max = 0, 40
+    limit_1 = 0.2
+    limit_2 = 0.15
+    for ax_l, ax_r in zip([ax11, ax21, ax31], [ax12, ax22, ax32]):
+        ax_l.set_xlim(cld_low, cld_max)
+        ax_l.set_ylim(-limit_1, limit_1)
+        ax_r.set_xlim(cld_low, cld_max)
+        ax_r.set_ylim(-limit_2, limit_2)
+
+    ax11.set_ylim(-0.3, 0.3)
+    ax12.set_ylim(-0.15, 0.15)
+
+    label_list = ['a', 'b', 'c', 'd', 'e', 'f']
+    ax_list = [ax11, ax12, ax21, ax31, ax22, ax32]
+    for i in range(6):
+        ax = ax_list[i]
+        label_text = f'({label_list[i]})'
+        ax.set_xlabel('Weighted Average Cloud Distance (km)', fontsize=label_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.hlines(0, 0, xmax, linestyle='--', color='white')
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.05*(ymax-ymin), label_text, fontsize=label_size, color='k')
+    
+    for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
+        ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
+        ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
+    fig.savefig(f'central_asia_test2_all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
+
+    return return_list
 
 def fitting_without_plot(x, y):
     mask = ~(np.isnan(x) | np.isnan(y) | np.isinf(x) | np.isinf(y))
@@ -1224,7 +1285,7 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1):
         oco_tx = file['tx'][...]
 
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(14, 5))
-    f.tight_layout(pad=3.0)
+    f.tight_layout(pad=5.0)
 
     title_size = 18
     label_size = 16
@@ -1252,16 +1313,17 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1):
 
     # second fig
     toa = o1.toa
-    mu = o1.mu
+    mu = np.mean(o1.mu)/180*np.pi
+    
     sl_np = o1.sl_5
-    sls_np = o1.sls_5/np.sqrt(3)
+    sls_np = o1.sls_5#/np.sqrt(3)
     c3d_np = o1.rad_c3d_5
     clr_np = o1.rad_clr_5
-    fp, z = 160, 130
+    fp, z = 166, 180
     points = nx+1
 
     w = 1./sls_np[z,fp,:] 
-    x = c3d_np[z,fp,:]/(toa[:]*mu)*np.pi
+    x = c3d_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
     x_len = len(x)
     mask = np.argsort(x)[x_len-points:]
     res = np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
@@ -1312,7 +1374,9 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1):
 def ax_index_label(ax, label, label_size):
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
-    ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size, color='k')
+    ax.text(xmin+0.0*(xmax-xmin), ymin+1.035*(ymax-ymin), label, fontsize=label_size, color='k')
+
+
 
 
 if __name__ == "__main__":

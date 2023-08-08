@@ -34,7 +34,7 @@ class OCOSIM:
         self.toa  = h1['toa'][...]
         self.mu  = h1['sza_mca'][...]
         self.sfc_alb = h1['sfc_alb'][...]
-        self.sza  = h1['sza'][...]
+        self.sza_avg  = h1['sza_avg'][...]
         self.np   = h1['Np'][...]
         self.logic= h1['logic'][...]
         self.nz,self.nf=self.lat.shape
