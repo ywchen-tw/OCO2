@@ -84,6 +84,8 @@ def oco_wv_select(trnsx, Trn_min, refl, nlay, nx, all_r,
             prob_g_final[:, i, :] = prob_g
             weight_g_final[:, i, :] = weight_g
 
+            
+
             solx_tmp = fsol[indlr[l0,1]:indlr[l0,0]+1]
             sort_sol_ind = np.argsort(solx_tmp)
             sol_indx_sort = np.arange(len(sort_sol_ind))+1
@@ -100,5 +102,6 @@ def oco_wv_select(trnsx, Trn_min, refl, nlay, nx, all_r,
         
         print(i, wli0, ods[i], trnsx[wli0]*refl)
         wli[i] = wli0
-
+        
+    weight_g_final = np.mean(weight_g_final, axis=0)
     return wli, abs_g_final, prob_g_final, weight_g_final, sol_g_final
