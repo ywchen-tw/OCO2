@@ -220,7 +220,10 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location, )
     return OCO_class
 
 
-def main(cfg_name='20181018_central_asia_2_test4.csv'):
+def main(cfg_name='20150622_amazon.csv'):
+
+    # '20181018_central_asia_2_test4.csv'
+    # 
 
     cfg_dir = '../simulation_dxdy/cfg'
 
@@ -239,9 +242,9 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     inter_compare = f'inter_{compare_num}avg'
 
     if 1:#not os.path.isfile(f'o2a_para_{compare_num}_central_asia_2.csv'):
-        filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl_with_aod.h5'
+        filename = '../simulation_dxdy/data_all_20150622_{}_{}_lbl_without_aod.h5'
         
-        pkl_filename = '20181018_central_asia_2_test4_{}_lbl_with_aod.pkl'
+        pkl_filename = '20150622_amazon_{}_lbl_without_aod.pkl'
         if not os.path.isfile(pkl_filename.format('o2a')):
             _, _, cld_location = cld_position(cfg_name)
             o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
@@ -296,8 +299,8 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
         mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
                               np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
         mask = mask.flatten()
-        parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
-        parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
+        parameters_cld_distance_list = fitting_3bands(cfg_info['cfg_name'], cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
+        parameters_cld_distance_list = fitting_3bands_with_weighted_dis(cfg_info['cfg_name'], weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         
         # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 
@@ -327,7 +330,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                    'weighted_cld_distance': oco_footprint_cld_distance.flatten(),
                                    },)
         output_csv['SND'] = output_csv['SND'].apply(lambda x: f'SND{x:.0f}')
-        output_csv.to_csv(f'central_asia_2_footprint_cld_distance.csv', index=False)
+        output_csv.to_csv(f'{cfg_name[:-4]}_footprint_cld_distance.csv', index=False)
 
                 
         # o2_slope_a, o2_slope_b, o2_inter_a, o2_inter_b = fitting(cld_dist[mask], getattr(o1, rad_c3d_compare)[:,:, -1].flatten()[mask], getattr(o1, rad_clr_compare)[:,:, -1].flatten()[mask], getattr(o1, slope_compare)[:,:,0].flatten()[mask], getattr(o1, inter_compare)[:,:,0].flatten()[mask],
@@ -462,7 +465,7 @@ def sfc_alt_plt(cfg_name,
     cbar.set_label('Surface altitude (m)', fontsize=label_size)
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'{cfg_name}_surface_altitude.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_surface_altitude.png', dpi=300)
 
 
 def cld_dist_plot(o1, cfg_name,
@@ -480,7 +483,7 @@ def cld_dist_plot(o1, cfg_name,
     cbar.set_label('Cloud distance (km)', fontsize=label_size)
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'{cfg_name}_cloud_distance.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_cloud_distance.png', dpi=300)
 
 def weighted_cld_dist_plot(o1, cfg_name,
                   img, wesn, lon_dom, lat_dom, 
@@ -497,7 +500,7 @@ def weighted_cld_dist_plot(o1, cfg_name,
     cbar.set_label('Cloud distance (km)', fontsize=label_size)
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'{cfg_name}_weighted_cloud_distance.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_weighted_cloud_distance.png', dpi=300)
 
 
 def o2a_conti_plot(o1, rad_c3d_compare, cfg_name,
@@ -516,7 +519,7 @@ def o2a_conti_plot(o1, rad_c3d_compare, cfg_name,
     cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     f.tight_layout()
-    f.savefig(f'{cfg_name}_o2a_conti_{rad_c3d_compare}.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_o2a_conti_{rad_c3d_compare}.png', dpi=300)
 
 def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, cfg_name,
                                 img, wesn, lon_dom, lat_dom, 
@@ -551,7 +554,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, cfg_name,
     ax2.text(xmin+0.0*(xmax-xmin), ymin+1.015*(ymax-ymin), '(b)', fontsize=label_size+4, color='k')
     
     f.tight_layout()
-    f.savefig(f'{cfg_name}_{file_tag}_{slope_compare}.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_{file_tag}_{slope_compare}.png', dpi=300)
 
 
 def continuum_fp_compare_plot(o1, o2, o3, cfg_name,
@@ -639,7 +642,7 @@ def continuum_fp_compare_plot(o1, o2, o3, cfg_name,
     cbar3.set_label('3D radiance', fontsize=16)
     ax3.set_title(f'{o3.lam[10]:.3f}nm')
     f.tight_layout()
-    f.savefig(f'{cfg_name}_continuum_fp_compare.png', dpi=300)
+    f.savefig(f'{cfg_name[:-4]}_continuum_fp_compare.png', dpi=300)
 
     # plt.show()
 
@@ -1091,7 +1094,7 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, band, plot=False):
     return slope_a, slope_b, inter_a, inter_b
 
 
-def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
+def fitting_3bands(cfg_name, cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
 
     return_list = []
     fig, ((ax11, ax12), 
@@ -1146,11 +1149,11 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
         ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
         ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    fig.savefig(f'central_asia_test2_all_band_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
+    fig.savefig(f'{cfg_name}_all_band_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
 
     return return_list
 
-def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
+def fitting_3bands_with_weighted_dis(cfg_name, cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask):
 
     return_list = []
     fig, ((ax11, ax12), 
@@ -1205,7 +1208,7 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, rad_3d_compare, rad
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
         ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
         ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    fig.savefig(f'central_asia_test2_all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
+    fig.savefig(f'{cfg_name}_all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
 
     return return_list
 
@@ -1352,7 +1355,7 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1):
     ax_index_label(ax1, '(a)', label_size+2)
     ax_index_label(ax2, '(b)', label_size+2)
     
-    f.savefig('wavelength_select_and_o2a_slope_inter_derive.png', dpi=300)
+    f.savefig(f'{cfg_name}_wavelength_select_and_o2a_slope_inter_derive.png', dpi=300)
 
 def ax_index_label(ax, label, label_size):
     xmin, xmax = ax.get_xlim()
