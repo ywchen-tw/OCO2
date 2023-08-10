@@ -299,7 +299,7 @@ def main(cfg_name='20150622_amazon.csv'):
         mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
                               np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
         mask = mask.flatten()
-        parameters_cld_distance_list = fitting_3bands(cfg_info['cfg_name'], cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
+        parameters_cld_distance_list = fitting_3bands(cfg_info['cfg_name'], cld_dist, o1, o2x, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         parameters_cld_distance_list = fitting_3bands_with_weighted_dis(cfg_info['cfg_name'], weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask)
         
         # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
