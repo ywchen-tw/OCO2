@@ -34,6 +34,7 @@ from oco_subroutine.oco_cfg import grab_cfg, save_h5_info
 
 
 import geopy.distance
+from haversine import haversine, Unit, haversine_vector
 
 import timeit
 
@@ -263,6 +264,55 @@ def cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
     
     return cloud_dist
 
+def weighted_cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
+
+    if os.path.isfile(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy"):
+        cloud_dist = np.load(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy")
+    else:
+        lon_cld, lat_cld = cth_lon, cth_lat
+        cld_list = cth>0
+        cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
+        cld_position = []
+        cld_position_latlon = []
+        for i in range(len(cld_X)):
+            cld_position.append(np.array([cld_X[i], cld_Y[i]]))
+            cld_position_latlon.append(np.array([cth_lat[cld_X[i], cld_Y[i]], cth_lon[cld_X[i], cld_Y[i]]]))
+        cld_position = np.array(cld_position)
+        cld_position_latlon = np.array(cld_position_latlon)
+
+        cloud_dist = np.zeros_like(lon_oco)
+
+
+        for j in range(cloud_dist.shape[1]):
+            for i in range(cloud_dist.shape[0]):
+                tmp_lon = lon_oco[i, j]
+                tmp_lat = lat_oco[i, j]
+
+                if np.logical_and(np.logical_and(tmp_lon >= np.min(cth_lon), tmp_lon <= np.max(cth_lon)), 
+                                  np.logical_and(tmp_lat >= np.min(cth_lat), tmp_lat <= np.max(cth_lat))):
+                    
+                    point = np.array([tmp_lat, tmp_lon])
+
+                    # distances = np.array([haversine(point, p, unit=Unit.KILOMETERS) for p in cld_latlon])
+                    distances = haversine_vector(point, cld_position_latlon, unit=Unit.KILOMETERS, comb=True)
+                    # Calculate the inverse distance weights
+                    
+                    weights = 1 / distances**2 #np.exp(-distances)
+                    #weights = 1 / distances                
+                    
+                    # Calculate the weighted average distance
+                    weighted_avg_distance = np.sum(distances * weights) / np.sum(weights)
+                    
+                    cloud_dist[i, j] = weighted_avg_distance
+                else:
+                    cloud_dist[i, j] = np.nan
+
+        np.save(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy", cloud_dist) 
+
+    return cloud_dist
+
+
+
 def convert_photon_unit(data_photon, wavelength, scale_factor=1):
     # original: 
     # Ph sec^{-1} m^{-2} sr^{-1} um^{-1}
@@ -349,7 +399,7 @@ def plt_map_cld_dis(sat, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data
     cbar.set_label('Cloud top height', fontsize=18)
 
     c2 = frame.scatter(snd_lon, snd_lat, s=5, c=cloud_dist, cmap='OrRd', 
-                       vmin=0, vmax=15)
+                       vmin=10, vmax=500)
     cbar2 = f.colorbar(c2, extend='max')
     cbar2.set_label('Cloud distance', fontsize=18, )
     #frame.scatter(lon_cld[cld_list>0], lat_cld[cld_list>0], s=5, color='r')
@@ -437,7 +487,7 @@ def run_case_modis_650(cfg_info):
     sfc_p[sfc_p<0] = np.nan
     sfc_T = met["Meteorology"]["skin_temperature_met"][...]
 
-    cloud_dist = cld_dist_calc(snd_lon, snd_lat, cth0[:], lon, lat, cfg_info, fdir_data)
+    cloud_dist = weighted_cld_dist_calc(snd_lon, snd_lat, cth0[:], lon, lat, cfg_info, fdir_data)
     plt_map_cld_dis(sat0, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data)
     # sys.exit()
     o2a_rad_convert = convert_photon_unit(o2a_rad, lam[:, :, 0]*1e3)
@@ -514,8 +564,8 @@ def run_case_modis_650(cfg_info):
                 qf_lon[i, j] = np.nan
                 alt_array[i, j] = np.nan
 
-    vmin = 0.5
-    vmax = 10
+    vmin = 10
+    vmax = 500
     select = np.isnan(snd_lat[:, :])==False
     marker_list = ['o', 's', 'd', 'v', '^', '<', '>', 'p', 'h', '8', 'D', 'P', 'X']
     ### with valid sfc_p
@@ -886,11 +936,11 @@ if __name__ == '__main__':
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
-    cfg = 'cfg/20170605_amazon.csv'
+    # cfg = 'cfg/20170605_amazon.csv'
     # cfg = 'cfg/20190209_dryden.csv'
     # cfg = 'cfg/20181018_central_asia.csv'
     # cfg = 'cfg/20190621_australia.csv'
-    # cfg = 'cfg/20151220_afric_east.csv'
+    cfg = 'cfg/20151220_afric_east.csv'
     print(cfg)
     run_simulation(cfg) #done
     
