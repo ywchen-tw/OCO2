@@ -5,7 +5,6 @@ import h5py
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib
-from glob import glob
 import numpy as np
 import copy
 from oco_post_class_ywc import OCOSIM
@@ -21,7 +20,7 @@ from tool_code import *
 import os, pickle 
 from matplotlib import font_manager
 import matplotlib.image as mpl_img
-from haversine import haversine, Unit, haversine_vector
+from haversine import Unit, haversine_vector
 from matplotlib import cm, colors
 import uncertainties.unumpy as unp
 import uncertainties as unc
@@ -46,21 +45,14 @@ def near_rad_calc(OCO_class):
     OCO_class.rad_clr_13, OCO_class.rad_c3d_13,\
     OCO_class.rad_clrs_13, OCO_class.rad_c3ds_13 = coarsening(OCO_class, size=13)
     
-    OCO_class.rad_clr_41, OCO_class.rad_c3d_41,\
-    OCO_class.rad_clrs_41, OCO_class.rad_c3ds_41 = coarsening(OCO_class, size=41)
-        
-    OCO_class.sl_5  = (OCO_class.rad_c3d_5-OCO_class.rad_clr_5) / OCO_class.rad_clr_5        # S_lamda
+    OCO_class.sl_5  = (OCO_class.rad_c3d_5-OCO_class.rad_clr_5) / OCO_class.rad_clr_5 
     OCO_class.sls_5 = (OCO_class.rad_c3ds_5/OCO_class.rad_clr_5 + OCO_class.rad_clrs_5/OCO_class.rad_clr_5)
 
-    OCO_class.sl_9  = (OCO_class.rad_c3d_9-OCO_class.rad_clr_9) / OCO_class.rad_clr_9        # S_lamda
+    OCO_class.sl_9  = (OCO_class.rad_c3d_9-OCO_class.rad_clr_9) / OCO_class.rad_clr_9
     OCO_class.sls_9 = (OCO_class.rad_c3ds_9/OCO_class.rad_clr_9 + OCO_class.rad_clrs_9/OCO_class.rad_clr_9)
 
-    OCO_class.sl_13  = (OCO_class.rad_c3d_13-OCO_class.rad_clr_13) / OCO_class.rad_clr_13        # S_lamda
+    OCO_class.sl_13  = (OCO_class.rad_c3d_13-OCO_class.rad_clr_13) / OCO_class.rad_clr_13
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
-
-    OCO_class.sl_41  = (OCO_class.rad_c3d_41-OCO_class.rad_clr_41) / OCO_class.rad_clr_41        # S_lamda
-    OCO_class.sls_41 = (OCO_class.rad_c3ds_41/OCO_class.rad_clr_41 + OCO_class.rad_clrs_41/OCO_class.rad_clr_41)
-
 
 def coarsening(OCO_class, size=3):
     ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size)
@@ -71,13 +63,18 @@ def coarsening(OCO_class, size=3):
     return ipa0, c3d, ipa0_std, c3d_std
 
 
-def coarsening_subfunction(rad_mca, cld_position, size):
+def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
     """
     Parameters:
     -----------
     rad_mca: 3D array, radiances of various wavelengths
     cld_position: 2D array
     size: int, size of the filter
+    option: str, 'no cloud' or 'cloud edge' or 'all'
+    ###### 'no cloud': filter out the average areas containing cloud
+    ###### 'cloud edge': only present the average areas containing cloud
+    ###### 'all': no filter
+    ****** Note that the box edge is not included in the filter
     """
     lams = rad_mca.shape[-1]
     tmp = np.zeros_like(rad_mca)
@@ -101,10 +98,15 @@ def coarsening_subfunction(rad_mca, cld_position, size):
     for i in range(lams):
         tmp3[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp3[tmp3<0] = np.nan
-    #tmp3[cld_position] = np.nan
 
-
-    return tmp
+    if option == 'no cloud':
+        return tmp
+    elif option == 'cloud edge':
+        return tmp2
+    elif option == 'all':
+        return tmp3
+    else:
+        raise OSError('option not found')
 
 def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unperturb'):
      
@@ -119,21 +121,24 @@ def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unp
             x=clr_np[z,fp,:]/toa[:]*np.pi
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
-        res=np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
-        slope,intercept=res[0]
-        slopestd=np.sqrt(res[1][0][0])
-        interceptstd=np.sqrt(res[1][1][1])
+        res = np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
+        slope, intercept = res[0]
+        slopestd = np.sqrt(res[1][0][0])
+        interceptstd = np.sqrt(res[1][1][1])
     else:
-        slope=np.nan; slopestd=np.nan; intercept=np.nan; interceptstd=np.nan
-    return(slope,slopestd,intercept,interceptstd)
+        slope = np.nan
+        slopestd = np.nan
+        intercept=np.nan
+        interceptstd=np.nan
+    return(slope, slopestd, intercept, interceptstd)
 
-def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line for a given footprint fp
+def slopes_propagation(OCO_class, mode='unperturb'): 
+    # goes through entire line for a given footprint fp
     array_size = [OCO_class.rad_clr_5.shape[0], OCO_class.rad_clr_5.shape[1], 2]
     OCO_class.slope_5avg, OCO_class.inter_5avg = (nan_array(array_size, dtype=np.float64) for _ in range(2))
     OCO_class.slope_9avg, OCO_class.inter_9avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
     OCO_class.slope_13avg, OCO_class.inter_13avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
-    OCO_class.slope_41avg, OCO_class.inter_41avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
-
+    
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
             slope, slopestd, inter, interstd = get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, points=11, mode='unperturb')
@@ -148,11 +153,7 @@ def slopes_propagation(OCO_class, mode='unperturb'): # goes through entire line 
             OCO_class.slope_13avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_13avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_41, OCO_class.sls_41, OCO_class.rad_c3d_41, OCO_class.rad_clr_41, fp, z, points=11, mode='unperturb')
-            OCO_class.slope_41avg[z,fp,:]=[slope,slopestd]
-            OCO_class.inter_41avg[z,fp,:]=[inter,interstd]
-
-def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location, ):
+def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     h5_file  = filename.format(band_tag, id_num)
     OCO_class = OCOSIM(h5_file)
     OCO_class.cld_location = cld_location
@@ -168,7 +169,7 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
 
-    cfg_dir = '../simulation_dxdy/cfg'
+    cfg_dir = '../simulation/cfg'
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_csv}')
     print(cfg_info.keys())
@@ -179,9 +180,8 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     
     date   = datetime.datetime(int(cfg_info['date'][:4]),    # year
                                int(cfg_info['date'][4:6]),   # month
-                               int(cfg_info['date'][6:])     # day
-                              )
-    
+                               int(cfg_info['date'][6:]))    # day
+                              
     cfg_name = cfg_info['cfg_name']
     case_name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     extent_png = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
@@ -199,7 +199,7 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    filename = '../simulation_dxdy/data_all_20181018_{}_{}_lbl_without_aod.h5'
+    filename = '../simulation/data_all_20181018_{}_{}_lbl_without_aod.h5'
     
     pkl_filename = '20181018_amazon_{}_lbl_without_aod.pkl'
     if 1:#not os.path.isfile(pkl_filename.format('o2a')):
@@ -236,12 +236,12 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
 
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask_fp = np.logical_and(np.logical_and(o1.lon[xco2_valid] >= extent[0], o1.lon[xco2_valid] <= extent[1]),
-                            np.logical_and(o1.lat[xco2_valid] >= extent[2], o1.lat[xco2_valid] <= extent[3]))
+                             np.logical_and(o1.lat[xco2_valid] >= extent[2], o1.lat[xco2_valid] <= extent[3]))
 
 
     f_cld_distance = interpolate.RegularGridInterpolator((np.array(weighted_cld_data['lon']).reshape(o1.lon2d.shape)[:, 0], 
-                                                            np.array(weighted_cld_data['lat']).reshape(o1.lon2d.shape)[0, :]),
-                                                            np.array(weighted_cld_data['cld_dis']).reshape(o1.lon2d.shape), method='nearest')
+                                                          np.array(weighted_cld_data['lat']).reshape(o1.lon2d.shape)[0, :]),
+                                                          np.array(weighted_cld_data['cld_dis']).reshape(o1.lon2d.shape), method='nearest')
     
     points_footprint = np.column_stack((o1.lon[xco2_valid][mask_fp].flatten(), o1.lat[xco2_valid][mask_fp].flatten()))
     oco_footprint_cld_distance = f_cld_distance(points_footprint)
@@ -320,19 +320,17 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     
     cld_lon, cld_lat, cld_location = cld_position(cfg_name)
     
-
-    with h5py.File(f'../simulation_dxdy/data/{case_name_tag}/pre-data.h5', 'r') as f:
+    with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as f:
         lon_2d = f['lon'][...]
         lat_2d = f['lat'][...]
         sfh_2d = f['mod/geo/sfh'][...]
-        rad650_2d = f[f'mod/rad/rad_650'][...]
         cth0 = f['mod/cld/cth_ipa'][...]
     
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
                           np.logical_and(lat_2d >= extent[2], lat_2d <= extent[3]))
 
-    img_file = f'../simulation_dxdy/data/{case_name_tag}/{cfg_info["png"]}'
+    img_file = f'../simulation/data/{case_name_tag}/{cfg_info["png"]}'
     wesn = extent_png
     img = mpimg.imread(img_file)
     lon_dom = extent_analysis[:2]
@@ -493,17 +491,14 @@ def continuum_fp_compare_plot(o1, o2, o3,
             l1b_lat.append(o1.lat[i, j])
             l1b_continuum.append(o1.l1b[i, j, np.argmin(np.abs(o1.wvl[i, j, :]-o1.lam[10]))])
     cc1 = ax1.contourf(o1.lon2d, o1.lat2d, rad_to_plot, lev, cmap='jet',
-                    vmin=vmin, vmax=vmax, extend='both', alpha=1)
+                       vmin=vmin, vmax=vmax, extend='both', alpha=1)
     scatter_arg = {'s': 60, 'cmap': 'jet', 'marker': 'o', 'edgecolors': 'k'}
     mask = (o1.lat.flatten()*1e6)>0
     ax1.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                vmin=vmin, vmax=vmax,
-                **scatter_arg)
-
-    cbar1 = f.colorbar(cc1, ax=ax1)#, extend='both')
-    cbar1.set_label('Radiance', fontsize=16)
-    ax1.set_title(f'{o1.lam[10]:.3f}nm')
+                vmin=vmin, vmax=vmax, **scatter_arg)
+    cbar1 = f.colorbar(cc1, ax=ax1)
+    ax1.set_title(f'{o1.lam[10]:.4f}nm')
 
     # ax2
     vmin, vmax = 0.0, 0.04
@@ -519,15 +514,12 @@ def continuum_fp_compare_plot(o1, o2, o3,
             l1b_continuum.append(o2.l1b[i, j, np.argmin(np.abs(o2.wvl[i, j, :]-o2.lam[10]))])
     cc2 = ax2.contourf(o2.lon2d, o2.lat2d, rad_to_plot, lev, cmap='jet',
                     vmin=vmin, vmax=vmax, extend='both', alpha=1)
-
     mask = (o2.lat.flatten()*1e6)>0
     ax2.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                vmin=vmin, vmax=vmax,
-                **scatter_arg)
-    cbar2 = f.colorbar(cc2, ax=ax2)#, extend='both')
-    cbar2.set_label('Radiance', fontsize=16)
-    ax2.set_title(f'{o2.lam[10]:.3f}nm')
+                vmin=vmin, vmax=vmax, **scatter_arg)
+    cbar2 = f.colorbar(cc2, ax=ax2)
+    ax2.set_title(f'{o2.lam[10]:.4f}nm')
 
     # ax3
     vmin, vmax = 0.00, 0.01
@@ -543,16 +535,15 @@ def continuum_fp_compare_plot(o1, o2, o3,
             l1b_continuum.append(o3.l1b[i, j, np.argmin(np.abs(o3.wvl[i, j, :]-o3.lam[10]))])
     cc3 = ax3.contourf(o3.lon2d, o3.lat2d, rad_to_plot, lev, cmap='jet',
                     vmin=vmin, vmax=vmax, extend='both', alpha=1)
-
     mask = (o3.lat.flatten()*1e6)>0
     ax3.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
-                vmin=vmin, vmax=vmax,
-                **scatter_arg)
-    cbar3 = f.colorbar(cc3, ax=ax3)#, extend='both')
-    cbar3.set_label('Radiance', fontsize=16)
+                vmin=vmin, vmax=vmax, **scatter_arg)
+    cbar3 = f.colorbar(cc3, ax=ax3)
+    ax3.set_title(f'{o3.lam[10]:.4f}nm')
 
-    ax3.set_title(f'{o3.lam[10]:.3f}nm')
+    for cbar in [cbar1, cbar2, cbar3]:
+        cbar.set_label('Radiance', fontsize=16)
     for ax, label in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
@@ -561,222 +552,8 @@ def continuum_fp_compare_plot(o1, o2, o3,
     f.savefig(f'{img_dir}/continuum_fp_compare.png', dpi=300)
 
 
-def plot_all_band_alb_sza_relationship(sfc_alb, sza, o2a_slope_a_list, wco2_slope_a_list, sco2_slope_a_list, point_avg,
-                                       img_dir='.'):
-    fig, ax1 = plt.subplots(1, 1, figsize=(6, 5), sharex=False)
-    fig.tight_layout(pad=5.0)
-    label_size = 16
-    tick_size = 12
-
-    o2a_slope_a = np.array([o2a_slope_a_list[sza==30], o2a_slope_a_list[sza==45], o2a_slope_a_list[sza==60]]).mean(axis=0)
-    wco2_slope_a = np.array([wco2_slope_a_list[sza==30], wco2_slope_a_list[sza==45], wco2_slope_a_list[sza==60]]).mean(axis=0)
-    sco2_slope_a = np.array([sco2_slope_a_list[sza==30], sco2_slope_a_list[sza==45], sco2_slope_a_list[sza==60]]).mean(axis=0)
-
-    ax1.scatter(sfc_alb[sza==30], o2a_slope_a_list[sza==45], s=50, label='o2a, sza=45', marker='X', alpha=0.65)
-    ax1.scatter(sfc_alb[sza==45], wco2_slope_a_list[sza==45], s=50, label='wco2, sza=45', marker='p', alpha=0.65)
-    ax1.scatter(sfc_alb[sza==60], sco2_slope_a_list[sza==45], s=50, label='sco2, sza=45', alpha=0.65)
-
-    xx = sfc_alb[sza==30]
-    yy = o2a_slope_a
-    mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
-    xx_o2a, yy_o2a = xx[mask], yy[mask]
-    
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx_o2a, yy_o2a, bounds=([-5, 0., 0], [5, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy_o2a - exp_decay_func_with_intercept(xx_o2a, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy_o2a-np.mean(yy_o2a))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax1.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:blue', 
-              label='o2a\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    yy = wco2_slope_a
-    mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
-    xx_wco2, yy_wco2 = xx[mask], yy[mask]
-
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx_wco2, yy_wco2, bounds=([-5, 0., 0], [5, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy_wco2 - exp_decay_func_with_intercept(xx_wco2, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy_wco2-np.mean(yy_wco2))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax1.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:orange', 
-              label='wco2\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    yy = sco2_slope_a
-    mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
-    xx_sco2, yy_sco2 = xx[mask], yy[mask]
-    
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx_sco2, yy_sco2, bounds=([-5, 0., 0], [5, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy_sco2 - exp_decay_func_with_intercept(xx_sco2, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy_sco2-np.mean(yy_sco2))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax1.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:green', 
-              label='sco2\nfit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-
-    ax1.legend()
-    ax1.set_ylabel('a', fontsize=label_size)
-    ax1.set_xlabel('surface albedo', fontsize=label_size)
-    ax1.set_title('coefficient a for slope', fontsize=label_size)
-    
-    fig.tight_layout()
-    fig.savefig(f'{img_dir}/all_bands_slope_alb_{point_avg}avg.png', dpi=150)
-
-    
-def plot_alb_sza_relationship(sfc_alb, sza, inter_a_list, slope_a_list, inter_e_list, slope_e_list, band_tag, point_avg):
-    fig, ((ax1, ax2),
-        (ax21, ax22)) = plt.subplots(2, 2, figsize=(12, 10), sharex=False)
-    fig.tight_layout(pad=5.0)
-    label_size = 16
-
-    for sza_val, marker in zip([30, 45, 60], ['X', 'p', 'o']):
-        ax1.scatter(sfc_alb[sza==sza_val], slope_a_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
-        ax2.scatter(sfc_alb[sza==sza_val], inter_a_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
-        ax21.scatter(sfc_alb[sza==sza_val], slope_e_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
-        ax22.scatter(sfc_alb[sza==sza_val], inter_e_list[sza==sza_val], s=50, label=f'sza={sza_val}', marker=marker, alpha=0.65)
-   
-    xx = sfc_alb[sza==30]
-    yy = np.nanmean(np.array([slope_a_list[sza==30], slope_a_list[sza==45], slope_a_list[sza==60]]), axis=0)
-    mask = ~(np.isnan(xx) | np.isnan(yy) | np.isinf(xx) | np.isinf(yy))
-    xx, yy = xx[mask], yy[mask]
-
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx, yy, bounds=([-5, 0., 0], [5, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy - exp_decay_func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax1.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='r', 
-              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    xx = sfc_alb[sza==30]
-    yy = np.array([inter_a_list[sza==30], inter_a_list[sza==45], inter_a_list[sza==60]]).mean(axis=0)
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx, yy, bounds=([-5, 0., 0], [5, 50, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,)
-    residuals = yy - exp_decay_func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-   
-    b_inter_a = popt[1]
-    
-
-    xx = sfc_alb[sza==30]
-    yy = inter_a_list[sza==30]
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy - exp_decay_func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax2.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:blue', 
-              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    yy = inter_a_list[sza==45]
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy - exp_decay_func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax2.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:orange', 
-              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-    
-    yy = inter_a_list[sza==60]
-    popt, pcov = curve_fit(exp_decay_func_with_intercept, xx, yy, bounds=([-5, b_inter_a, 0], [5, b_inter_a*1.00001, 0.3]),
-                        #p0=(0.1, 0.7),
-                        maxfev=3000,
-                        #sigma=value_std[val_mask], 
-                        #absolute_sigma=True,
-                        )
-    residuals = yy - exp_decay_func_with_intercept(xx, *popt)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((yy-np.mean(yy))**2)
-    r_squared = 1 - (ss_res / ss_tot)
-    plot_xx = np.arange(0.05, xx.max()+0.05, 0.01)
-    ax2.plot(plot_xx, exp_decay_func_with_intercept(plot_xx, *popt), '--', color='tab:green', 
-              label='fit: a=%5.3f\n     b=%5.1f\n     c=%5.3f' % tuple(popt), linewidth=1.5, alpha=0.5)
-
-    yy = np.array([slope_e_list[sza==30], slope_e_list[sza==45], slope_e_list[sza==60]])
-    yy = yy[yy<10].mean()
-    ax21.hlines(yy, plot_xx[0], plot_xx[-1], 'r', alpha=0.5, label=f'{yy:.3f}')
-
-    yy = inter_e_list[sza==30]
-    yy = yy[yy<10].mean()
-    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:blue', alpha=0.5, label=f'{yy:.3f}')
-    yy = inter_e_list[sza==45]
-    yy = yy[yy<10].mean()
-    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:orange', alpha=0.5, label=f'{yy:.3f}')
-    yy = inter_e_list[sza==60]
-    yy = yy[yy<10].mean()
-    ax22.hlines(yy, plot_xx[0], plot_xx[-1], 'tab:green', alpha=0.5, label=f'{yy:.3f}')
-    
-    ax1.legend()
-    ax2.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-    ax21.legend()
-    ax22.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-
-
-    ax21.set_ylim(0, 10)
-
-    ax1.set_ylabel('a', fontsize=label_size)
-    ax2.set_ylabel('a', fontsize=label_size)
-
-    ax21.set_ylabel('e-folding distance (km)', fontsize=label_size)
-    ax22.set_ylabel('e-folding distance (km)', fontsize=label_size)
-
-    for ax in [ax1, ax2, ax21, ax22]:
-        ax.set_xlabel('surface albedo', fontsize=label_size)
-    
-    ax1.set_title('coefficient a for slope', fontsize=label_size)
-    ax2.set_title('coefficient a for intercept', fontsize=label_size)
-    ax21.set_title('e-folding distance for slope', fontsize=label_size)
-    ax22.set_title('e-folding distance for intercept', fontsize=label_size)
-    fig.tight_layout()
-    fig.savefig(f'{band_tag}_slope_inter_cld_distance_{point_avg}avg.png', dpi=150)
-    plt.show()
-    
-
 def cld_position(cfg_name):
-    cldfile = f'../simulation_dxdy/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
@@ -786,7 +563,7 @@ def cld_position(cfg_name):
 
 
 def cld_dist_calc(cfg_name, o1, slope_compare):
-    cldfile = f'../simulation_dxdy/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         cth = f[f'mod/cld/cth_ipa'][...]
 
@@ -815,8 +592,7 @@ def cld_dist_calc(cfg_name, o1, slope_compare):
     cld_slope_inter.to_pickle(f'{cfg_name}_cld_distance.pkl')
 
 def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
-
-    cldfile = f'../simulation_dxdy/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
@@ -853,7 +629,6 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
 def heatmap_xy_3(x, y, ax):
     mask = ~(np.isnan(x) | np.isnan(y) | np.isinf(x) | np.isinf(y))
     x, y = x[mask], y[mask]
-    
     # cloud distance
     interval = 1/2
     start = 1
@@ -889,16 +664,14 @@ def heatmap_xy_3(x, y, ax):
             yy = value_avg[val_mask][mask]
             if len(yy) > 0:
                 popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
-                                    p0=(0.1, 0.7),
-                                    maxfev=5000,
-                                    sigma=value_std[val_mask][mask], 
-                                    absolute_sigma=True,
-                                    )
+                                       p0=(0.1, 0.7),
+                                       maxfev=5000,
+                                       sigma=value_std[val_mask][mask], 
+                                       absolute_sigma=True,)
                 residuals = yy - exp_decay_func(xx, *popt)
                 ss_res = np.sum(residuals**2)
                 ss_tot = np.sum((yy-np.mean(yy))**2)
                 r_squared = 1 - (ss_res / ss_tot)
-
                 if r_squared > temp_r2:
                     temp_r2 = r_squared
                 else:
@@ -912,7 +685,6 @@ def heatmap_xy_3(x, y, ax):
     print('-'*15)
     print(f'E-folding dis: {e_fold_dist:.2f} +/- {e_fold_dist_err:.2f}')
     ax.legend(fontsize=13)
-
     return popt, perr
 
 def exp_decay_func(x, a, b):
@@ -922,7 +694,6 @@ def exp_decay_func_with_intercept(x, a, b, c):
      return a * np.exp(-b * x) + c
 
 def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, band, plot=False):
-
     if plot:
         fig, (ax11, ax12) = plt.subplots(1, 2, figsize=(12, 4), sharex=False)
         fig.tight_layout(pad=5.0)
@@ -958,20 +729,21 @@ def fitting(cloud_dist, rad_3d, rad_clr, slope, inter, band, plot=False):
     return slope_a, slope_b, inter_a, inter_b
 
 
-def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
+def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, 
+                   slope_compare, inter_compare, region_mask,
                    img_dir='.'):
 
     return_list = []
     fig, ((ax11, ax12), 
-            (ax21, ax22),
-            (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
+          (ax21, ax22),
+          (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
     fig.tight_layout(pad=5.0)
     label_size = 16
     tick_size = 13
 
     ax_list = [(ax11, ax12), 
-                (ax21, ax22),
-                (ax31, ax32)]
+               (ax21, ax22),
+               (ax31, ax32)]
     for i in range(3):
         oco_band = [o1, o2, o3][i]
         rad_3d = getattr(oco_band, rad_3d_compare)[:,:, -1].flatten()
@@ -1019,9 +791,9 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slop
 
     return return_list
 
-def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
+def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, 
+                                     rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
                                      img_dir='.'):
-
     return_list = []
     fig, ((ax11, ax12), 
             (ax21, ax22),
@@ -1031,15 +803,14 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, rad_3d_compare, rad
     tick_size = 13
 
     ax_list = [(ax11, ax12), 
-                (ax21, ax22),
-                (ax31, ax32)]
+               (ax21, ax22),
+               (ax31, ax32)]
     for i in range(3):
         oco_band = [o1, o2, o3][i]
         rad_3d = getattr(oco_band, rad_3d_compare)[:,:, -1].flatten()
         rad_clr = getattr(oco_band, rad_clr_compare)[:,:, -1].flatten()
         mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
-        #mask = np.logical_and(cloud_dist > 0, region_mask)
-
+        
         slope = getattr(oco_band, slope_compare)[:,:,0].flatten()
         inter = getattr(oco_band, inter_compare)[:,:,0].flatten()
 
@@ -1126,14 +897,11 @@ def fitting_without_plot(x, y):
 def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     date   = datetime.datetime(int(cfg_info['date'][:4]),    # year
                                int(cfg_info['date'][4:6]),   # month
-                               int(cfg_info['date'][6:])     # day
-                              )
+                               int(cfg_info['date'][6:]))    # day
     case_name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     nx = int(cfg_info['nx'])
-    with h5py.File(f'../simulation_dxdy/data/{case_name_tag}/atm_abs_o2a_{nx+1}.h5', 'r') as file:
-        wvl = file['wl_oco'][...]
+    with h5py.File(f'../simulation/data/{case_name_tag}/atm_abs_o2a_{nx+1}.h5', 'r') as file:
         trnsx = file['trns_oco'][...]
-        oco_lam = file['lamx'][...]
         oco_tx = file['tx'][...]
 
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(14, 5))
@@ -1142,6 +910,7 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     label_size = 16
     tick_size = 14
     refl = o1.sfc_alb
+
     # first fig
     x = np.arange(1016)
     sx = np.argsort(trnsx)
@@ -1163,11 +932,9 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     # second fig
     toa = o1.toa
     mu = np.mean(o1.mu)/180*np.pi
-    
     sl_np = o1.sl_5
     sls_np = o1.sls_5#/np.sqrt(3)
     c3d_np = o1.rad_c3d_5
-    clr_np = o1.rad_clr_5
     fp, z = 166, 180
     points = nx+1
 
@@ -1204,7 +971,6 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     ax2.set_xlabel('Reflectance', fontsize=label_size)
     ax2.set_ylabel('Perturbation (%)', fontsize=label_size)
 
-
     popt, pcov = res
     # calculate parameter confidence interval
     a, b = unc.correlated_values(popt, pcov)
@@ -1224,8 +990,6 @@ def ax_index_label(ax, label, label_size):
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     ax.text(xmin+0.0*(xmax-xmin), ymin+1.035*(ymax-ymin), label, fontsize=label_size, color='k')
-
-
 
 
 if __name__ == "__main__":

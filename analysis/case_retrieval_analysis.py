@@ -5,58 +5,40 @@ import h5py
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib
-from glob import glob
 import numpy as np
-import copy
 from oco_post_class_ywc import OCOSIM
 from matplotlib import cm, colors
-from scipy import interpolate
-from scipy import stats
-from scipy.ndimage import uniform_filter
-from  scipy.optimize import curve_fit
-import geopy.distance
-import xarray as xr
 import seaborn as sns
 from tool_code import *
 import os, pickle 
 from matplotlib import font_manager
 import matplotlib.image as mpl_img
-from haversine import haversine, Unit, haversine_vector
 from matplotlib import cm, colors
 import uncertainties.unumpy as unp
 import uncertainties as unc
 import cartopy.crs as ccrs
 import cartopy.feature as cf  
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 import cartopy.io.img_tiles as cimgt
 from urllib.request import urlopen, Request
 import io
 from PIL import Image
-
-
-from util.oco_cfg import grab_cfg, output_h5_info, nan_array, ax_lon_lat_label
+from util.oco_cfg import grab_cfg, output_h5_info
 
 font_path = '/System/Library/Fonts/Supplemental/Arial.ttf'  # Your font path goes here
 font_manager.fontManager.addfont(font_path)
 prop = font_manager.FontProperties(fname=font_path)
-
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = prop.get_name()
 
-def main():
-    cfg_name='20181018_central_asia_2_test4.csv'
 
-    cfg_dir = '../simulation_dxdy/cfg'
-
-
+def main(cfg_name='20181018_central_asia_2_test4.csv'):
+    cfg_dir = '../simulation/cfg'
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     if 'o2' in cfg_info.keys():
         id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[-12:-3]
-        boundary = [[float(i) for i in cfg_info['subdomain']], 'r']
     else:
-        boundary = [[float(i) for i in cfg_info['subdomain']], 'orange']
-    subdomain = cfg_info['subdomain']
+        sys.exit('Error: no output file in cfg_info[o2]')
 
     pkl_filename = '20181018_amazon_{}_lbl_with_aod.pkl'
     with open(pkl_filename.format('o2a'), 'rb') as f:
@@ -75,7 +57,7 @@ def main():
     extent_png = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
 
-    img_file = f'../simulation_dxdy/data/{case_name_tag}/{cfg_info["png"]}'
+    img_file = f'../simulation/data/{case_name_tag}/{cfg_info["png"]}'
     wesn = extent_png
     img = mpimg.imread(img_file)
     lon_dom = extent_analysis[:2]
@@ -91,7 +73,7 @@ def main():
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
-    with h5py.File(f'../simulation_dxdy/data/{case_name_tag}/pre-data.h5', 'r') as predata:
+    with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as predata:
         modis_aod = predata['mod/aod/AOD_550_land'][...]
         modis_lon, modis_lat = predata['lon'][...], predata['lat'][...]
     modis_aod[modis_aod<0] = np.nan
@@ -108,10 +90,8 @@ def main():
     df = pd.DataFrame({key:retrieval_no_aod_parameterization[key][...] for key in key_list})
     df['o2a_inter'] = retrieval_no_aod_parameterization['pert_o2'][...][:, 0]
     df['o2a_slope'] = retrieval_no_aod_parameterization['pert_o2'][...][:, 1]
-
     df['wco2_inter'] = retrieval_no_aod_parameterization['pert_wco2'][...][:, 0]
     df['wco2_slope'] = retrieval_no_aod_parameterization['pert_wco2'][...][:, 1]
-
     df['sco2_inter'] = retrieval_no_aod_parameterization['pert_sco2'][...][:, 0]
     df['sco2_slope'] = retrieval_no_aod_parameterization['pert_sco2'][...][:, 1]
     df.replace(-2, np.nan, inplace=True)
@@ -206,7 +186,7 @@ def main():
     scene_google_map(img, wesn, lon_dom, lat_dom, o1,
                     img_dir=img_dir)
     
-    with h5py.File(f'../simulation_dxdy/data/{case_name_tag}/atm_abs_o2a_11.h5', 'r') as file:
+    with h5py.File(f'../simulation/data/{case_name_tag}/atm_abs_o2a_11.h5', 'r') as file:
         wvl = file['wl_oco'][...]
         trnsx = file['trns_oco'][...]
         oco_lam = file['lamx'][...]

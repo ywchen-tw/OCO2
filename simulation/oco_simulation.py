@@ -268,7 +268,6 @@ def preprocess(cfg_info):
                     int(cfg_info['date'][6:]))    # day
     extent = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
-    print(f'simulation extent: {extent}')
     name_tag = f"{cfg_info['cfg_name']}_{date.strftime('%Y%m%d')}"
     # ===============================================================
 
@@ -280,15 +279,12 @@ def preprocess(cfg_info):
     # download satellite data based on given date and region
     # ===============================================================
     fname_sat = '/'.join([fdir_data, 'sat.pk'])
-    print(f'fname_sat: {fname_sat}')
-
     sat0 = satellite_download(date=date, 
                               fdir_out=cfg_info['path_sat_data'], 
                               fdir_pre_data=fdir_data,
                               extent=extent,
                               extent_analysis=extent_analysis,
                               fname=fname_sat, overwrite=False)
-
     # ===============================================================
     if not ('l2' in cfg_info.keys()):
         oco_data_dict = {'l2': 'oco_std',
@@ -319,7 +315,8 @@ def preprocess(cfg_info):
     for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
         fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
         if not os.path.isfile(fname_abs):
-            oco_abs(cfg, sat0, zpt_file=zpt_file, iband=iband, 
+            oco_abs(cfg, sat0, 
+                    zpt_file=zpt_file, iband=iband, 
                     nx=nx, 
                     Trn_min=float(cfg_info['Trn_min']), 
                     pathout=fdir_data,
@@ -344,14 +341,14 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
-        # cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
-        #                 overwrite=True, case_name_tag=name_tag)
+        cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
+                        overwrite=True, case_name_tag=name_tag)
         modis_650_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_650,
                                    solver=solver, wvl=650, plot=True)
     # ======================================================================
 
 @timing
-def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
+def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     # Get information from cfg_info
     # ======================================================================
     date      = preprocess_info[0]
@@ -397,24 +394,19 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     run_case_modis_650(cfg_info, preprocess_info)
-    sys.exit()
-    #"""
+
     if not check_h5_info(cfg, 'o2'): 
-        o2_h5 = run_case('o2a', cfg_info, preprocess_info,
+        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info,
                           sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'o2', o2_h5)
-    #""" 
-    
-    #"""
+
     if not check_h5_info(cfg, 'wco2'):
-        wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'wco2', wco2_h5)
-    #"""
-    #""""
+
     if not check_h5_info(cfg, 'sco2'):
-        sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
         save_h5_info(cfg, 'sco2', sco2_h5)
-    #"""
 
 if __name__ == '__main__':
     
@@ -427,8 +419,6 @@ if __name__ == '__main__':
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     run_simulation(cfg) #done
-    
-    # cProfile.run('run_simulation(cfg)')
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 

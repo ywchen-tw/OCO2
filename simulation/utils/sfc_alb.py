@@ -23,7 +23,7 @@ def cal_sfc_alb_2d(x_ref, y_ref, data_ref, x_bkg_2d, y_bkg_2d, data_bkg_2d, scal
     data_ref = data_ref[logic_valid]
 
     if scale:
-        popt, pcov = curve_fit(func, data_bkg, data_ref)
+        popt, _ = curve_fit(func, data_bkg, data_ref)
         slope = popt[0]
     else:
         slope = 1.0
