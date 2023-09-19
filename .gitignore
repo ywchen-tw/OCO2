@@ -22,6 +22,7 @@ __pycache__/
 *.npy
 *.txt
 *.ipynb
+_*
 
 # Distribution / packaging
 .Python
@@ -33,6 +34,7 @@ simulation/data
 simulation/tmp-data
 simulation_dxdy/data
 simulation_dxdy/tmp-data
+spectra_analysis/
 test/tmp-data
 retrieval/RtRetrievalFramework
 build/
