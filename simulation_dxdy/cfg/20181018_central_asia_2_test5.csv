@@ -4,7 +4,7 @@ date,20181018,,,,,,
 juld,291,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,20181004.png,,,,,,# PNG file
+png,aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
 pngwesn,55.15,55.45,33.85,34.3,,,# PNG file extent
 subdomain,55.15,55.45,33.85,34.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -49,7 +49,7 @@ cbt_high,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
 o2,data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
-wco2,data_all_20181018_wco2_6170_6209_sfc_alb_0.376_sza_48.5.h5,,,,,,
+wco2,/Users/yuch8913/programming/oco/simulation_dxdy/data/20181018_central_asia_2_test5_20181018/data_all_20181018_wco2_6170_6209_sfc_alb_0.376_sza_48.5_aod500_0.000.h5,,,,,,
 sco2,data_all_20181018_sco2_6170_6209_sfc_alb_0.357_sza_48.5.h5,,,,,,
 ,,,,,,,
 # full physics retrieval information,,,,,,,

@@ -8,7 +8,6 @@ from matplotlib import ticker
 import matplotlib.image as mpl_img
 import platform
 from er3t.pre.abs import abs_16g
-#from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
 from er3t.pre.pha import pha_mie_wc 
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
@@ -63,12 +62,12 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, cfg_info, fdir='tmp-data', solver
         data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
         data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
         if solver.lower() == 'ipa':
-            suffix = 'ipa0'     # with wind correction only
+            suffix = 'ipa'     # with wind correction only
         elif solver.lower() == '3d':
-            suffix = 'ipa'      # with parallex and wind correction
-        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data[f'mod/cld/cot_{suffix}'][...])
-        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data[f'mod/cld/cer_{suffix}'][...])
-        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data[f'mod/cld/cth_{suffix}'][...])
+            suffix = '3d'      # with parallex and wind correction
+        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data[f'mod/cld/cot_{suffix}_650'][...])
+        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data[f'mod/cld/cer_{suffix}_650'][...])
+        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data[f'mod/cld/cth_{suffix}_650'][...])
 
     modl1b    =  sat_tmp(data)
     fname_cld = '%s/cld.pk' % fdir
@@ -172,15 +171,11 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
 
     # create data directory (for storing data) if the directory does not exist
     # ==================================================================================================
-    #name_tag = __file__.replace('.py', '')
-    fname_sat = f'data/{case_name_tag}/sat.pk'
     extent_list = sat.extent
     extent_analysis = sat.extent_analysis
     mod_img = mpl_img.imread(sat.fnames['mod_rgb'][0])
     mod_img_wesn = sat.extent
     ref_threshold = float(cfg_info['ref_threshold'])
-    
-    fdir_data = os.path.abspath('data/%s' % case_name_tag)
     # ==================================================================================================
 
     # read in MODIS measured radiance
@@ -191,10 +186,13 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         lat_mod = f['lat'][...]
         rad_mod = f['mod/rad/rad_650'][...]
         cth_mod = f['mod/cld/cth_l2'][...]
+        cot_3d_650 = f['mod/cld/cot_3d_650'][...]
+        cer_3d_650 = f['mod/cld/cer_3d_650'][...]
+        cth_3d_650 = f['mod/cld/cth_3d_650'][...]
         if solver.lower() == 'ipa':
-            cth_mod = f['mod/cld/cth_ipa0_650'][...]
+            cth_mod = f['mod/cld/cth_ipa_650'][...]
         elif solver.lower() == '3d':
-            cth_mod = f['mod/cld/cth_ipa'][...]
+            cth_mod = f['mod/cld/cth_3d_650'][...]
     # ==================================================================================================
 
     # read in EaR3T simulations (3D)
@@ -311,8 +309,7 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax1.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
         ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
-        #ax1.set_title('MODIS Measured Radiance', fontsize=label_size)
-
+        
         logic = (lon_mod>=extent_analysis[0]) & (lon_mod<=extent_analysis[1]) &\
                 (lat_mod>=extent_analysis[2]) & (lat_mod<=extent_analysis[3])
 
@@ -323,18 +320,7 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax2.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
         ax2.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
         ax2.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
-        #ax2.set_title(f'EaR$^3$T Simulated {solver} Radiance', fontsize=label_size)
-        
-        # xedges = np.arange(-0.01, 0.61, 0.005)
-        # yedges = np.arange(-0.01, 0.61, 0.005)
-        # heatmap, xedges, yedges = np.histogram2d(rad_mod[logic], rad_rtm_3d[logic], bins=(xedges, yedges))
-        # YY, XX = np.meshgrid((yedges[:-1]+yedges[1:])/2.0, (xedges[:-1]+xedges[1:])/2.0)
-
-        # levels = np.concatenate((np.arange(1.0, 10.0, 1.0),
-        #                          np.arange(10.0, 200.0, 10.0),
-        #                          np.arange(200.0, 1000.0, 100.0),
-        #                          np.arange(1000.0, 10001.0, 5000.0)))
-
+                
         ax3 = fig.add_axes([0.65, 0.05, 0.315, 0.9])
         ax3.set_aspect('equal', 'box')
         cs = ax3.contourf(XX, YY, heatmap, levels, extend='both', locator=ticker.LogLocator(), cmap='jet')
@@ -358,7 +344,53 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
             ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), 
                     label_ord, fontsize=label_size, color='k')
 
-
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}_comparison.png', bbox_inches='tight')
+        # ==================================================================================================
+
+        # ==================================================================================================
+        label_size = 16
+        tick_size = 12
+        plt.clf()
+        fig = plt.figure(figsize=(15, 5))
+        ax1 = fig.add_axes([0.05, 0.05, 0.25, 0.9])
+        ax1.imshow(mod_img, extent=mod_img_wesn)
+        cs1 = ax1.pcolormesh(lon_mod, lat_mod, cot_3d_650, cmap='jet',
+                       vmin=0.0, vmax=50.0)
+        cb1 = fig.colorbar(cs1, ax=ax1, orientation='vertical', pad=0.05)
+        cb1.set_label('COT', fontsize=label_size)
+        logic = (lon_mod>=extent_analysis[0]) & (lon_mod<=extent_analysis[1]) &\
+                (lat_mod>=extent_analysis[2]) & (lat_mod<=extent_analysis[3])
+
+        ax2 = fig.add_axes([0.40, 0.05, 0.25, 0.9])
+        ax2.imshow(mod_img, extent=mod_img_wesn)
+        cs2 = ax2.pcolormesh(lon_mod, lat_mod, cer_3d_650, cmap='jet',
+                             vmin=0.0, vmax=30.0)
+        cb2 = fig.colorbar(cs2, ax=ax2, orientation='vertical', pad=0.05)
+        cb2.set_label('CER ($\mathrm{\mu m}$)', fontsize=label_size)
+
+
+        ax3 = fig.add_axes([0.75, 0.05, 0.25, 0.9])
+        ax3.imshow(mod_img, extent=mod_img_wesn)
+        cs3 = ax3.pcolormesh(lon_mod, lat_mod, cth_3d_650, cmap='jet',
+                             vmin=0.0, vmax=10.0)
+        cb3 = fig.colorbar(cs3, ax=ax3, orientation='vertical', pad=0.05)
+        cb3.set_label('CTH (km)', fontsize=label_size)
+
+
+        for ax, label_ord in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
+            ax.set_xlim(extent_analysis[0], extent_analysis[1])
+            ax.set_ylim(extent_analysis[2], extent_analysis[3])
+            ax.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
+            ax.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
+            ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+            ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+            xmin, xmax = ax.get_xlim()
+            ymin, ymax = ax.get_ylim()
+            ax.tick_params(axis='both', labelsize=tick_size)
+            ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), 
+                    label_ord, fontsize=label_size, color='k')
+
+        plt.subplots_adjust(hspace=0.4, wspace=0.4)
+        plt.savefig(f'{sat.fdir_pre_data}/modis_650_cloud_information.png', bbox_inches='tight')
         # ==================================================================================================

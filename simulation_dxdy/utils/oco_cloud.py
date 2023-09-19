@@ -528,9 +528,9 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     #/----------------------------------------------------------------------------\#
     with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r+') as f0:
         # Update or create groups with try-except blocks
-        group_data = {'mod/cld/cot_ipa0_650': cot_ipa0_650,
-                      'mod/cld/cer_ipa0_650': cer_ipa0_650,
-                      'mod/cld/cth_ipa0_650': cth_ipa0_650,
+        group_data = {'mod/cld/cot_ipa_650': cot_ipa0_650,
+                      'mod/cld/cer_ipa_650': cer_ipa0_650,
+                      'mod/cld/cth_ipa_650': cth_ipa0_650,
                       'mod/cld/cot_3d_650': cot_3d_650,
                       'mod/cld/cer_3d_650': cer_3d_650,
                       'mod/cld/cth_3d_650': cth_3d_650,
