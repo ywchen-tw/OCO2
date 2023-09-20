@@ -99,6 +99,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     df.drop_duplicates('snd', inplace=True)
     df['diff_xco2'] = df['xco2_retrieved']-df['xco2_L2_file']
 
+    XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df, img_dir=img_dir)
     XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
                                        img_dir=img_dir)
     print(df['psur_MT_file'].min(), df['psur_MT_file'].max())
@@ -266,6 +267,32 @@ def aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
     f.tight_layout()
     f.savefig(f'{img_dir}/MODIS_550AOD.png', dpi=300)
 
+def XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df,
+                 img_dir='.', label_size=16, tick_size=14):
+
+    f, ax =plt.subplots(1, 1, figsize=(6, 6))
+
+    ax.imshow(img, extent=wesn)
+    ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    ax.tick_params(axis='both', labelsize=tick_size)
+    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+    ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+ 
+        
+    mask = df['xco2_retrieved'][...]!=-2
+    c = ax.scatter(df['lon'], df['lat'], 
+                    c=df['xco2_L2_file'], s=30,
+                    cmap='RdBu_r', vmin=394, vmax=412)
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('$\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
+    cbar.ax.tick_params(labelsize=tick_size)
+    f.tight_layout(pad=0.2)
+    f.savefig(f'{img_dir}/MODIS_XCO2_l2.png', dpi=300)
+
+
 def XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
                                        img_dir='.', label_size=16, tick_size=14):
     f, (ax1, ax2, ax3) =plt.subplots(1, 3, figsize=(17, 6))
@@ -345,6 +372,8 @@ def XCO2_before_after_pixel(img, wesn, lon_dom, lat_dom, df,
     for ax, label in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
+        ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+        ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
 
     f.tight_layout(pad=0.2)

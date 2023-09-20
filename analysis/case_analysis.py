@@ -164,7 +164,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_2_test5.csv'):
+def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -193,7 +193,7 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 5
+    compare_num = 13
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
@@ -202,7 +202,7 @@ def main(cfg_csv='20181018_central_asia_2_test5.csv'):
     filename = '../simulation/data_all_20181018_{}_{}_lbl_without_aod.h5'
     
     pkl_filename = '20181018_amazon_{}_lbl_without_aod.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -442,7 +442,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
         ax.imshow(img, extent=wesn)
         ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
         ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
-        #ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
         ax_lon_lat_label(ax, label_size=14, tick_size=12)
     mask = ~(cth0>0)
     c1 = ax1.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
@@ -460,6 +460,8 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
     for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
+        ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+        ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
         
     f.tight_layout(pad=0.5)
@@ -682,8 +684,6 @@ def heatmap_xy_3(x, y, ax):
     plot_xx = np.arange(0, cld_list.max()+0.75, 0.5)
     ax.plot(plot_xx, exp_decay_func(plot_xx, *popt), '--', color='limegreen', 
             label='fit: amplitude     = {:.3f} $\pm$ {:.3f}\n     e-folding dis = {:.2f} $\pm$ {:.2f}'.format(popt[0], perr[0], e_fold_dist, e_fold_dist_err), linewidth=3.5)
-    print('-'*15)
-    print(f'E-folding dis: {e_fold_dist:.2f} +/- {e_fold_dist_err:.2f}')
     ax.legend(fontsize=13)
     return popt, perr
 
