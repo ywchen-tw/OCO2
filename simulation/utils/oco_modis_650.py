@@ -223,10 +223,6 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax1 = fig.add_subplot(234)
         ax1.imshow(mod_img, extent=mod_img_wesn)
         ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
-        ax1.set_xlabel('Longititude [$^\circ$]')
-        ax1.set_ylabel('Latitude [$^\circ$]')
-        ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax1.set_title('MODIS Measured Radiance')
 
         logic = (lon_mod>=extent_analysis[0]) &\
@@ -247,18 +243,10 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax3 = fig.add_subplot(232)
         ax3.imshow(mod_img, extent=mod_img_wesn)
         ax3.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
-        ax3.set_xlabel('Longititude [$^\circ$]')
-        ax3.set_ylabel('Latitude [$^\circ$]')
-        ax3.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax3.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax3.set_title(f'EaR$^3$T Simulated {solver} Radiance')
         
         ax13 = fig.add_subplot(233)
         diff = ax13.imshow((rad_rtm_3d-rad_mod).T, cmap='bwr', extent=extent, origin='lower', vmin=-0.15, vmax=0.15)
-        ax13.set_xlabel('Longititude [$^\circ$]')
-        ax13.set_ylabel('Latitude [$^\circ$]')
-        ax13.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax13.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         cbar_13 = fig.colorbar(diff, ax=ax13)
         cbar_13.set_label('Simulated - MODIS Radiance')
         ax13.set_title(f'{solver} Simulated - MODIS Radiance')
@@ -275,22 +263,18 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax22.imshow(mod_img, extent=mod_img_wesn)
         cth_mask = ~np.isnan(cth_mod)
         ax22.scatter(lon_mod, lat_mod, cth_mod, c='r')
-        ax22.set_xlabel('Longititude [$^\circ$]')
-        ax22.set_ylabel('Latitude [$^\circ$]')
-        ax22.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax22.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax22.set_title(f'EaR$^3$T Cloud mask\n(ref threshold: {ref_threshold})')
 
         ax4 = fig.add_subplot(236) 
         cth_img = ax4.imshow(cth_mod.T, cmap='jet', extent=extent, origin='lower', vmin=0.0, vmax=10)
         fig.colorbar(cth_img, ax=ax4)
-        ax4.set_xlabel('Longititude [$^\circ$]')
-        ax4.set_ylabel('Latitude [$^\circ$]')
-        ax4.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax4.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
         ax4.set_title('EaR$^3$T CTH')
 
         for ax in [ax1, ax3, ax13, ax22, ax4]:
+            ax.set_xlabel('Longititude [$^\circ$]')
+            ax.set_ylabel('Latitude [$^\circ$]')
+            ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
+            ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
             ax.set_xlim(extent_list[0]+0.15, extent_list[1]-0.15)
             ax.set_ylim(extent_list[2]+0.15, extent_list[3]-0.15)
 
@@ -305,22 +289,11 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax1 = fig.add_axes([0.05, 0.05, 0.21, 0.9])
         ax1.imshow(mod_img, extent=mod_img_wesn)
         ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
-        ax1.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
-        ax1.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
-        ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
-        
-        logic = (lon_mod>=extent_analysis[0]) & (lon_mod<=extent_analysis[1]) &\
-                (lat_mod>=extent_analysis[2]) & (lat_mod<=extent_analysis[3])
-
+                
         ax2 = fig.add_axes([0.35, 0.05, 0.21, 0.9])
         ax2.imshow(mod_img, extent=mod_img_wesn)
         ax2.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
-        ax2.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
-        ax2.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
-        ax2.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.5)))
-        ax2.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.5)))
-                
+                        
         ax3 = fig.add_axes([0.65, 0.05, 0.315, 0.9])
         ax3.set_aspect('equal', 'box')
         cs = ax3.contourf(XX, YY, heatmap, levels, extend='both', locator=ticker.LogLocator(), cmap='jet')
@@ -329,7 +302,6 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax3.set_ylim(0.0, 0.6)
         ax3.set_xlabel('MODIS Measured Radiance', fontsize=label_size)
         ax3.set_ylabel(f'Simulated {solver} Radiance', fontsize=label_size)
-        
 
         for ax in [ax1, ax2]:
             ax.set_xlim(extent_analysis[0], extent_analysis[1])
@@ -354,31 +326,26 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         plt.clf()
         fig = plt.figure(figsize=(15, 5))
         ax1 = fig.add_axes([0.05, 0.05, 0.25, 0.9])
-        ax1.imshow(mod_img, extent=mod_img_wesn)
+        ax2 = fig.add_axes([0.40, 0.05, 0.25, 0.9])
+        ax3 = fig.add_axes([0.75, 0.05, 0.25, 0.9])
+        
         cs1 = ax1.pcolormesh(lon_mod, lat_mod, cot_3d_650, cmap='jet',
                        vmin=0.0, vmax=50.0)
         cb1 = fig.colorbar(cs1, ax=ax1, orientation='vertical', pad=0.05)
         cb1.set_label('COT', fontsize=label_size)
-        logic = (lon_mod>=extent_analysis[0]) & (lon_mod<=extent_analysis[1]) &\
-                (lat_mod>=extent_analysis[2]) & (lat_mod<=extent_analysis[3])
 
-        ax2 = fig.add_axes([0.40, 0.05, 0.25, 0.9])
-        ax2.imshow(mod_img, extent=mod_img_wesn)
         cs2 = ax2.pcolormesh(lon_mod, lat_mod, cer_3d_650, cmap='jet',
                              vmin=0.0, vmax=30.0)
         cb2 = fig.colorbar(cs2, ax=ax2, orientation='vertical', pad=0.05)
         cb2.set_label('CER ($\mathrm{\mu m}$)', fontsize=label_size)
 
-
-        ax3 = fig.add_axes([0.75, 0.05, 0.25, 0.9])
-        ax3.imshow(mod_img, extent=mod_img_wesn)
         cs3 = ax3.pcolormesh(lon_mod, lat_mod, cth_3d_650, cmap='jet',
                              vmin=0.0, vmax=10.0)
         cb3 = fig.colorbar(cs3, ax=ax3, orientation='vertical', pad=0.05)
         cb3.set_label('CTH (km)', fontsize=label_size)
 
-
         for ax, label_ord in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
+            ax.imshow(mod_img, extent=mod_img_wesn)
             ax.set_xlim(extent_analysis[0], extent_analysis[1])
             ax.set_ylim(extent_analysis[2], extent_analysis[3])
             ax.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
