@@ -18,7 +18,7 @@ import numpy as np
 from datetime import datetime
 from scipy import stats
 from er3t.pre.abs import abs_oco_h5
-from er3t.pre.sfc import sfc_sat
+from er3t.pre.sfc import sfc_sat, sfc_2d_gen
 from er3t.pre.pha import pha_mie_wc
 from er3t.util.oco2 import oco2_std
 from er3t.rtm.mca import mca_atm_1d, mca_atm_3d, mca_sfc_2d
@@ -37,6 +37,7 @@ from util.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
 from util.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
 from util.oco_atm_atmmod import atm_atmmod
 from util.oco_cld_sat import cld_sat
+from util.oco_glint_brdf import oco_ocean_brdf, cal_ocean_brdf
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
@@ -68,26 +69,38 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
     # mca_sfc object
     # =================================================================================
-    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
-        data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
-                'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
-                'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
+    # with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
+    #     data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
+    #             'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
+    #             'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
     
-    if sfc_alb_abs is not None:
-        print('sfc_alb_abs is not None')
-        print('Simulated uniform sfc albedo: ', sfc_alb_abs)
-        simulated_sfc_alb = sfc_alb_abs
-        data['alb_2d']['data'][...] = simulated_sfc_alb
+    # if sfc_alb_abs is not None:
+    #     print('sfc_alb_abs is not None')
+    #     print('Simulated uniform sfc albedo: ', sfc_alb_abs)
+    #     simulated_sfc_alb = sfc_alb_abs
+    #     data['alb_2d']['data'][...] = simulated_sfc_alb
+    # else:
+    #     print('sfc_alb_abs is None')
+    #     avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
+    #     print('Average sfc albedo: ', avg_sfc_alb)
+    #     simulated_sfc_alb = avg_sfc_alb
+    
+    # mod43     = sat_tmp(data)
+    # fname_sfc = '%s/sfc.pk' % fdir
+    # sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=overwrite)
+    # sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
+
+    # surface setup
+    #/----------------------------------------------------------------------------\#
+    sfc_alb = oco_ocean_brdf(sat, band=tag)
+    sfc_alb = cal_ocean_brdf(wavelength, sat)
+    if isinstance(sfc_alb, np.ndarray) or isinstance(sfc_alb, dict):
+        sfc0 = sfc_2d_gen(sfc_2d=sfc_alb, fname='%s/sfc_%3.3d.pk' % (fdir, wavelength))
+        alb0 = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d_%3.3d.bin' % (fdir, wavelength), overwrite=overwrite)
     else:
-        print('sfc_alb_abs is None')
-        avg_sfc_alb = np.nanmean(data['alb_2d']['data'])
-        print('Average sfc albedo: ', avg_sfc_alb)
-        simulated_sfc_alb = avg_sfc_alb
-    
-    mod43     = sat_tmp(data)
-    fname_sfc = '%s/sfc.pk' % fdir
-    sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=overwrite)
-    sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
+        alb0 = sfc_alb
+    #\----------------------------------------------------------------------------/#
+
     # =================================================================================
 
     # mca_sca object (newly added for phase function)
@@ -167,7 +180,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     if sza_abs is not None:
         sza = sza_abs
     
-    print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
+    # print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
     # cpu number used
     if platform.system() in ['Windows', 'Darwin']:
         Ncpu=os.cpu_count()-1
@@ -181,6 +194,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
         if (not os.path.isfile(output_file)) or (overwrite==True):
             # run mcarats
+            sfc_2d = alb0
             temp_dir = f'{fdir}/{wavelength:.4f}nm/oco2/rad_{solver.lower()}'
             run = False if os.path.isdir(temp_dir) and overwrite==False else True
             mca0 = mcarats_ng(date=date,
@@ -215,8 +229,9 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
 
     if solver.lower() == 'ipa':
-        sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=False)
-        sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
+        # sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=False)
+        # sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
+        sfc_2d = alb0
         cld0    = cld_sat(fname=fname_cld, overwrite=False)
         cld0.lay['extinction']['data'][...] = 0.0
         atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, fname='%s/mca_atm_3d.bin' % fdir)
@@ -257,7 +272,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
             plot_mca_simulation(sat, modl1b, out0, oco_std0,
                                 'ipa0', fdir, cth, scale_factor, wavelength)
             # ------------------------------------------------------------------------------------------------------
-    return simulated_sfc_alb, sza, aod
+    return np.mean(sfc_alb['diffuse_alb']), sza, aod
 
 @timing
 def preprocess(cfg_info):
@@ -324,7 +339,7 @@ def preprocess(cfg_info):
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
+    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
@@ -393,11 +408,10 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    run_case_modis_650(cfg_info, preprocess_info)
+    #run_case_modis_650(cfg_info, preprocess_info)
 
     # if not check_h5_info(cfg, 'o2'): 
-    #     o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info,
-    #                       sfc_alb=sfc_alb, sza=sza)
+    #     o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
     #     save_h5_info(cfg, 'o2', o2_h5)
 
     # if not check_h5_info(cfg, 'wco2'):
@@ -410,7 +424,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    cfg = 'cfg/20151201_ocean_1.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'

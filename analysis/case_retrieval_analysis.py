@@ -83,17 +83,17 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
     aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
                 img_dir=img_dir)
-    retrieval_no_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_2.h5', 'r')
-    mask = retrieval_no_aod_parameterization['xco2_retrieved'][...]!=-2
+    retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_2.h5', 'r')
+    mask = retrieval_aod_parameterization['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
-    df = pd.DataFrame({key:retrieval_no_aod_parameterization[key][...] for key in key_list})
-    df['o2a_inter'] = retrieval_no_aod_parameterization['pert_o2'][...][:, 0]
-    df['o2a_slope'] = retrieval_no_aod_parameterization['pert_o2'][...][:, 1]
-    df['wco2_inter'] = retrieval_no_aod_parameterization['pert_wco2'][...][:, 0]
-    df['wco2_slope'] = retrieval_no_aod_parameterization['pert_wco2'][...][:, 1]
-    df['sco2_inter'] = retrieval_no_aod_parameterization['pert_sco2'][...][:, 0]
-    df['sco2_slope'] = retrieval_no_aod_parameterization['pert_sco2'][...][:, 1]
+    df = pd.DataFrame({key:retrieval_aod_parameterization[key][...] for key in key_list})
+    df['o2a_inter'] = retrieval_aod_parameterization['pert_o2'][...][:, 0]
+    df['o2a_slope'] = retrieval_aod_parameterization['pert_o2'][...][:, 1]
+    df['wco2_inter'] = retrieval_aod_parameterization['pert_wco2'][...][:, 0]
+    df['wco2_slope'] = retrieval_aod_parameterization['pert_wco2'][...][:, 1]
+    df['sco2_inter'] = retrieval_aod_parameterization['pert_sco2'][...][:, 0]
+    df['sco2_slope'] = retrieval_aod_parameterization['pert_sco2'][...][:, 1]
     df.replace(-2, np.nan, inplace=True)
     df.loc[df['xco2_L2_file']<1, 'xco2_L2_file'] = df.loc[df['xco2_L2_file']<1, 'xco2_L2_file']*1e6
     df.drop_duplicates('snd', inplace=True)
@@ -199,11 +199,11 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                 fp=160, z=135,
                                 img_dir=img_dir)
     
-    retrieval_no_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pixel_2.h5', 'r')
-    mask = retrieval_no_aod_pixel['xco2_retrieved'][...]!=-2
+    retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pixel_2.h5', 'r')
+    mask = retrieval_aod_pixel['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
-    df_pixel = pd.DataFrame({key:retrieval_no_aod_pixel[key][...] for key in key_list})
+    df_pixel = pd.DataFrame({key:retrieval_aod_pixel[key][...] for key in key_list})
     df_pixel.replace(-2, np.nan, inplace=True)
     df_pixel.loc[df_pixel['xco2_L2_file']<1, 'xco2_L2_file'] = df_pixel.loc[df_pixel['xco2_L2_file']<1, 'xco2_L2_file']*1e6
     df_pixel.drop_duplicates('snd', inplace=True)
@@ -770,7 +770,7 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     ax.set_ylim(ymin, ymax)
     ax.set_xlim(xmin, xmax)
     ax.text((xmin+(xmax-xmin)*0.295), (ymin+(ymax-ymin)*0.68), 
-            'uncertainty requirement: 1 ppm', color='orange', fontsize=15)
+            'regional uncertainty requirement: 1 ppm', color='orange', fontsize=14)
 
     
     cld_mask = cld_dist<= cld_dist_threshold

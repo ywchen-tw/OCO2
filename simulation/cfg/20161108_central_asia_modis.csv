@@ -1,10 +1,10 @@
 descriptor,Central_Asia,,,,,,
 ,,,,,,,
-date,20181018,,,,,,
-juld,291,,,,,,# Julian Day
+date,20160514,,,,,,
+juld,135,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
+png,aqua_rgb_2016-05-14_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
 pngwesn,55.15,55.45,33.85,34.3,,,# PNG file extent
 subdomain,55.15,55.45,33.85,34.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -33,7 +33,6 @@ g_mode,FALSE,,,,,,# TRUE or FALSE
 # aerosol setting,,,,,,,
 _aerosol,TRUE,,,,,,# TRUE or FALSE
 asy,0.6,,,,,,# aerosol asymmetry parameter
-,,,,,,,
 ,,,,,,,
 # cot-ref relationship,,,,,,,
 cth_thick,10,,,,,,# clout top height for thick clouds (km)

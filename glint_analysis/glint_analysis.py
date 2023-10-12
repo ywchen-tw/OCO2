@@ -153,9 +153,9 @@ def slopes_propagation(OCO_class, mode='unperturb'):
             OCO_class.slope_13avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_13avg[z,fp,:]=[inter,interstd]
 
-def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
-    h5_file  = filename.format(band_tag, id_num)
-    OCO_class = OCOSIM(h5_file)
+def cld_rad_slope_calc(case_name_tag, band_tag, h5_output, filename, pkl_filename, cld_location):
+    h5_file_path  = h5_output#filename.format(case_name_tag, h5_output)
+    OCO_class = OCOSIM(h5_file_path)
     OCO_class.cld_location = cld_location
     near_rad_calc(OCO_class)
     slopes_propagation(OCO_class)
@@ -164,12 +164,12 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_2_test4.csv'):
+def main(cfg_csv='20151201_ocean_1.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
 
-    cfg_dir = '../simulation/cfg'
+    cfg_dir = '../glint/cfg'
 
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_csv}')
     print(cfg_info.keys())
@@ -193,20 +193,20 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 13
+    compare_num = 5
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    filename = '../simulation/data_all_20181018_{}_{}_lbl_without_aod.h5'
+    filename = '../glint/data/{}/{}'
     
-    pkl_filename = '20181018_amazon_{}_lbl_without_aod.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    pkl_filename = '20151201_amazon_{}_lbl_with_aod.pkl'
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
-        o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
-        o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
-        o3 = cld_rad_slope_calc('sco2', id_num, filename, pkl_filename, cld_location)
+        o1 = cld_rad_slope_calc(case_name_tag, 'o2a', cfg_info['o2'], filename, pkl_filename, cld_location)
+        o2 = cld_rad_slope_calc(case_name_tag, 'wco2', cfg_info['wco2'], filename, pkl_filename, cld_location)
+        o3 = cld_rad_slope_calc(case_name_tag, 'sco2', cfg_info['sco2'], filename, pkl_filename, cld_location)
     else:
         with open(pkl_filename.format('o2a'), 'rb') as f:
             o1 = pickle.load(f)
@@ -215,14 +215,14 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
         with open(pkl_filename.format('sco2'), 'rb') as f:
             o3 = pickle.load(f)
 
-    if not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
+    if 1:#not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
         cld_dist_calc(cfg_name, o2, slope_compare)
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
     # weighted_cld_dist_calc
     #--------------------------------------
-    if not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
         weighted_cld_dist_calc(cfg_name, o2, slope_compare)
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -245,7 +245,7 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     
     points_footprint = np.column_stack((o1.lon[xco2_valid][mask_fp].flatten(), o1.lat[xco2_valid][mask_fp].flatten()))
     oco_footprint_cld_distance = f_cld_distance(points_footprint)
-    oco_footprint_cld_distance = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])[::-1]
+    #oco_footprint_cld_distance = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])[::-1]
     print(len(points_footprint))
     print(len(oco_footprint_cld_distance))
     #""" 
@@ -322,17 +322,18 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     
     cld_lon, cld_lat, cld_location = cld_position(cfg_name)
     
-    with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as f:
+    with h5py.File(f'../glint/data/{case_name_tag}/pre-data.h5', 'r') as f:
         lon_2d = f['lon'][...]
         lat_2d = f['lat'][...]
         sfh_2d = f['mod/geo/sfh'][...]
-        cth0 = f['mod/cld/cth_ipa'][...]
+        #cth0 = f['mod/cld/cth_ipa'][...]
+        cth0 = f[f'mod/cld/logic_cld'][...]
     
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
                           np.logical_and(lat_2d >= extent[2], lat_2d <= extent[3]))
 
-    img_file = f'../simulation/data/{case_name_tag}/{cfg_info["png"]}'
+    img_file = f'../glint/data/{case_name_tag}/{cfg_info["png"]}'
     wesn = extent_png
     img = mpimg.imread(img_file)
     lon_dom = extent_analysis[:2]
@@ -557,17 +558,17 @@ def continuum_fp_compare_plot(o1, o2, o3,
 
 
 def cld_position(cfg_name):
-    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../glint/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/logic_cld'][...]
         cld_list = cth>0
     return lon_cld, lat_cld, cld_list
 
 
 def cld_dist_calc(cfg_name, o1, slope_compare):
-    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../glint/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         cth = f[f'mod/cld/cth_ipa'][...]
 
@@ -596,7 +597,7 @@ def cld_dist_calc(cfg_name, o1, slope_compare):
     cld_slope_inter.to_pickle(f'{cfg_name}_cld_distance.pkl')
 
 def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
-    cldfile = f'../simulation/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
+    cldfile = f'../glint/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
@@ -830,11 +831,11 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_xlim(cld_low, cld_max)
         ax_r.set_ylim(-limit_2, limit_2)
 
-    ax11.set_ylim(-0.1, 0.3)
+    ax11.set_ylim(-0.3, 0.3)
     ax12.set_ylim(-0.05, 0.25)
-    ax21.set_ylim(-0.1, 0.2)
+    ax21.set_ylim(-0.3, 0.2)
     ax22.set_ylim(-0.05, 0.25)
-    ax31.set_ylim(-0.1, 0.2)
+    ax31.set_ylim(-0.3, 0.2)
     ax32.set_ylim(-0.05, 0.2)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']
@@ -902,7 +903,7 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
                                int(cfg_info['date'][6:]))    # day
     case_name_tag = '%s_%s' % (cfg_info['cfg_name'], date.strftime('%Y%m%d'))
     nx = int(cfg_info['nx'])
-    with h5py.File(f'../simulation/data/{case_name_tag}/atm_abs_o2a_{nx+1}.h5', 'r') as file:
+    with h5py.File(f'../glint/data/{case_name_tag}/atm_abs_o2a_{nx+1}.h5', 'r') as file:
         trnsx = file['trns_oco'][...]
         oco_tx = file['tx'][...]
 

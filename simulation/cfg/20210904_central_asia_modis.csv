@@ -1,10 +1,10 @@
 descriptor,Central_Asia,,,,,,
 ,,,,,,,
-date,20181018,,,,,,
-juld,291,,,,,,# Julian Day
+date,20210904,,,,,,
+juld,247,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
+png,aqua_rgb_2021-09-04_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
 pngwesn,55.15,55.45,33.85,34.3,,,# PNG file extent
 subdomain,55.15,55.45,33.85,34.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -34,7 +34,6 @@ g_mode,FALSE,,,,,,# TRUE or FALSE
 _aerosol,TRUE,,,,,,# TRUE or FALSE
 asy,0.6,,,,,,# aerosol asymmetry parameter
 ,,,,,,,
-,,,,,,,
 # cot-ref relationship,,,,,,,
 cth_thick,10,,,,,,# clout top height for thick clouds (km)
 cgt_thick,7,,,,,,# clout geometric thickness for thick clouds (km)
@@ -56,7 +55,7 @@ sco2,data_all_20181018_sco2_6170_6209_sfc_alb_0.357_sza_48.5.h5,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 ,,,,,,,
 # simulation parameters,,,,,,,
-ref_threshold,0.05,,,,,,
+ref_threshold,0.1,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
 oco_N_photons,1.00E+09,,,,,,
 Ncpu,16,,,,,,

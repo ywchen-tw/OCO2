@@ -17,6 +17,7 @@ import h5py
 import numpy as np
 from datetime import datetime
 from scipy import stats
+import pandas as pd
 from er3t.pre.abs import abs_oco_h5
 from er3t.pre.cld import cld_sat
 from er3t.pre.sfc import sfc_sat
@@ -27,16 +28,17 @@ from er3t.rtm.mca import mcarats_ng
 from er3t.rtm.mca import mca_out_ng
 from er3t.rtm.mca import mca_sca
 
-from utils.create_atm import create_oco_atm
-from utils.modis_download import modis_download
-from utils.oco_cfg import grab_cfg, save_h5_info
-from utils.abs_coeff import oco_abs
-from utils.modis_raw_collect import cdata_sat_raw
-from utils.oco_cloud import cdata_cld_ipa
-from utils.post_process import cdata_all
-from utils.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
-from utils.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
-from utils.oco_atm_atmmod import atm_atmmod
+from util.create_atm import create_oco_atm
+from util.modis_download import modis_download
+from util.oco_cfg import grab_cfg, save_h5_info
+from util.abs_coeff import oco_abs
+from util.modis_raw_collect import cdata_sat_raw
+from util.oco_cloud import cdata_cld_modis_only
+from util.post_process import cdata_all
+from util.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
+from util.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
+from util.oco_atm_atmmod import atm_atmmod
+from haversine import Unit, haversine_vector
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, fname_atm_abs=None, cth=None, 
@@ -270,7 +272,7 @@ def preprocess(cfg_info):
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
     print(f'simulation extent: {extent}')
     ref_threshold = float(cfg_info['ref_threshold'])
-    name_tag = f"{cfg_info['cfg_name']}_{date.strftime('%Y%m%d')}"
+    name_tag = f"{cfg_info['cfg_name']}_modis"
     # ===============================================================
 
     # create data/name_tag directory if it does not exist
@@ -281,22 +283,158 @@ def preprocess(cfg_info):
     # download satellite data based on given date and region
     # ===============================================================
     fname_sat = '/'.join([fdir_data, 'sat.pk'])
-    print(f'fname_sat: {fname_sat}')
-
     sat0 = modis_download(date=date, 
                               fdir_out=cfg_info['path_sat_data'], 
                               fdir_pre_data=fdir_data,
                               extent=extent,
                               extent_analysis=extent_analysis,
                               fname=fname_sat, overwrite=False)
-
     # ===============================================================
-        
+    if not ('l2' in cfg_info.keys()):
+        oco_data_dict = {'l2': 'oco_std',
+                         'met': 'oco_met',
+                         'l1b': 'oco_l1b',
+                         'lt': 'oco_lite',
+                         'dia': 'oco_dia',
+                         'imap': 'oco_imap',
+                         'co2prior': 'oco_co2prior'}
+        for key, value in oco_data_dict.items():
+            save_h5_info(cfg_info['cfg_path'], key, sat0.fnames[value][0].split('/')[-1])
+    save_h5_info(cfg_info['cfg_path'], 'png', sat0.fnames['mod_rgb'][0].split('/')[-1])
+    # create tmp-data/{name_tag} directory if it does not exist
+    # ===============================================================
+    fdir_cot_tmp = path_dir('tmp-data/%s/cot' % ('20181018_central_asia_2_test4_20181018'))
+    # ===============================================================
+
+    # # create atmosphere based on OCO-Met and CO2_prior
+    # # ===============================================================
+    zpt_file = os.path.abspath('/'.join([path_dir('/'.join(['data', '20181018_central_asia_2_test4_20181018'])), 'zpt.h5']))
+    # if not os.path.isfile(zpt_file):
+    #     create_oco_atm(sat=sat0, o2mix=float(cfg_info['o2mix']), output=zpt_file)
+    # # ===============================================================
+
+    # # read out wavelength information from absorption file
+    # # ===============================================================
+    # nx = int(cfg_info['nx'])
+    # for iband, band_tag in enumerate(['o2a', 'wco2', 'sco2']):
+    #     fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(nx+1):d}.h5'
+    #     if not os.path.isfile(fname_abs):
+    #         oco_abs(cfg, sat0, 
+    #                 zpt_file=zpt_file, iband=iband, 
+    #                 nx=nx, 
+    #                 Trn_min=float(cfg_info['Trn_min']), 
+    #                 pathout=fdir_data,
+    #                 reextract=False, plot=True)
+    
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        #cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, ref_threshold=ref_threshold, photons=1e6, plot=True)
+    cdata_cld_modis_only(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
-    return date, extent, name_tag, fdir_data, sat0, 
+    
+    # weighted_cld_dist_calc
+    #--------------------------------------
+    cfg_name = cfg_info['cfg_name']
+    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+        img_file = f'../simulation/data/{name_tag}/{cfg_info["png"]}'
+        weighted_cld_dist_calc(cfg_name, img_file, extent, extent_analysis)
+    weighted_cld_data = pd.read_pickle(f'../simulation/data/{cfg_name}_modis/weighted_cld_distance.pkl')
+    weighted_cld_dist = weighted_cld_data['cld_dis']
+    hist = np.histogram(weighted_cld_dist, bins=np.linspace(0, 50, 101), density=True)
+    #--------------------------------------
+
+
+
+    
+    
+    return date, extent, name_tag, fdir_data, sat0, zpt_file
+
+
+def weighted_cld_dist_calc(cfg_name, img_file, img_extent, wesn):
+    cldfile = f'../simulation/data/{cfg_name}_modis/pre-data.h5'
+    print(cldfile)
+    with h5py.File(cldfile, 'r') as f:
+        lon_cld = f['lon'][...]
+        lat_cld = f['lat'][...]
+        cth = f['mod/cld/logic_cld_3d_650'][...]
+        cth = f['mod/cld/cld_msk_3d_650'][...]
+        cth = f['mod/cld/cot_3d_650'][...]>0
+
+    cld_list = cth==1
+    cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
+    cld_position = []
+    cld_latlon = []
+    for i in range(len(cld_X)):
+        cld_position.append(np.array([cld_X[i], cld_Y[i]]))
+        cld_latlon.append([lat_cld[cld_X[i], cld_Y[i]], lon_cld[cld_X[i], cld_Y[i]]])
+    cld_position = np.array(cld_position)
+    cld_latlon = np.array(cld_latlon)
+
+    cloud_dist = np.zeros_like(lon_cld)
+    for j in range(cloud_dist.shape[1]):
+        for i in range(cloud_dist.shape[0]):
+            if cld_list[i, j] == 1:
+                cloud_dist[i, j] = 0
+            else:
+                point = np.array([lat_cld[i, j], lon_cld[i, j]])
+                distances = haversine_vector(point, cld_latlon, unit=Unit.KILOMETERS, comb=True)
+                weights = 1 / distances**2  # Calculate the inverse distance weights
+                # Calculate the weighted average distance
+                cloud_dist[i, j] = np.sum(distances * weights) / np.sum(weights)
+    
+    lon_dom = wesn[:2]
+    lat_dom = wesn[2:]
+    select = (lon_cld>lon_dom[0]) & (lon_cld<lon_dom[1]) & (lat_cld>lat_dom[0]) & (lat_cld<lat_dom[1])
+    output = np.array([lon_cld, 
+                       lat_cld, 
+                       cloud_dist])
+    print(output.shape)
+    cld_slope_inter = pd.DataFrame(output.reshape(output.shape[0], output.shape[1]*output.shape[2]).T,
+                                   columns=['lon', 'lat', 'cld_dis', ])
+    output_name = f'../simulation/data/{cfg_name}_modis/weighted_cld_distance.pkl'
+    cld_slope_inter.to_pickle(output_name)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    from matplotlib.ticker import FixedLocator
+
+    img = mpimg.imread(img_file)
+    lon_dom = wesn[:2]
+    lat_dom = wesn[2:]
+
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6.75))
+
+    ax1.imshow(img, extent=img_extent)
+    ax1.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    ax1.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    ax1.scatter(lon_cld[cth>0], lat_cld[cth>0], s=3, color='r')
+    ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+    ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+
+    ax_lon_lat_label(ax1, label_size=14, tick_size=12)
+    
+    select = (lon_cld>lon_dom[0]) & (lon_cld<lon_dom[1]) & (lat_cld>lat_dom[0]) & (lat_cld<lat_dom[1])
+    ax2.hist(cloud_dist[(cloud_dist>0) & select], 
+             bins=np.linspace(0, 50, 51), density=True, color='r', alpha=0.5)
+    ax2.set_xlabel('Weighted average cloud distance (km)', fontsize=14)
+    ax2.set_ylabel('Probability density', fontsize=14)
+    
+    
+    for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=18, color='k')
+        
+    f.tight_layout(pad=0.5)
+    f.savefig(f'../simulation/data/{cfg_name}_modis/weighted_cld_dis_pdf.png', dpi=300)
+
+
+    return output_name 
+
+def ax_lon_lat_label(ax, label_size=14, tick_size=12):
+    ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+    ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+
 
 @timing
 def run_case_modis_650(cfg_info, preprocess_info):
@@ -388,7 +526,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 if __name__ == '__main__':
     
     #cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
-    cfg = 'cfg/20160514_central_asia_modis.csv'
+    cfg = 'cfg/20110328_central_asia_modis.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
