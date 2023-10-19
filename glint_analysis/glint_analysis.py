@@ -55,10 +55,10 @@ def near_rad_calc(OCO_class):
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
 
 def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size)
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size)
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size)
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size)
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all_exlcude_cloud')
     
     return ipa0, c3d, ipa0_std, c3d_std
 
@@ -99,12 +99,17 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
         tmp3[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp3[tmp3<0] = np.nan
 
-    if option == 'no cloud':
+    tmp4 = copy.copy(tmp3)
+    tmp4[cld_position] = np.nan
+
+    if option == 'no_cloud':
         return tmp
-    elif option == 'cloud edge':
+    elif option == 'cloud_edge':
         return tmp2
     elif option == 'all':
         return tmp3
+    elif option == 'all_exlcude_cloud':
+        return tmp4
     else:
         raise OSError('option not found')
 
@@ -570,7 +575,7 @@ def cld_position(cfg_name):
 def cld_dist_calc(cfg_name, o1, slope_compare):
     cldfile = f'../glint/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'
     with h5py.File(cldfile, 'r') as f:
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/logic_cld'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
@@ -601,7 +606,7 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/logic_cld'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
