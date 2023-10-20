@@ -4,7 +4,7 @@ date,20151201,,,,,,
 juld,335,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,aqua_rgb_2015-12-01_44.20-44.77--10.07--9.33.png,,,,,,# PNG file
+png,aqua_rgb_2015-12-01_95.45-96.02--18.35--17.52.png,,,,,,# PNG file
 pngwesn,95.6,95.87,-18.2,-17.67,,,# PNG file extent
 subdomain,95.6,95.87,-18.2,-17.67,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -56,7 +56,7 @@ sco2,,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 ,,,,,,,
 # simulation parameters,,,,,,,
-ref_threshold,0.0675,,,,,,
+ref_threshold,0.075,,,,,,
 modis_650_N_photons,1.00E+07,,,,,,
-oco_N_photons,1.00E+07,,,,,,
+oco_N_photons,1.00E+09,,,,,,
 Ncpu,16,,,,,,
