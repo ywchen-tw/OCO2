@@ -14,7 +14,7 @@ def oco_wv_select(trnsx, Trn_min, refl, nlay, nx, all_r,
     # minimum transmittance with spectral sub-range
     mn = np.max([Trn_min*np.max(trnsx), np.min(trnsx)]) 
     if mn == np.min(trnsx):
-        mn = mn*1.01
+        mn = mn*1.05
     m0 = (mx-mn)/np.float64(nx)  # T increments
     ods = np.empty(nx+1) # T sorted (nx sub-samples)
     wli = np.empty(nx+1, dtype=int) # wl index
