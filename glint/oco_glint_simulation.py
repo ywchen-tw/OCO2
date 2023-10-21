@@ -93,7 +93,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     # surface setup
     #/----------------------------------------------------------------------------\#
     sfc_alb = oco_ocean_brdf(sat, band=tag)
-    sfc_alb = cal_ocean_brdf(wavelength, sat)
+    #sfc_alb = cal_ocean_brdf(wavelength, sat)
     if isinstance(sfc_alb, np.ndarray) or isinstance(sfc_alb, dict):
         sfc0 = sfc_2d_gen(sfc_2d=sfc_alb, fname='%s/sfc_%3.3d.pk' % (fdir, wavelength))
         alb0 = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d_%3.3d.bin' % (fdir, wavelength), overwrite=overwrite)
