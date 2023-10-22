@@ -44,7 +44,7 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, cfg_info, fdir='tmp-data', solver
     # =================================================================================
     data = {}
     with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
-        data['alb_2d'] = dict(data=f['mod/sfc/alb_43_650'][...], name='Surface albedo', units='N/A')
+        data['alb_2d'] = dict(data=f['mod/sfc/alb_43_650'][...], name='Surface albedo (lambertian)', units='N/A')
         data['lon_2d'] = dict(data=f['mod/sfc/lon'][...], name='Longitude', units='degrees')
         data['lat_2d'] = dict(data=f['mod/sfc/lat'][...], name='Latitude' , units='degrees')
 

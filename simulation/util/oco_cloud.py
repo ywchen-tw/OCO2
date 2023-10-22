@@ -291,18 +291,21 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         lat_2d_ = lat_2d.copy()
     extent_ = [np.min(lon_2d_), np.max(lon_2d_), np.min(lat_2d_), np.max(lat_2d_)]
 
-    cth_ = cth.copy()
+    # cth_ = cth.copy()
+    cth_ = cth[indices_x, indices_y]
     cth_[cth_==0.0] = np.nan
 
     cth_ipa0 = np.zeros_like(ref_2d)
-    cth_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
+    # cth_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
+    cth_ipa0 = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
     cth_ipa0[np.isnan(cth_ipa0)] = 0.0
     #\--------------------------------------------------------------/#
 
     # cer_ipa0
     #/--------------------------------------------------------------\#
     cer_ipa0 = np.zeros_like(ref_2d)
-    cer_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cer_l2, lon_2d_, lat_2d_)
+    # cer_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cer_l2, lon_2d_, lat_2d_)
+    cer_ipa0 = find_nearest(lon_cld, lat_cld, cer_l2[indices_x, indices_y], lon_2d_, lat_2d_)
     #\--------------------------------------------------------------/#
 
     # cot_ipa0

@@ -69,7 +69,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     # mca_sfc object
     # =================================================================================
     with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
-        data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo', 'units': 'N/A'},
+        data = {'alb_2d': {'data': f_pre_data[f'oco/sfc/alb_{tag}_2d'][...], 'name': 'Surface albedo (lambertian)', 'units': 'N/A'},
                 'lon_2d': {'data': f_pre_data['mod/sfc/lon'][...], 'name': 'Longitude', 'units': 'degrees'},
                 'lat_2d': {'data': f_pre_data['mod/sfc/lat'][...], 'name': 'Latitude', 'units': 'degrees'}}
     
@@ -393,12 +393,12 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    run_case_modis_650(cfg_info, preprocess_info)
+    # run_case_modis_650(cfg_info, preprocess_info)
 
-    # if not check_h5_info(cfg, 'o2'): 
-    #     o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info,
-    #                       sfc_alb=sfc_alb, sza=sza)
-    #     save_h5_info(cfg, 'o2', o2_h5)
+    if not check_h5_info(cfg, 'o2'): 
+        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info,
+                          sfc_alb=sfc_alb, sza=sza)
+        save_h5_info(cfg, 'o2', o2_h5)
 
     # if not check_h5_info(cfg, 'wco2'):
     #     wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
@@ -410,12 +410,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    # cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
-    # cfg = 'cfg/20170605_amazon_2.csv'
+    cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     run_simulation(cfg) #done

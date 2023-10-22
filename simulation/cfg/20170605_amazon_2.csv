@@ -4,7 +4,7 @@ date,20170605,,,,,,
 juld,156,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,20170718.png,,,,,,# PNG file
+png,aqua_rgb_2017-06-05_-67.35--66.09--0.15-1.25.png,,,,,,# PNG file
 pngwesn,-67.1991,-66.2404,-0.0047,1.097,,,# PNG file extent
 subdomain,-67.1991,-66.2404,-0.0047,1.097,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -19,6 +19,9 @@ imap,,,,,,,
 co2prior,oco2_L2CPrND_07794a_151219_B10003r_191121015231.h5,,,,,,
 sol,solar.txt,,,,,,# Location of solar file
 ,,,,,,,
+# zpt setting,,,,,,,
+o2mix,0.20935,,,,,,# o2 dry-air mixing ratio
+,,,,,,,
 # absorption information,,,,,,,
 footprint,1,,,,,,# 1 to 8
 ils_min,0.05,,,,,,# minimum relative ils weight for calculating absorbance
@@ -27,16 +30,33 @@ Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
 abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
 g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
+# aerosol setting,,,,,,,
+_aerosol,TRUE,,,,,,# TRUE or FALSE
+asy,0.6,,,,,,# aerosol asymmetry parameter
+,,,,,,,
+,,,,,,,
+# cot-ref relationship,,,,,,,
+cth_thick,10,,,,,,# clout top height for thick clouds (km)
+cgt_thick,7,,,,,,# clout geometric thickness for thick clouds (km)
+cth_thin,3,,,,,,# clout top height for thin clouds (km)
+cgt_thin,1,,,,,,# clout geometric thickness for thin clouds (km)
+cot_Nphotons,1.00E+07,,,,,,# number photons used for COT-Ref relationship
+,,,,,,,
+# cloud setting,,,,,,,
+cgt_low,,,,,,,
+cbt_high,,,,,,,
+,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,,,,,,,
+o2,,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
 wco2,,,,,,,
 sco2,,,,,,,
 ,,,,,,,
 # full physics retrieval information,,,,,,,
-retrieval,B10.04,,,,,,
+retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 ,,,,,,,
 # simulation parameters,,,,,,,
 ref_threshold,0.09,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
 oco_N_photons,1.00E+09,,,,,,
+Ncpu,16,,,,,,
