@@ -55,10 +55,10 @@ def near_rad_calc(OCO_class):
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
 
 def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size)
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size)
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size)
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size)
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all_exlcude_cloud')
     
     return ipa0, c3d, ipa0_std, c3d_std
 
@@ -99,12 +99,17 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
         tmp3[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp3[tmp3<0] = np.nan
 
-    if option == 'no cloud':
+    tmp4 = copy.copy(tmp3)
+    tmp4[cld_position] = np.nan
+
+    if option == 'no_cloud':
         return tmp
-    elif option == 'cloud edge':
+    elif option == 'cloud_edge':
         return tmp2
     elif option == 'all':
         return tmp3
+    elif option == 'all_exlcude_cloud':
+        return tmp4
     else:
         raise OSError('option not found')
 
@@ -193,7 +198,7 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 13
+    compare_num = 5
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
@@ -202,7 +207,7 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     filename = '../simulation/data_all_20181018_{}_{}_lbl_without_aod.h5'
     
     pkl_filename = '20181018_amazon_{}_lbl_without_aod.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)

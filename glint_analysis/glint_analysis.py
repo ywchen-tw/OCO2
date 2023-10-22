@@ -169,7 +169,7 @@ def cld_rad_slope_calc(case_name_tag, band_tag, h5_output, filename, pkl_filenam
     return OCO_class
 
 
-def main(cfg_csv='20151201_ocean_1.csv'):
+def main(cfg_csv='20151201_ocean_2.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
