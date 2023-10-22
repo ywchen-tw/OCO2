@@ -4,19 +4,19 @@ date,20170721,,,,,,
 juld,202,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,,,,,,,# PNG file
-pngwesn,131.1,132.4,-17,-15.3,,,# PNG file extent
-subdomain,131.1,132.4,-17,-15.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+png,aqua_rgb_2017-07-21_130.95-132.55--17.15--15.15.png,,,,,,# PNG file
+pngwesn,131.1,132.4,-17.0,-15.3,,,# PNG file extent
+subdomain,131.1,132.4,-17.0,-15.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
 data files,,,,,,,# all V10r data
 path_sat_data,../sat_data,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"
-l2,,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.10r
-lt,,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r
-l1b,,,,,,,# L1B file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L1B_Science.10r
-dia,,,,,,,# diagnostic file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Diagnostic.10r
-met,,,,,,,# MET file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Met.10r
-imap,,,,,,,
-co2prior,,,,,,,
+l2,oco2_L2StdND_16236a_170721_B10004r_200426070506.h5,,,,,,# L2 file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Standard.10r
+lt,oco2_LtCO2_170721_B10206Ar_200730085136s.nc4,,,,,,# lite file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Lite_FP.10r
+l1b,oco2_L1bScND_16236a_170721_B10003r_200229192937.h5,,,,,,# L1B file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L1B_Science.10r
+dia,oco2_L2DiaND_16236a_170721_B10004r_200426064203.h5,,,,,,# diagnostic file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Diagnostic.10r
+met,oco2_L2MetND_16236a_170721_B10003r_200229192937.h5,,,,,,# MET file https://oco2.gesdisc.eosdis.nasa.gov/data/OCO2_DATA/OCO2_L2_Met.10r
+imap,oco2_L2IDPND_16236a_170721_B10003r_200318072751.h5,,,,,,
+co2prior,oco2_L2CPrND_16236a_170721_B10003r_200301002123.h5,,,,,,
 sol,solar.txt,,,,,,# Location of solar file
 ,,,,,,,
 # zpt setting,,,,,,,
