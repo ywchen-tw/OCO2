@@ -324,7 +324,7 @@ def preprocess(cfg_info):
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-        cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
+    cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
