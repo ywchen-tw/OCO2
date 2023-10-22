@@ -335,7 +335,7 @@ def preprocess(cfg_info):
                     nx=nx, 
                     Trn_min=float(cfg_info['Trn_min']), 
                     pathout=fdir_data,
-                    reextract=False, plot=True)
+                    reextract=True, plot=True)
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
