@@ -417,6 +417,7 @@ if __name__ == '__main__':
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     # cfg = 'cfg/20170605_amazon_2.csv'
     cfg = 'cfg/20190621_australia_2.csv'
+    # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     run_simulation(cfg) #done

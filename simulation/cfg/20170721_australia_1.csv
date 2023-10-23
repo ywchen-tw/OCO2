@@ -5,8 +5,8 @@ juld,202,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
 png,aqua_rgb_2017-07-21_130.95-132.55--17.15--15.15.png,,,,,,# PNG file
-pngwesn,131.1,132.4,-17,-15.3,,,# PNG file extent
-subdomain,131.1,132.4,-17,-15.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
+pngwesn,131.1,132.4,-17.0,-15.3,,,# PNG file extent
+subdomain,131.1,132.4,-17.0,-15.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
 data files,,,,,,,# all V10r data
 path_sat_data,../sat_data,,,,,,"# Note that I used V8r for most data files (for heritage reasons), except for the Lite file (V10)"

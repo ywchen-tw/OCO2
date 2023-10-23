@@ -394,11 +394,13 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     logic_out = (cot_ipa0<cot_ipa[0]) | (cot_ipa0>cot_ipa[-1])
     logic_low = (logic_out) & (ref_2d<np.median(ref_2d[indices_x, indices_y]))
     logic_high = logic_out & np.logical_not(logic_low)
-    cot_ipa0[logic_low]  = cot_ipa[0]
-    cot_ipa0[logic_high] = cot_ipa[-1]
+    # cot_ipa0[logic_low]  = cot_ipa[0]
+    # cot_ipa0[logic_high] = cot_ipa[-1]
     # manually set the cer0 based on high or low cloud
     cer_ipa0[logic_low]  = 10
     cer_ipa0[logic_high] = 25
+    cer_ipa0[indices_x[logic_thick], indices_y[logic_thick]]  = 10
+    cer_ipa0[indices_x[logic_thin] , indices_y[logic_thin]] = 25
     
     #\--------------------------------------------------------------/#
     #\----------------------------------------------------------------------------/#
