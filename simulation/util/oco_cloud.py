@@ -399,8 +399,8 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     # manually set the cer0 based on high or low cloud
     cer_ipa0[logic_low]  = 10
     cer_ipa0[logic_high] = 25
-    cer_ipa0[indices_x[logic_thick], indices_y[logic_thick]]  = 10
-    cer_ipa0[indices_x[logic_thin] , indices_y[logic_thin]] = 25
+    cer_ipa0[indices_x[logic_thick], indices_y[logic_thick]]  = 25
+    cer_ipa0[indices_x[logic_thin] , indices_y[logic_thin]] = 10
     
     #\--------------------------------------------------------------/#
     #\----------------------------------------------------------------------------/#
