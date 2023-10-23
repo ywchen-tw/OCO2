@@ -409,10 +409,10 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     #run_case_modis_650(cfg_info, preprocess_info)
-    sys.exit()
-    # if not check_h5_info(cfg, 'o2'): 
-    #     o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-    #     save_h5_info(cfg, 'o2', o2_h5)
+    # sys.exit()
+    if 1:#not check_h5_info(cfg, 'o2'): 
+        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        save_h5_info(cfg, 'o2', o2_h5)
 
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
