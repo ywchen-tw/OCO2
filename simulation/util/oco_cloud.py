@@ -305,7 +305,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     #/--------------------------------------------------------------\#
     cer_ipa0 = np.zeros_like(ref_2d)
     # cer_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cer_l2, lon_2d_, lat_2d_)
-    cer_ipa0 = find_nearest(lon_cld, lat_cld, cer_l2[indices_x, indices_y], lon_2d_, lat_2d_)
+    # cer_ipa0 = find_nearest(lon_cld, lat_cld, cer_l2[indices_x, indices_y], lon_2d_, lat_2d_)
     #\--------------------------------------------------------------/#
 
     # cot_ipa0
@@ -396,6 +396,9 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     logic_high = logic_out & np.logical_not(logic_low)
     cot_ipa0[logic_low]  = cot_ipa[0]
     cot_ipa0[logic_high] = cot_ipa[-1]
+    # manually set the cer0 based on high or low cloud
+    cer_ipa0[logic_low]  = 10
+    cer_ipa0[logic_high] = 25
     
     #\--------------------------------------------------------------/#
     #\----------------------------------------------------------------------------/#
