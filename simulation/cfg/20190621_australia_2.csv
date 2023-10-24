@@ -48,7 +48,7 @@ cbt_high,,,,,,,
 ,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
+o2,data_all_20190621_o2a_1596_1671_sfc_alb_0.258_sza_54.0_aod500_0.000.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
 wco2,,,,,,,
 sco2,,,,,,,
 ,,,,,,,
