@@ -442,23 +442,25 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     return collect_data
     
 
-def run_simulation(cfg, sfc_alb=None, sza=None):
+def run_simulation(cfg, sfc_alb=None, sza=None, cot=None, cer=None, cth=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     #run_case_modis_650(cfg_info, preprocess_info)
     # sys.exit()
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
-                             cld_manual=True, cot=2, cer=10, cth=1)
+                             cld_manual=True, cot=cot, cer=cer, cth=cth)
         save_h5_info(cfg, 'o2', o2_h5)
 
-    # if 1:#not check_h5_info(cfg, 'wco2'):
-    #     wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-    #     save_h5_info(cfg, 'wco2', wco2_h5)
+    if 1:#not check_h5_info(cfg, 'wco2'):
+        wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                               cld_manual=True, cot=cot, cer=cer, cth=cth)
+        save_h5_info(cfg, 'wco2', wco2_h5)
 
-    # if 1:#not check_h5_info(cfg, 'sco2'):
-    #     sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-    #     save_h5_info(cfg, 'sco2', sco2_h5)
+    if 1:#not check_h5_info(cfg, 'sco2'):
+        sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                               cld_manual=True, cot=cot, cer=cer, cth=cth)
+        save_h5_info(cfg, 'sco2', sco2_h5)
 
 if __name__ == '__main__':
     
@@ -471,8 +473,9 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg) #done
-
+    # run_simulation(cfg) #done
+    run_simulation(cfg, cot=2, cer=10, cth=1)
+    run_simulation(cfg, cot=2, cer=10, cth=2)
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
 
