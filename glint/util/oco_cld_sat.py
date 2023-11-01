@@ -163,7 +163,8 @@ class cld_sat:
                 cloud_bottom_height = layer_thickness
             h_bottom = max([cloud_bottom_height, layer_thickness])
             h_top    = min([cloud_top_height, 30.0])
-        
+        print('h_bottom:', h_bottom)
+        print('h_top:', h_top)
         if h_bottom >= h_top:
             sys.exit('Error   [cld_sat]: Cloud bottom height is greater than cloud top height, check whether the input cloud top height \'cth\' is in the units of \'km\'.')
         print('h_bottom:', h_bottom)

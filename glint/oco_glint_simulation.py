@@ -41,10 +41,12 @@ from util.oco_glint_brdf import oco_ocean_brdf, cal_ocean_brdf
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
-                     fname_atm_abs=None, cth=None, 
+                     fname_atm_abs=None, 
                      scale_factor=1.0, 
                      fdir='tmp-data', solver='3D',
-                     sfc_alb_abs=None, sza_abs=None, overwrite=True):
+                     sfc_alb_abs=None, sza_abs=None, 
+                     cld_manual=False, cot=None, cer=None, cth=None, 
+                     overwrite=True):
 
     """
     Calculate OCO2 radiance using cloud (MODIS level 1b) and surface properties (MOD09A1) from MODIS
@@ -133,6 +135,12 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         # =================================================================================
 
         modl1b    =  sat_tmp(data)
+        if cld_manual:
+            modl1b.data['cth_2d']['data'][modl1b.data['cth_2d']['data']>0] = cth
+            modl1b.data['cot_2d']['data'][modl1b.data['cot_2d']['data']>0] = cot
+            modl1b.data['cer_2d']['data'][modl1b.data['cer_2d']['data']>0] = cer
+
+
         fname_cld = '%s/cld.pk' % fdir
         cth0 = modl1b.data['cth_2d']['data']
         cth0[cth0>10.0] = 10.0
@@ -272,7 +280,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
             plot_mca_simulation(sat, modl1b, out0, oco_std0,
                                 'ipa0', fdir, cth, scale_factor, wavelength)
             # ------------------------------------------------------------------------------------------------------
-    return np.mean(sfc_alb['diffuse_alb']), sza, aod
+    return np.mean(sfc_alb['diffuse_alb']), sza, aod, cot, cer, cth
 
 @timing
 def preprocess(cfg_info):
@@ -341,6 +349,32 @@ def preprocess(cfg_info):
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
     cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
+
+    with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r') as f_pre_data:
+        data = {}
+        data['lon_2d'] = dict(name='Gridded longitude'               , units='degrees'    , data=f_pre_data['lon'][...])
+        data['lat_2d'] = dict(name='Gridded latitude'                , units='degrees'    , data=f_pre_data['lat'][...])
+        data['rad_2d'] = dict(name='Gridded radiance'                , units='km'         , data=f_pre_data[f'mod/rad/rad_650'][...])
+        suffix = 'ipa'      # with parallex and wind correction
+        data['cot_2d'] = dict(name='Gridded cloud optical thickness' , units='N/A'        , data=f_pre_data[f'mod/cld/cot_{suffix}'][...])
+        data['cer_2d'] = dict(name='Gridded cloud effective radius'  , units='micro'      , data=f_pre_data[f'mod/cld/cer_{suffix}'][...])
+        data['cth_2d'] = dict(name='Gridded cloud top height'        , units='km'         , data=f_pre_data[f'mod/cld/cth_{suffix}'][...])
+ 
+    print('cot avg:', np.nanmean(data['cot_2d']['data'][data['cot_2d']['data']>0]))
+    print('cer avg:', np.nanmean(data['cer_2d']['data'][data['cer_2d']['data']>0]))
+    print('cth avg:', np.nanmean(data['cth_2d']['data'][data['cth_2d']['data']>0]))
+    # import matplotlib.pyplot as plt
+    # plt.clf()
+    # plt.hist(data['cot_2d']['data'][data['cot_2d']['data']>0].flatten(), bins=100)
+    # plt.title('cot')
+    # plt.show()
+    # plt.hist(data['cer_2d']['data'][data['cer_2d']['data']>0].flatten(), bins=100)
+    # plt.title('cer')
+    # plt.show()
+    # plt.hist(data['cth_2d']['data'][data['cth_2d']['data']>0].flatten(), bins=100)
+    # plt.title('cth')
+    # plt.show()
+
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
 @timing
@@ -363,7 +397,8 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
 
 @timing
-def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
+def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
+                 cld_manual=False, cot=None, cer=None, cth=None,):
     # Get information from cfg_info
     # ======================================================================
     date      = preprocess_info[0]
@@ -389,11 +424,13 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     Nphotons = float(cfg_info['oco_N_photons']) if sza is None else 1e8
     for wavelength in wvls:
         for solver in ['IPA', '3D']:
-            alb_sim, sza_sim, aod_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength, 
+            (alb_sim, sza_sim, aod_sim, 
+            cot_sim, cer_sim, cth_sim) = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength, 
                                             cfg_info=cfg_info,
-                                            fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
+                                            fname_atm_abs=fname_abs, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
+                                            cld_manual=True, cot=cot, cer=cer, cth=cth,
                                             overwrite=True)
     # ===============================================================
 
@@ -411,21 +448,23 @@ def run_simulation(cfg, sfc_alb=None, sza=None):
     #run_case_modis_650(cfg_info, preprocess_info)
     # sys.exit()
     if 1:#not check_h5_info(cfg, 'o2'): 
-        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                             cld_manual=True, cot=2, cer=10, cth=1)
         save_h5_info(cfg, 'o2', o2_h5)
 
-    if 1:#not check_h5_info(cfg, 'wco2'):
-        wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-        save_h5_info(cfg, 'wco2', wco2_h5)
+    # if 1:#not check_h5_info(cfg, 'wco2'):
+    #     wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+    #     save_h5_info(cfg, 'wco2', wco2_h5)
 
-    if 1:#not check_h5_info(cfg, 'sco2'):
-        sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-        save_h5_info(cfg, 'sco2', sco2_h5)
+    # if 1:#not check_h5_info(cfg, 'sco2'):
+    #     sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+    #     save_h5_info(cfg, 'sco2', sco2_h5)
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20151201_ocean_2_cal_para.csv'
-    # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
+    cfg = 'cfg/20151201_ocean_1_cal_para.csv'
+    # cfg = 'cfg/20151201_ocean_1.csv'
+    # cfg = 'cfg/20161005_atlantic_1_cal_para copy.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'

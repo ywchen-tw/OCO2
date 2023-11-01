@@ -55,15 +55,15 @@ def near_rad_calc(OCO_class):
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
 
 def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all_exlcude_cloud')
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all_exlcude_cloud')
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all_exlcude_cloud')
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all_exlcude_cloud')
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all')
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all')
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all')
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all')
     
     return ipa0, c3d, ipa0_std, c3d_std
 
 
-def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
+def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
     """
     Parameters:
     -----------
@@ -78,28 +78,28 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
     """
     lams = rad_mca.shape[-1]
     tmp = np.zeros_like(rad_mca)
-    rad_mca_mask_cld = rad_mca.copy()
+    rad_mca_mask_cld = copy.deepcopy(rad_mca)
     rad_mca_mask_cld[cld_position] = -999999
     for i in range(lams):
         tmp[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
     tmp[tmp<0] = np.nan
 
     tmp2 = np.zeros_like(rad_mca)
-    rad_mca_mask_cld2 = rad_mca.copy()
+    rad_mca_2 = copy.deepcopy(rad_mca)
     for i in range(lams):
-        tmp2[:,:,i] = uniform_filter(rad_mca_mask_cld2[:,:,i], size=size, mode='constant', cval=-999999)
+        tmp2[:,:,i] = uniform_filter(rad_mca_2[:,:,i], size=size, mode='constant', cval=-999999)
     tmp2[tmp2<0] = np.nan
 
     tmp2[~np.isnan(tmp)] = np.nan
     tmp2[cld_position] = np.nan
 
     tmp3 = np.zeros_like(rad_mca)
-    rad_mca_mask_cld = rad_mca.copy()
+    rad_mca_3 = copy.deepcopy(rad_mca)
     for i in range(lams):
-        tmp3[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
+        tmp3[:,:,i] = uniform_filter(rad_mca_3[:,:,i], size=size, mode='constant', cval=-999999)
     tmp3[tmp3<0] = np.nan
 
-    tmp4 = copy.copy(tmp3)
+    tmp4 = copy.deepcopy(tmp3)
     tmp4[cld_position] = np.nan
 
     if option == 'no_cloud':
@@ -169,7 +169,7 @@ def cld_rad_slope_calc(case_name_tag, band_tag, h5_output, filename, pkl_filenam
     return OCO_class
 
 
-def main(cfg_csv='20151201_ocean_1.csv'):
+def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -207,7 +207,7 @@ def main(cfg_csv='20151201_ocean_1.csv'):
     filename = '../glint/data/{}/{}'
     
     pkl_filename = '20151201_amazon_{}_lbl_with_aod.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc(case_name_tag, 'o2a', cfg_info['o2'], filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc(case_name_tag, 'wco2', cfg_info['wco2'], filename, pkl_filename, cld_location)
@@ -220,14 +220,14 @@ def main(cfg_csv='20151201_ocean_1.csv'):
         with open(pkl_filename.format('sco2'), 'rb') as f:
             o3 = pickle.load(f)
 
-    if 1:#not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
+    if not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
         cld_dist_calc(cfg_name, o2, slope_compare)
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
     # weighted_cld_dist_calc
     #--------------------------------------
-    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+    if not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
         weighted_cld_dist_calc(cfg_name, o2, slope_compare)
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -260,7 +260,9 @@ def main(cfg_csv='20151201_ocean_1.csv'):
     mask = mask.flatten()
     parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
-    
+    parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, shadow=True, img_dir=img_dir)
+
+
     # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 
     
@@ -357,12 +359,14 @@ def main(cfg_csv='20151201_ocean_1.csv'):
     slope_intercept_compare_plot(o1, 'O_2-A', 'o2a',
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
-                                slope_compare, inter_compare, img_dir=img_dir)
+                                slope_compare, inter_compare, 
+                                rad_clr_compare, rad_c3d_compare,img_dir=img_dir)
     
     slope_intercept_compare_plot(o3, 'SCO_2', 'sco2',
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
-                                slope_compare, inter_compare, img_dir=img_dir)
+                                slope_compare, inter_compare, 
+                                rad_clr_compare, rad_c3d_compare, img_dir=img_dir)
     
     o2a_conti_plot(o1, rad_c3d_compare,
                    img, wesn, lon_dom, lat_dom, label_size=14, img_dir=img_dir)
@@ -431,7 +435,7 @@ def o2a_conti_plot(o1, rad_c3d_compare,
     mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
     print(mask.sum())
     c = ax.scatter(o1.lon2d, o1.lat2d, 
-                   c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5, cmap='Reds')
+                   c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5, cmap='Greys_r')
     ax.scatter(o1.lon2d[mask], o1.lat2d[mask], 
                    c='grey', s=5, cmap='Reds')
     cbar = f.colorbar(c, ax=ax, extend='both')
@@ -443,14 +447,14 @@ def o2a_conti_plot(o1, rad_c3d_compare,
 def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
-                                slope_compare, inter_compare, label_size=14, img_dir='.'):
+                                slope_compare, inter_compare, 
+                                rad_clr_compare, rad_c3d_compare, label_size=14, img_dir='.'):
     
     f, (ax1, ax2) =plt.subplots(1, 2, figsize=(12, 6.75))
     for ax in [ax1, ax2]:
         ax.imshow(img, extent=wesn)
         ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
         ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
-        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
         ax_lon_lat_label(ax, label_size=14, tick_size=12)
     mask = ~(cth0>0)
     c1 = ax1.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
@@ -465,9 +469,16 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('$\mathrm{%s}$ intercept' %(label_tag), fontsize=label_size)
     
+    bright_area_mask = getattr(OCO_class, rad_c3d_compare)[:,:,-1] > getattr(OCO_class, rad_clr_compare)[:,:,-1]
+    bright_area = np.zeros(bright_area_mask.shape)
+    bright_area[bright_area_mask] = 1
+
     for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=10, color='r')
+        ax.contour(bright_area, colors='k', linewidths=5, levels=[0.5])
+        # ax.scatter(lon_2d[bright_area_mask], lat_2d[bright_area_mask], s=10, color='k')
         ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
         ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
@@ -661,11 +672,13 @@ def heatmap_xy_3(x, y, ax):
     ax.errorbar(cld_list, value_avg, yerr=value_std, 
                 marker='s', markersize=3,
                 color='r', linewidth=2, linestyle='', ecolor='skyblue')
-    
+    print('cld_list:', cld_list)
+    print('value_avg:', value_avg)
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1, 1.25, 1.5] if cld_val.min()<=2 else [cld_val.min().round(0), cld_val.min().round(0)+0.25,] 
+    cld_val_min = cld_val.min().round(0)
+    cld_min_list = [1, 1.25, 1.5] if cld_val_min<=2 else [cld_val_min, cld_val_min+0.25,] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):
@@ -801,7 +814,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare,
 
 def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, 
                                      rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
-                                     img_dir='.'):
+                                     shadow=False, img_dir='.'):
     return_list = []
     fig, ((ax11, ax12), 
             (ax21, ax22),
@@ -817,7 +830,11 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         oco_band = [o1, o2, o3][i]
         rad_3d = getattr(oco_band, rad_3d_compare)[:,:, -1].flatten()
         rad_clr = getattr(oco_band, rad_clr_compare)[:,:, -1].flatten()
-        mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
+        if shadow:
+            mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d<rad_clr), region_mask)
+        else:
+            mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
+        # mask = np.logical_and(rad_3d<rad_clr, region_mask)
         
         slope = getattr(oco_band, slope_compare)[:,:,0].flatten()
         inter = getattr(oco_band, inter_compare)[:,:,0].flatten()
@@ -837,11 +854,17 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_ylim(-limit_2, limit_2)
 
     ax11.set_ylim(-0.3, 0.3)
-    ax12.set_ylim(-0.05, 0.25)
     ax21.set_ylim(-0.3, 0.2)
-    ax22.set_ylim(-0.05, 0.25)
     ax31.set_ylim(-0.3, 0.2)
-    ax32.set_ylim(-0.05, 0.2)
+
+    if shadow:
+        ax12.set_ylim(-0.25, 0.05)
+        ax22.set_ylim(-0.25, 0.05)
+        ax32.set_ylim(-0.2, 0.05)
+    else:
+        ax12.set_ylim(-0.05, 0.25)
+        ax22.set_ylim(-0.05, 0.25)
+        ax32.set_ylim(-0.05, 0.2)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']
     ax_list = [ax11, ax12, ax21, ax31, ax22, ax32]
@@ -858,7 +881,10 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
         ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
         ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
+    if shadow:
+        fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}_shadow.png', dpi=150, bbox_inches='tight')
+    else:
+        fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}_bright.png', dpi=150, bbox_inches='tight')
 
     return return_list
 

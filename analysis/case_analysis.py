@@ -207,7 +207,7 @@ def main(cfg_csv='20190621_australia_2.csv'):
     filename = '../simulation/data/%s/data_all_20190621_{}_{}_lbl_with_aod.h5' %case_name_tag
     
     pkl_filename = '20190621_amazon_{}_lbl_with_aod.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -233,10 +233,10 @@ def main(cfg_csv='20190621_australia_2.csv'):
     weighted_cld_dist = weighted_cld_data['cld_dis']
     #--------------------------------------
 
-    if not os.path.isfile(f'{cfg_name}_weighted_cld_vert_distance.pkl'):
-        weighted_cld_dist_vert_calc(cfg_name, o2, slope_compare)
-    weighted_cld_vert_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance_vertical.pkl')
-    weighted_cld_dist = weighted_cld_vert_data['cld_dis']
+    # if not os.path.isfile(f'{cfg_name}_weighted_cld_vert_distance.pkl'):
+    #     weighted_cld_dist_vert_calc(cfg_name, o2, slope_compare)
+    # weighted_cld_vert_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance_vertical.pkl')
+    # weighted_cld_dist = weighted_cld_vert_data['cld_dis']
     
 
     #cld_dist = weighted_cld_dist
@@ -470,12 +470,13 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('$\mathrm{%s}$ intercept' %(label_tag), fontsize=label_size)
     
+    lonlat_interval = 0.1 if (lon_2d.max()-lon_2d.min())<1 else 0.2
     for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
         ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
-        ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
-        ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+        ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, lonlat_interval)))
+        ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, lonlat_interval)))
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
         
     f.tight_layout(pad=0.5)
@@ -669,7 +670,7 @@ def weighted_cld_dist_vert_calc(cfg_name, o1, slope_compare):
                 point = np.array([o1.lat2d[i, j], o1.lon2d[i, j]])
                 horizontal_distances = haversine_vector(point, cld_latlon, unit=Unit.KILOMETERS, comb=True)
                 distances = np.sqrt(horizontal_distances**2 + np.array(cld_top_height).reshape(-1, 1)**2)
-                weights = 1 / distances**2  # Calculate the inverse distance weights
+                weights = 1 / distances**1  # Calculate the inverse distance weights
                 # Calculate the weighted average distance
                 cloud_dist[i, j] = np.sum(distances * weights) / np.sum(weights)
     
@@ -879,12 +880,12 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_xlim(cld_low, cld_max)
         ax_r.set_ylim(-limit_2, limit_2)
 
-    ax11.set_ylim(-0.1, 0.3)
-    ax12.set_ylim(-0.05, 0.25)
-    ax21.set_ylim(-0.1, 0.2)
-    ax22.set_ylim(-0.05, 0.25)
-    ax31.set_ylim(-0.1, 0.2)
-    ax32.set_ylim(-0.05, 0.2)
+    ax11.set_ylim(-0.3, 0.5)
+    ax12.set_ylim(-0.05, 0.35)
+    ax21.set_ylim(-0.3, 0.35)
+    ax22.set_ylim(-0.05, 0.35)
+    ax31.set_ylim(-0.3, 0.35)
+    ax32.set_ylim(-0.05, 0.3)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']
     ax_list = [ax11, ax12, ax21, ax31, ax22, ax32]
