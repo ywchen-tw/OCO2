@@ -1,8 +1,8 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks=32
+#SBATCH --account=ucb427_asc1
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -157,13 +157,13 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, pha_obj=pha0, fname='%s/mca_atm_3d.bin' % fdir) # newly modified for phase function
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
-    if cfg_info['_aerosol'] == 'TRUE':
+    if cfg_info['_aerosol'] == 'TRUE' and AOD_550_land_mean>0:
         # add homogeneous 1d mcarats "atmosphere", aerosol layer
-        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
+        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
         ssa = SSA_land_mean # aerosol single scattering albedo
         cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
-        print(f'aod {wavelength:.2f} nm mean:', aod)
-        print('cth mode:', cth_mode.mode[0])
+        # print(f'aod {wavelength:.2f} nm mean:', aod)
+        # print('cth mode:', cth_mode.mode[0])
         asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
         z_bot  = np.min(levels)         # altitude of layer bottom in km
         z_top  = cth_mode.mode[0]       # altitude of layer top in km
@@ -436,7 +436,8 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
 
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim, fdir_out=fdir_data, aod_550=aod_sim)
+    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim, fdir_out=fdir_data, 
+                             aod_550=aod_sim, cot=cot_sim, cer=cer_sim, cth=cth_sim)
     # ===============================================================
     
     return collect_data
