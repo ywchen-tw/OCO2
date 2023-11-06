@@ -259,9 +259,9 @@ def cdata_all(date, tag, fdir_mca, fname_abs, sat, sfc_alb, sza,
     elif aod_550 is not None and cth is None:
         output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod550_%.3f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550)
     elif aod_550 is None and cth is not None:
-        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_cth_%.1f_cer_%.0f_cth_%.0f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, cth, cer, cth)
+        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_cot_%.1f_cer_%.0f_cth_%.0f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, cot, cer, cth)
     else:
-        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cth_%.1f_cer_%.0f_cth_%.0f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550, cth, cer, cth)
+        output_file = 'data_all_%s_%s_%4.4d_%4.4d_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%.0f_cth_%.0f.h5' % (date.strftime('%Y%m%d'), tag, oco.index_s, oco.index_e, sfc_alb, sza, aod_550, cot, cer, cth)
 
 
 

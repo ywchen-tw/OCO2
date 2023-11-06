@@ -207,7 +207,7 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     filename = '../glint/data/{}/{}'
     
     pkl_filename = '20151201_amazon_{}_lbl_with_aod.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc(case_name_tag, 'o2a', cfg_info['o2'], filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc(case_name_tag, 'wco2', cfg_info['wco2'], filename, pkl_filename, cld_location)

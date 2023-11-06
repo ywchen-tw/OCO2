@@ -447,7 +447,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cot=None, cer=None, cth=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     #run_case_modis_650(cfg_info, preprocess_info)
-    # sys.exit()
+    sys.exit()
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
                              cld_manual=True, cot=cot, cer=cer, cth=cth)
@@ -465,7 +465,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cot=None, cer=None, cth=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20151201_ocean_1_cal_para.csv'
+    cfg = 'cfg/20151201_ocean_2_cal_para.csv'
     # cfg = 'cfg/20151201_ocean_1.csv'
     # cfg = 'cfg/20161005_atlantic_1_cal_para copy.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
@@ -475,8 +475,9 @@ if __name__ == '__main__':
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     # run_simulation(cfg) #done
-    run_simulation(cfg, cot=2, cer=10, cth=1)
-    run_simulation(cfg, cot=2, cer=10, cth=2)
+    run_simulation(cfg, cot=5, cer=25, cth=5)
+    run_simulation(cfg, cot=5, cer=25, cth=8)
+    run_simulation(cfg, cot=10, cer=25, cth=5)
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
 
