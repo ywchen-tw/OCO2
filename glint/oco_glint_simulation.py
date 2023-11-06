@@ -465,7 +465,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cot=None, cer=None, cth=None):
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20151201_ocean_2_cal_para.csv'
+    cfg = 'cfg/20151201_ocean_1_cal_para.csv'
     # cfg = 'cfg/20151201_ocean_1.csv'
     # cfg = 'cfg/20161005_atlantic_1_cal_para copy.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
