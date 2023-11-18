@@ -396,7 +396,9 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
 
     # post-processing - combine the all the calculations into one dataset
     # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim, fdir_out=fdir_data, aod_550=aod_sim)
+    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, sfc_alb=alb_sim, sza=sza_sim, fdir_out=fdir_data, 
+                             aod_550=aod_sim,
+                             cld_manual=False, cot=None, cer=None, cth=None,)
     # ===============================================================
     
     return collect_data
