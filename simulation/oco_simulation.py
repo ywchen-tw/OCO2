@@ -1,8 +1,7 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks=32
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -40,10 +39,12 @@ from util.oco_cld_sat import cld_sat
 
 
 def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
-                     fname_atm_abs=None, cth=None, 
+                     fname_atm_abs=None, 
                      scale_factor=1.0, 
                      fdir='tmp-data', solver='3D',
-                     sfc_alb_abs=None, sza_abs=None, overwrite=True):
+                     sfc_alb_abs=None, sza_abs=None, 
+                     cld_manual=False, cot=None, cer=None, cth=None, aod550=None,
+                     overwrite=True):
 
     """
     Calculate OCO2 radiance using cloud (MODIS level 1b) and surface properties (MOD09A1) from MODIS
@@ -117,9 +118,17 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         AOD_550_land_mean = f_pre_data['mod/aod/AOD_550_land_mean'][...]
         Angstrom_Exponent_land_mean = f_pre_data['mod/aod/Angstrom_Exponent_land_mean'][...]
         SSA_land_mean = f_pre_data['mod/aod/SSA_660_land_mean'][...]
+        
+        if aod550 is not None:
+            AOD_550_land_mean = aod550
         # =================================================================================
 
         modl1b    =  sat_tmp(data)
+        if cld_manual:
+            modl1b.data['cth_2d']['data'][modl1b.data['cth_2d']['data']>0] = cth
+            modl1b.data['cot_2d']['data'][modl1b.data['cot_2d']['data']>0] = cot
+            modl1b.data['cer_2d']['data'][modl1b.data['cer_2d']['data']>0] = cer
+        
         fname_cld = '%s/cld.pk' % fdir
         cth0 = modl1b.data['cth_2d']['data']
         cth0[cth0>10.0] = 10.0
@@ -136,7 +145,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     atm3d0  = mca_atm_3d(cld_obj=cld0, atm_obj=atm0, pha_obj=pha0, fname='%s/mca_atm_3d.bin' % fdir) # newly modified for phase function
     atm1d0  = mca_atm_1d(atm_obj=atm0, abs_obj=abs0)
 
-    if cfg_info['_aerosol'] == 'TRUE':
+    if cfg_info['_aerosol'] == 'TRUE' and AOD_550_land_mean>0:
         # add homogeneous 1d mcarats "atmosphere", aerosol layer
         aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
         ssa = SSA_land_mean # aerosol single scattering albedo
@@ -348,7 +357,8 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
 
 @timing
-def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
+def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
+                 cld_manual=False, cot=None, cer=None, cth=None, aod550=None):
     # Get information from cfg_info
     # ======================================================================
     date      = preprocess_info[0]
@@ -356,6 +366,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     fdir_data = preprocess_info[3]
     sat0      = preprocess_info[4]
     zpt_file  = preprocess_info[5]
+    zpt_file = '/Users/yuch8913/programming/oco/glint/data/20151201_ocean_1_20151201/zpt.h5'
     # ======================================================================
     if sfc_alb != None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
@@ -376,9 +387,10 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
         for solver in ['IPA', '3D']:
             alb_sim, sza_sim, aod_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength, 
                                             cfg_info=cfg_info,
-                                            fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
+                                            fname_atm_abs=fname_abs, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
+                                            cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550,
                                             overwrite=True)
     # ===============================================================
 
@@ -390,37 +402,40 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
     return collect_data
     
 
-def run_simulation(cfg, sfc_alb=None, sza=None):
+def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=None, cth=None, aod550=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
+    # sys.exit()
     # run_case_modis_650(cfg_info, preprocess_info)
 
     if 1:#not check_h5_info(cfg, 'o2'): 
-        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info,
-                          sfc_alb=sfc_alb, sza=sza)
+        o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550)
         save_h5_info(cfg, 'o2', o2_h5)
 
     if 1:#not check_h5_info(cfg, 'wco2'):
-        wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550)
         save_h5_info(cfg, 'wco2', wco2_h5)
 
     if 1:#not check_h5_info(cfg, 'sco2'):
-        sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
+        sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
+                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550)
         save_h5_info(cfg, 'sco2', sco2_h5)
 
 if __name__ == '__main__':
     
-    # cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    cfg = 'cfg/20181018_central_asia_zpt_test.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20190209_dryden_470cloud.csv'
     # cfg = 'cfg/20170605_amazon_2.csv'
     # cfg = 'cfg/20190621_australia_2.csv'
-    cfg = 'cfg/20170721_australia_1.csv'
+    # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg) #done
+    run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 

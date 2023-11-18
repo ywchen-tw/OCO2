@@ -113,17 +113,18 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
     else:
         raise OSError('option not found')
 
-def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unperturb'):
+def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, sza, points=11, mode='unperturb'):
      
     nwl=sls_np[z,fp,:].shape[0]
     flt=np.where(sls_np[z,fp,:]>1e-6)
     use=len(flt[0])
+    mu = np.mean(sza)/180*np.pi
     if use==nwl:
         w=1./sls_np[z,fp,:]    
         if mode=='unperturb':
-            x=c3d_np[z,fp,:]/toa[:]*np.pi
+            x=c3d_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
         else:
-            x=clr_np[z,fp,:]/toa[:]*np.pi
+            x=clr_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
         res = np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
@@ -143,18 +144,18 @@ def slopes_propagation(OCO_class, mode='unperturb'):
     OCO_class.slope_5avg, OCO_class.inter_5avg = (nan_array(array_size, dtype=np.float64) for _ in range(2))
     OCO_class.slope_9avg, OCO_class.inter_9avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
     OCO_class.slope_13avg, OCO_class.inter_13avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
-    
+    sza = np.mean(OCO_class.sza_avg)
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
-            slope, slopestd, inter, interstd = get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, points=11, mode='unperturb')
+            slope, slopestd, inter, interstd = get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_5avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_5avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_9avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_9avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_13avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_13avg[z,fp,:]=[inter,interstd]
 
@@ -350,6 +351,9 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     sfc_alt_plt(img, wesn, lon_dom, lat_dom, 
                 lon_2d, lat_2d, sfh_2d, img_dir=img_dir)
     
+    image_xco2(img, wesn, lon_dom, lat_dom, o1,
+               img_dir=img_dir)
+    
     cld_dist_plot(o1, img, wesn, lon_dom, lat_dom, 
                   lon_2d, lat_2d, cth0, cld_dist, img_dir=img_dir)
     
@@ -392,6 +396,21 @@ def sfc_alt_plt(img, wesn, lon_dom, lat_dom,
     f.tight_layout()
     f.savefig(f'{img_dir}/surface_altitude.png', dpi=300)
 
+def image_xco2(img, wesn, lon_dom, lat_dom, o1,
+                label_size=14, img_dir='.'):
+    f, ax=plt.subplots(figsize=(8, 8))
+    ax.imshow(img, extent=wesn)
+    ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    c = ax.scatter(o1.lon, o1.lat, 
+                   c=o1.co2*1e6, s=20,
+                   cmap='RdBu_r', vmin=394, vmax=400, 
+                   edgecolor='white', linewidth=0.15)
+    cbar = f.colorbar(c, ax=ax, extend='both')
+    cbar.set_label('$\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
+    ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    f.tight_layout()
+    f.savefig(f'{img_dir}/xco2_image.png', dpi=300)
 
 def cld_dist_plot(o1, img, wesn, lon_dom, lat_dom, 
                   lon_2d, lat_2d, cth0, cld_dist, label_size=14, img_dir='.'):

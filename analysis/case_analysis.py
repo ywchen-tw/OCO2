@@ -113,17 +113,18 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no cloud'):
     else:
         raise OSError('option not found')
 
-def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, points=11, mode='unperturb'):
+def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, sza, points=11, mode='unperturb'):
      
     nwl=sls_np[z,fp,:].shape[0]
     flt=np.where(sls_np[z,fp,:]>1e-6)
     use=len(flt[0])
+    mu = np.mean(sza)/180*np.pi
     if use==nwl:
         w=1./sls_np[z,fp,:]    
         if mode=='unperturb':
-            x=c3d_np[z,fp,:]/toa[:]*np.pi
+            x=c3d_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
         else:
-            x=clr_np[z,fp,:]/toa[:]*np.pi
+            x=clr_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
         x_len = len(x)
         mask = np.argsort(x)[x_len-points:]
         res = np.polyfit(x[mask], sl_np[z,fp,:][mask], 1, w=w[mask], cov=True) # now get covariance as well!
@@ -143,18 +144,18 @@ def slopes_propagation(OCO_class, mode='unperturb'):
     OCO_class.slope_5avg, OCO_class.inter_5avg = (nan_array(array_size, dtype=np.float64) for _ in range(2))
     OCO_class.slope_9avg, OCO_class.inter_9avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
     OCO_class.slope_13avg, OCO_class.inter_13avg = (nan_array(array_size, dtype=np.float64) for _ in range(2)) 
-    
+    sza = np.mean(OCO_class.sza_avg)
     for z in range(OCO_class.rad_clr_5.shape[0]):
         for fp in range(OCO_class.rad_clr_5.shape[1]):   
-            slope, slopestd, inter, interstd = get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, points=11, mode='unperturb')
+            slope, slopestd, inter, interstd = get_slope_np(OCO_class.toa, OCO_class.sl_5, OCO_class.sls_5, OCO_class.rad_c3d_5, OCO_class.rad_clr_5, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_5avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_5avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_9, OCO_class.sls_9, OCO_class.rad_c3d_9, OCO_class.rad_clr_9, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_9avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_9avg[z,fp,:]=[inter,interstd]
 
-            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, points=11, mode='unperturb')
+            slope,slopestd,inter,interstd=get_slope_np(OCO_class.toa, OCO_class.sl_13, OCO_class.sls_13, OCO_class.rad_c3d_13, OCO_class.rad_clr_13, fp, z, sza, points=11, mode='unperturb')
             OCO_class.slope_13avg[z,fp,:]=[slope,slopestd]
             OCO_class.inter_13avg[z,fp,:]=[inter,interstd]
 
@@ -169,10 +170,11 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20190621_australia_2.csv'):
+def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
+    # 20190621_australia_2.csv
 
     cfg_dir = '../simulation/cfg'
 
@@ -204,10 +206,11 @@ def main(cfg_csv='20190621_australia_2.csv'):
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    filename = '../simulation/data/%s/data_all_20190621_{}_{}_lbl_with_aod.h5' %case_name_tag
-    
-    pkl_filename = '20190621_amazon_{}_lbl_with_aod.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
+    filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod.h5' 
+
+    pkl_filename = '20181018_central_asia_{}_lbl_with_aod.pkl'
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -359,12 +362,12 @@ def main(cfg_csv='20190621_australia_2.csv'):
     weighted_cld_dist_plot(o1, img, wesn, lon_dom, lat_dom, 
                   lon_2d, lat_2d, cth0, weighted_cld_dist, img_dir=img_dir)
     
-    slope_intercept_compare_plot(o1, 'O_2-A', 'o2a',
+    slope_intercept_compare_plot(o1, 'O_2-A', 'o2a', pxl_by_pxl_output_csv,
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
                                 slope_compare, inter_compare, img_dir=img_dir)
     
-    slope_intercept_compare_plot(o3, 'SCO_2', 'sco2',
+    slope_intercept_compare_plot(o3, 'SCO_2', 'sco2', pxl_by_pxl_output_csv,
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
                                 slope_compare, inter_compare, img_dir=img_dir)
@@ -376,7 +379,7 @@ def main(cfg_csv='20190621_australia_2.csv'):
                               img, wesn, lon_dom, lat_dom, 
                               lon_2d, lat_2d, cth0, img_dir=img_dir)
     
-    # o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir=img_dir)
+    o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir=img_dir)
     
 
 def sfc_alt_plt(img, wesn, lon_dom, lat_dom, 
@@ -445,7 +448,7 @@ def o2a_conti_plot(o1, rad_c3d_compare,
     f.tight_layout()
     f.savefig(f'{img_dir}/o2a_conti_{rad_c3d_compare}.png', dpi=300)
 
-def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
+def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, pxl_by_pxl_output_csv,
                                 img, wesn, lon_dom, lat_dom, 
                                 lon_2d, lat_2d, cth0, 
                                 slope_compare, inter_compare, label_size=14, img_dir='.'):
@@ -461,6 +464,11 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
     c1 = ax1.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
                    c=getattr(OCO_class, slope_compare)[:,:,0][mask], s=10,
                    cmap='RdBu_r', vmin=-0.3, vmax=0.3)
+    idx = 91
+    print(pxl_by_pxl_output_csv['SND'][idx])
+    print('lon ind:', np.argmin(np.abs(pxl_by_pxl_output_csv['LON'][idx]-OCO_class.lon2d[:, 0])))
+    print('lat ind:', np.argmin(np.abs(pxl_by_pxl_output_csv['LAT'][idx]-OCO_class.lat2d[0, :])))
+    ax1.scatter(pxl_by_pxl_output_csv['LON'][idx], pxl_by_pxl_output_csv['LAT'][idx], marker='^', s=30, color='k')
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('$\mathrm{%s}$ slope' %(label_tag), fontsize=label_size)
 
@@ -480,7 +488,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
         
     f.tight_layout(pad=0.5)
-    f.savefig(f'{img_dir}/{file_tag}_{slope_compare}.png', dpi=300)
+    f.savefig(f'{img_dir}/{file_tag}_{slope_compare}_test.png', dpi=300)
 
 
 def continuum_fp_compare_plot(o1, o2, o3, 
@@ -983,11 +991,11 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
 
     # second fig
     toa = o1.toa
-    mu = np.mean(o1.mu)/180*np.pi
+    mu = np.mean(o1.sza_avg)/180*np.pi
     sl_np = o1.sl_5
     sls_np = o1.sls_5#/np.sqrt(3)
     c3d_np = o1.rad_c3d_5
-    fp, z = 166, 180
+    fp, z = 170, 114
     points = nx+1
 
     w = 1./sls_np[z,fp,:] 
@@ -1032,7 +1040,8 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     std = unp.std_devs(py)*100
     ax2.plot(px, nom, c='r') # plot the regression line and uncertainty band (95% confidence)
     ax2.fill_between(px, nom - 1.96 * std, nom + 1.96 * std, color='orange', alpha=0.2)
-
+    print('slope: ', a)
+    print('intercept: ', b)
     ax_index_label(ax1, '(a)', label_size+2)
     ax_index_label(ax2, '(b)', label_size+2)
     
