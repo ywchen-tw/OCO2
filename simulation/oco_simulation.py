@@ -366,7 +366,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     fdir_data = preprocess_info[3]
     sat0      = preprocess_info[4]
     zpt_file  = preprocess_info[5]
-    zpt_file = '/Users/yuch8913/programming/oco/glint/data/20151201_ocean_1_20151201/zpt.h5'
+    zpt_file = '../glint/data/20151201_ocean_1_20151201/zpt.h5'
     # ======================================================================
     if sfc_alb != None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
