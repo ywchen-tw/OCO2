@@ -1,7 +1,7 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
+#SBATCH --ntasks=16
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
@@ -368,8 +368,10 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     zpt_file  = preprocess_info[5]
     zpt_file = '../glint/data/20151201_ocean_1_20151201/zpt.h5'
     # ======================================================================
-    if sfc_alb != None:
+    if sfc_alb != None and cld_manual == False:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
+    elif sfc_alb != None and cld_manual == True:
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}_cth_{cth:.1f}_cot_{cot:.0f}_cer_{cer:.0f}/{band_tag}')
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
     
@@ -398,7 +400,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     # ===============================================================
     collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, sfc_alb=alb_sim, sza=sza_sim, fdir_out=fdir_data, 
                              aod_550=aod_sim,
-                             cld_manual=False, cot=None, cer=None, cth=None,)
+                             cld_manual=cld_manual, cot=cot, cer=cer,)
     # ===============================================================
     
     return collect_data
@@ -437,7 +439,15 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.1, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+
+    run_simulation(cfg, sfc_alb=0.3, sza=15, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.3, sza=30, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.3, sza=60, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.3, sza=75, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
