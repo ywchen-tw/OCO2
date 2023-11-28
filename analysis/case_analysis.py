@@ -170,7 +170,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_2_test4.csv'):
+def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -207,9 +207,10 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     inter_compare = f'inter_{compare_num}avg'
 
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
-    filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod.h5' 
+    # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
+    filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_0.300_sza_30.0_aod550_0.000.h5' %case_name_tag
 
-    pkl_filename = '20181018_central_asia_{}_lbl_with_aod.pkl'
+    pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
     if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
@@ -717,7 +718,7 @@ def heatmap_xy_3(x, y, ax):
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1, 1.25, 1.5] if cld_val.min()<=2 else [cld_val.min().round(0), cld_val.min().round(0)+0.25,] 
+    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(10)] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):
