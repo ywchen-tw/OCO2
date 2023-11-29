@@ -59,13 +59,13 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     with h5py.File(zpt_file, 'r') as oco_zpt:
         levels = oco_zpt['h_edge'][...]
     fname_atm = '%s/atm.pk' % fdir
-    atm0      = atm_atmmod(zpt_file=zpt_file, fname=fname_atm, overwrite=overwrite)
+    atm0      = atm_atmmod(zpt_file=zpt_file, fname=fname_atm, overwrite=True)
     # =================================================================================
 
     # abs object from OCO ABSCO, MET, CO2 prior files
     # =================================================================================
     fname_abs = '%s/abs.pk' % fdir
-    abs0      = abs_oco_h5(wavelength=wavelength, fname=fname_abs, fname_h5=fname_atm_abs, atm_obj=atm0, overwrite=overwrite)
+    abs0      = abs_oco_h5(wavelength=wavelength, fname=fname_abs, fname_h5=fname_atm_abs, atm_obj=atm0, overwrite=True)
     # =================================================================================
 
     # mca_sfc object
@@ -88,14 +88,14 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
     
     mod43     = sat_tmp(data)
     fname_sfc = '%s/sfc.pk' % fdir
-    sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=overwrite)
-    sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
+    sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=True)
+    sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=True)
     # =================================================================================
 
     # mca_sca object (newly added for phase function)
     # =================================================================================
-    pha0 = pha_mie_wc(wavelength=wavelength, overwrite=overwrite)
-    sca  = mca_sca(pha_obj=pha0, fname='%s/mca_sca.bin' % fdir, overwrite=overwrite)
+    pha0 = pha_mie_wc(wavelength=wavelength, overwrite=True)
+    sca  = mca_sca(pha_obj=pha0, fname='%s/mca_sca.bin' % fdir, overwrite=True)
     # =================================================================================
 
     # 3D-cld and 1D-AOD object
