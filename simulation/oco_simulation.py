@@ -138,7 +138,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         cgt0[cth0>4.0] = cth0[cth0>4.0]-3.0   # high clouds (cth>4km) has cloud base at 3 km
         cld0 = cld_sat(zpt_file=zpt_file, fname_atm=fname_atm, sat_info=sat,
                        sat_obj=modl1b, fname=fname_cld, cth=cth0, cgt=cgt0, dz=0.5,#np.unique(atm0.lay['thickness']['data'])[0],
-                       overwrite=overwrite)
+                       overwrite=True)
     # =================================================================================
 
     # mca_atm object
