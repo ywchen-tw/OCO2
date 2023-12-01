@@ -211,8 +211,13 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     
     alb = 0.3
     sza = 30
-    
-    filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_0.000.h5' %case_name_tag
+    aod = 0
+    cot = 5
+    cer = 25
+    cth = 5
+    # data_all_20181018_o2a_6170_6209_sfc_alb_0.050_sza_45.0_aod550_0.000_cot_5.0_cer_25_cth_5
+    filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
+        %(case_name_tag, alb, sza, aod, cot, cer, cth)
 
     pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
     if not os.path.isfile(pkl_filename.format('o2a')):
@@ -275,6 +280,12 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     
+    if not os.path.isfile(f'{cfg_name}_fitting_result.txt'):
+        with open(f'{cfg_name}_fitting_result.txt', 'wb') as f:
+            f.write(f'{"alb":<10}{"sza":<10}{"aod":<10}{"cot":<10}{"cer":<10}{"cth":<10}\n')
+    with open(f'{cfg_name}_fitting_result.txt', 'a') as f:
+        f.write(f'{alb:<10.3f}{sza:<10.1f}{aod:<10.3f}{cot:<10.1f}{cer:<10}{cth:<10}\n')
+    sys.exit()
     # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 
     
@@ -859,7 +870,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare,
 def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, 
                                      rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
                                      img_dir='.'):
-    return_list = []
+    return_list, return_list_err = [], []
     fig, ((ax11, ax12), 
             (ax21, ax22),
             (ax31, ax32)) = plt.subplots(3, 2, figsize=(12, 12), sharex=False)
@@ -883,6 +894,7 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         (slope_a, slope_b), (slope_a_unc, slope_b_unc) = heatmap_xy_3(cloud_dist[mask], slope[mask], ax1)
         (inter_a, inter_b), (inter_a_unc, inter_b_unc) = heatmap_xy_3(cloud_dist[mask], inter[mask], ax2)
         return_list.append((slope_a, slope_b, inter_a, inter_b))
+        return_list_err.append((slope_a_unc, slope_b_unc, inter_a_unc, inter_b_unc))
 
     cld_low, cld_max = 0, 45
     limit_1 = 0.2
@@ -917,7 +929,7 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
     fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', dpi=150, bbox_inches='tight')
 
-    return return_list
+    return return_list, return_list_err
 
 def fitting_without_plot(x, y):
     mask = ~(np.isnan(x) | np.isnan(y) | np.isinf(x) | np.isinf(y))

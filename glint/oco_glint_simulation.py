@@ -475,9 +475,11 @@ if __name__ == '__main__':
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
     # run_simulation(cfg) #done
-    run_simulation(cfg, cot=5, cer=25, cth=5)
-    run_simulation(cfg, cot=5, cer=25, cth=8)
-    run_simulation(cfg, cot=10, cer=25, cth=5)
+    run_simulation(cfg, sza=45)
+    run_simulation(cfg, sza=60)
+    # run_simulation(cfg, cot=5, cer=25, cth=5)
+    # run_simulation(cfg, cot=5, cer=25, cth=8)
+    # run_simulation(cfg, cot=10, cer=25, cth=5)
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
 

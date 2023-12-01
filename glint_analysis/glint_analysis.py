@@ -55,10 +55,10 @@ def near_rad_calc(OCO_class):
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
 
 def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all')
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all')
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all')
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all')
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='no_cloud')
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='no_cloud')
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='no_cloud')
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='no_cloud')
     
     return ipa0, c3d, ipa0_std, c3d_std
 
@@ -102,6 +102,9 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
     tmp4 = copy.deepcopy(tmp3)
     tmp4[cld_position] = np.nan
 
+    tmp5 = copy.deepcopy(tmp3)
+    tmp5[tmp>0] = np.nan
+
     if option == 'no_cloud':
         return tmp
     elif option == 'cloud_edge':
@@ -110,6 +113,8 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
         return tmp3
     elif option == 'all_exlcude_cloud':
         return tmp4
+    elif option == 'with_cloud':
+        return tmp5
     else:
         raise OSError('option not found')
 
@@ -208,7 +213,7 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     filename = '../glint/data/{}/{}'
     
     pkl_filename = '20151201_amazon_{}_lbl_with_aod.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc(case_name_tag, 'o2a', cfg_info['o2'], filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc(case_name_tag, 'wco2', cfg_info['wco2'], filename, pkl_filename, cld_location)
@@ -220,6 +225,8 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
             o2 = pickle.load(f)
         with open(pkl_filename.format('sco2'), 'rb') as f:
             o3 = pickle.load(f)
+
+
 
     if not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
         cld_dist_calc(cfg_name, o2, slope_compare)
@@ -233,6 +240,77 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
     #--------------------------------------
+
+    mask = weighted_cld_dist<10
+    fig = plt.figure(figsize=(8, 4))
+    ax1 = fig.add_subplot(121)
+    ax1.hist(o1.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    ax1.set_xlabel('o2-a slope')
+    ax2 = fig.add_subplot(122)
+    ax2.hist(o1.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    ax2.set_xlabel('o2-a intercept')
+    ylim = ax1.get_ylim()
+    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    ylim = ax2.get_ylim()
+    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    fig.savefig(f'{cfg_name}_o2a_slope_inter_hist_without_cloud_cld_lt_10.png')
+    plt.show()
+    fig = plt.figure(figsize=(8, 4))
+    ax1 = fig.add_subplot(121)
+    ax1.hist(o2.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    ax1.set_xlabel('wco2 slope')
+    ax2 = fig.add_subplot(122)
+    ax2.hist(o2.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    ax2.set_xlabel('wco2 intercept')
+    ylim = ax1.get_ylim()
+    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    ylim = ax2.get_ylim()
+    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    fig.savefig(f'{cfg_name}_wco2_slope_inter_hist_without_cloud_cld_lt_10.png')
+    plt.show()
+    fig = plt.figure(figsize=(8, 4))
+    ax1 = fig.add_subplot(121)
+    ax1.hist(o3.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    ax1.set_xlabel('sco2 slope')
+    ax2 = fig.add_subplot(122)
+    ax2.hist(o3.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    ax2.set_xlabel('sco2 intercept')
+    ylim = ax1.get_ylim()
+    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    ylim = ax2.get_ylim()
+    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    fig.savefig(f'{cfg_name}_sco2_slope_inter_hist_without_cloud_cld_lt_10.png')
+    plt.show()
+    
+    # fig = plt.figure(figsize=(5, 4))
+    # ax1 = fig.add_subplot(111)
+    # mask1 = weighted_cld_dist<1
+    # y1 = getattr(o1, rad_c3d_compare)[:,:,:].reshape(-1, 11)[mask1]
+    # y1_clr = getattr(o1, rad_clr_compare)[:,:,:].reshape(-1, 11)[mask1]
+    # print(y1.shape)
+    # ax1.errorbar(o1.lam, np.nanmean(y1, axis=(0)), yerr=np.nanstd(y1, axis=(0)), label='near cloud')
+    # mask2 = weighted_cld_dist>20
+    # y2 = getattr(o1, rad_c3d_compare)[:,:,:].reshape(-1, 11)[mask2]
+    # y2_clr = getattr(o1, rad_clr_compare)[:,:,:].reshape(-1, 11)[mask2]
+    # ax1.errorbar(o1.lam, np.nanmean(y2, axis=(0)), yerr=np.nanstd(y2, axis=(0)), label='away cloud')
+    # ax1.legend()
+    # plt.show()
+    # fig = plt.figure(figsize=(5, 4))
+    # ax1 = fig.add_subplot(111)
+    # mu = np.mean(np.mean(o1.sza_avg))/180*np.pi
+    # y1_ref = y1/(o1.toa[:]*np.cos(mu))*np.pi
+    # y2_ref = y2/(o1.toa[:]*np.cos(mu))*np.pi
+    # y1_clr_ref = y1_clr/(o1.toa[:]*np.cos(mu))*np.pi
+    # y2_clr_ref = y2_clr/(o1.toa[:]*np.cos(mu))*np.pi
+    # ax1.errorbar(np.nanmean(y1_ref, axis=(0)),
+    #              np.nanmean(y1_ref-y1_clr_ref, axis=(0)),
+    #              xerr=np.nanstd(y1_ref, axis=(0)), label='near cloud')
+    # ax1.errorbar(np.nanmean(y2_ref, axis=(0)), 
+    #              np.nanmean(y2_ref-y2_clr_ref, axis=(0)),
+    #              xerr=np.nanstd(y2_ref, axis=(0)), label='away cloud')
+    # ax1.legend()
+    # plt.show()
+    sys.exit()
 
     #cld_dist = weighted_cld_dist
     xco2 = o1.co2
@@ -705,7 +783,7 @@ def heatmap_xy_3(x, y, ax):
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
             if len(yy) > 0:
-                popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
+                popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-15, 1e-3], [15, 15,]),
                                        p0=(0.1, 0.7),
                                        maxfev=5000,
                                        sigma=value_std[val_mask][mask], 
