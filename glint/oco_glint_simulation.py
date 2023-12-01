@@ -408,6 +408,10 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     zpt_file  = preprocess_info[5]
     # ======================================================================
     if sfc_alb != None:
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}/{band_tag}')
+    elif sza != None:
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_sza_{sza:.1f}/{band_tag}')
+    elif sfc_alb != None and sza != None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
@@ -430,7 +434,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
                                             fname_atm_abs=fname_abs, scale_factor=1.0, 
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            cld_manual=True, cot=cot, cer=cer, cth=cth,
+                                            cld_manual=cld_manual, cot=cot, cer=cer, cth=cth,
                                             overwrite=True)
     # ===============================================================
 
@@ -443,24 +447,24 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     return collect_data
     
 
-def run_simulation(cfg, sfc_alb=None, sza=None, cot=None, cer=None, cth=None):
+def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=None, cth=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
     #run_case_modis_650(cfg_info, preprocess_info)
     # sys.exit()
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
-                             cld_manual=True, cot=cot, cer=cer, cth=cth)
+                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth)
         save_h5_info(cfg, 'o2', o2_h5)
 
     if 1:#not check_h5_info(cfg, 'wco2'):
         wco2_h5 = run_case_oco('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
-                               cld_manual=True, cot=cot, cer=cer, cth=cth)
+                               cld_manual=cld_manual, cot=cot, cer=cer, cth=cth)
         save_h5_info(cfg, 'wco2', wco2_h5)
 
     if 1:#not check_h5_info(cfg, 'sco2'):
         sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
-                               cld_manual=True, cot=cot, cer=cer, cth=cth)
+                               cld_manual=cld_manual, cot=cot, cer=cer, cth=cth)
         save_h5_info(cfg, 'sco2', sco2_h5)
 
 if __name__ == '__main__':
