@@ -152,10 +152,14 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         ssa = SSA_land_mean # aerosol single scattering albedo
         cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
         print(f'aod {wavelength:.2f} nm mean:', aod)
-        print('cth mode:', cth_mode.mode[0])
+        if len(cth_mode.mode) == 0:
+            z_top  = 2       # altitude of layer top in km
+        else:
+            print('cth mode:', cth_mode.mode[0])
+            z_top  = cth_mode.mode[0]       # altitude of layer top in km
         asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
         z_bot  = np.min(levels)         # altitude of layer bottom in km
-        z_top  = cth_mode.mode[0]       # altitude of layer top in km
+        
         aer_ext = aod / (z_top-z_bot) / 1000
 
         atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
