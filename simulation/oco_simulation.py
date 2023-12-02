@@ -7,7 +7,7 @@
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
 #SBATCH --output=sbatch-output_%x_%j.txt
 #SBATCH --job-name=OCO2_test
-#SBATCH --account=ucb427_asc1
+###SBATCH --account=ucb427_asc1
 
 import os
 from pathlib import Path
@@ -437,7 +437,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
 if __name__ == '__main__':
     
     # cfg = 'cfg/20181018_central_asia_zpt_test.csv'
-    cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    cfg = 'cfg/20181018_central_asia_2_test6.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
