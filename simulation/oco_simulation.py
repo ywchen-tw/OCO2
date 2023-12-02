@@ -1,7 +1,7 @@
 #!/bin/env python
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
+#SBATCH --ntasks=32
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
