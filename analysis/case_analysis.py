@@ -208,13 +208,14 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
 
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
-    
+
     alb = 0.3
-    sza = 30
-    aod = 0
+    sza = 45
     cot = 5
     cer = 25
     cth = 5
+    aod = 1
+
     # data_all_20181018_o2a_6170_6209_sfc_alb_0.050_sza_45.0_aod550_0.000_cot_5.0_cer_25_cth_5
     filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
         %(case_name_tag, alb, sza, aod, cot, cer, cth)
@@ -278,13 +279,52 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
                             np.logical_and(o1.lat2d >= extent[2], o1.lat2d <= extent[3]))
     mask = mask.flatten()
     parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
-    parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
+    parameters_cld_distance_list, parameters_cld_distance_list_unc = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     
+    channel_list = ['o2a', 'wco2', 'sco2']
+    # if not os.path.isfile(f'{cfg_name}_fitting_result.txt'):
+    #     with open(f'{cfg_name}_fitting_result.txt', 'w') as f:
+    #         head = f'{"alb"}{"sza":<10}{"aod":<10}{"cot":<10}{"cer":<10}{"cth":<10}'
+    #         for i in range(3):
+    #             head += f'{"slope_%s_amp" %channel_list[i]:<20}{"slope_%s_dec" %channel_list[i]:<20}'
+    #             head += f'{"inter_%s_amp" %channel_list[i]:<20}{"inter_%s_dec" %channel_list[i]:<20}'
+    #             head += f'{"slope_%s_amp_unc" %channel_list[i]:<20}{"slope_%s_dec_unc" %channel_list[i]:<20}'
+    #             head += f'{"inter_%s_amp_unc" %channel_list[i]:<20}{"inter_%s_dec_unc" %channel_list[i]:<20}'
+    #             # head += f'{"slope_{channel_list[i]}_amp":<20}{"slope_o2a_dec":<20}{"inter_o2a_amp":<20}{"inter_o2a_dec":<20}'
+    #             # head += f'{"slope_o2a_amp_unc":<20}{"slope_o2a_dec_unc":<20}{"inter_o2a_amp_unc":<20}{"inter_o2a_dec_unc":<20}'
+    #         # head += f'{"slope_o2a_amp":<20}{"slope_o2a_dec":<20}{"inter_o2a_amp":<20}{"inter_o2a_dec":<20}'
+    #         # head += f'{"slope_o2a_amp_unc":<20}{"slope_o2a_dec_unc":<20}{"inter_o2a_amp_unc":<20}{"inter_o2a_dec_unc":<20}'
+    #         f.write(head+'\n')
+    
+    # # e_fold_dist = 1/popt[1]
+    # # e_fold_dist_err = perr[1]/(popt[1]**2)
+    # print(parameters_cld_distance_list)
+    # with open(f'{cfg_name}_fitting_result.txt', 'a') as f:
+    #     write_data = f'{alb:<10.3f}{sza:<10.1f}{aod:<10.3f}{cot:<10.1f}{cer:<10}{cth:<10}'
+    #     for i in range(3):
+    #         write_data += f'{parameters_cld_distance_list[i][0]:<20.5e}{parameters_cld_distance_list[i][1]:<20.5e}'
+    #         write_data += f'{parameters_cld_distance_list[i][2]:<20.5e}{parameters_cld_distance_list[i][3]:<20.5e}'
+    #         write_data += f'{parameters_cld_distance_list_unc[i][0]:<20.5e}{parameters_cld_distance_list_unc[i][1]:<20.5e}'
+    #         write_data += f'{parameters_cld_distance_list_unc[i][2]:<20.5e}{parameters_cld_distance_list_unc[i][3]:<20.5e}'
+    #     f.write(write_data+'\n')
     if not os.path.isfile(f'{cfg_name}_fitting_result.txt'):
-        with open(f'{cfg_name}_fitting_result.txt', 'wb') as f:
-            f.write(f'{"alb":<10}{"sza":<10}{"aod":<10}{"cot":<10}{"cer":<10}{"cth":<10}\n')
+        with open(f'{cfg_name}_fitting_result.txt', 'w') as f:
+            head = 'alb,sza,aod,cot,cer,cth,'
+            for i in range(3):
+                head += 'slope_%s_amp,slope_%s_dec,inter_%s_amp,inter_%s_dec,' %(channel_list[i], channel_list[i], channel_list[i], channel_list[i])
+                head += 'slope_%s_amp_unc,slope_%s_dec_unc,inter_%s_amp_unc,inter_%s_dec_unc,' %(channel_list[i], channel_list[i], channel_list[i], channel_list[i])
+            f.write(head[:-1]+'\n')
+    
+    # e_fold_dist = 1/popt[1]
+    # e_fold_dist_err = perr[1]/(popt[1]**2)
     with open(f'{cfg_name}_fitting_result.txt', 'a') as f:
-        f.write(f'{alb:<10.3f}{sza:<10.1f}{aod:<10.3f}{cot:<10.1f}{cer:<10}{cth:<10}\n')
+        write_data = f'{alb},{sza},{aod},{cot},{cer},{cth},'
+        for i in range(3):
+            for j in range(4):
+                write_data += f'{parameters_cld_distance_list[i][j]},'
+            for j in range(4):
+                write_data += f'{parameters_cld_distance_list_unc[i][j]},'    
+        f.write(write_data[:-1]+'\n')
     sys.exit()
     # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
 

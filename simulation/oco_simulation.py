@@ -400,7 +400,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
                                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550,
-                                            overwrite=False)
+                                            overwrite=True)
     # ===============================================================
 
     # post-processing - combine the all the calculations into one dataset
@@ -436,7 +436,8 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_zpt_test.csv'
+    # cfg = 'cfg/20181018_central_asia_zpt_test.csv'
+    cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
@@ -446,6 +447,7 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
+    run_simulation(cfg)
     # run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
     
     # run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
@@ -475,10 +477,10 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=10, cer=12, cth=3, aod550=0) 
 
 
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.1)
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.3)
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.5)
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=1.0)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.1)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.3)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.5)
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=1.0)
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
 
