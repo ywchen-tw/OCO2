@@ -371,8 +371,10 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     # ======================================================================
     if sfc_alb != None and cld_manual == False:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
-    elif sfc_alb != None and cld_manual == True:
+    elif sfc_alb != None and cld_manual == True and aod550 is None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}_cth_{cth:.1f}_cot_{cot:.0f}_cer_{cer:.0f}/{band_tag}')
+    elif sfc_alb != None and cld_manual == True and aod550 is not None:
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}_aod550_{aod550:.1f}_cth_{cth:.1f}_cot_{cot:.0f}_cer_{cer:.0f}/{band_tag}')
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
     
@@ -466,8 +468,13 @@ if __name__ == '__main__':
 
     # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=2, cer=12, cth=3, aod550=0) 
     # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=12, cth=3, aod550=0) 
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=10, cer=12, cth=3, aod550=0) 
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=10, cer=12, cth=3, aod550=0) 
 
+
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.1)
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.3)
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0.5)
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=1.0)
     # run_simulation(cfg, sfc_alb=0.5, sza=45)
 
 
