@@ -1,13 +1,13 @@
-#!/bin/env python
-#SBATCH --partition=amilan
-#SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --time=24:00:00
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
-#SBATCH --output=sbatch-output_%x_%j.txt
-#SBATCH --job-name=OCO2_test
-#SBATCH --account=ucb427_asc1
+###!/bin/env python
+###SBATCH --partition=amilan
+###SBATCH --nodes=1
+###SBATCH --ntasks=32
+###SBATCH --time=24:00:00
+###SBATCH --mail-type=ALL
+###SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
+###SBATCH --output=sbatch-output_%x_%j.txt
+###SBATCH --job-name=OCO2_test
+###SBATCH --account=ucb427_asc1
 
 import os
 from pathlib import Path
@@ -455,20 +455,20 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
     ### run_simulation(cfg, sfc_alb=0.3, sza=15, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.3, sza=30, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.3, sza=60, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.3, sza=75, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.3, sza=30, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.3, sza=60, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.3, sza=75, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
     ### run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=6, aod550=0) 
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=8, aod550=0) 
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=10, aod550=0) 
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=8, aod550=0) 
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=10, aod550=0) 
 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=10, cer=25, cth=5, aod550=0) 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=15, cer=25, cth=5, aod550=0) 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=20, cer=25, cth=5, aod550=0) 
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=10, cer=25, cth=5, aod550=0) 
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=15, cer=25, cth=5, aod550=0) 
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=20, cer=25, cth=5, aod550=0) 
 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=1, aod550=0) 
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=2, aod550=0) 
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=1, aod550=0) 
+    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=2, aod550=0) 
     # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0)
     # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=4, aod550=0) 
 
