@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/bin/env bash
 
 #SBATCH --partition=amilan
 #SBATCH --nodes=1
