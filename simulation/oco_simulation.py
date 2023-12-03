@@ -385,7 +385,8 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     # path for CURC
     if 'colorado.edu' in platform.uname()[1]:
         fdir_tmp = fdir_tmp.replace("/projects/yuch8913", "/scratch/alpine/yuch8913")
-    
+        path_dir(fdir_tmp)
+
     # read out wavelength information from absorption file
     # ===============================================================
     fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(int(cfg_info["nx"])+1):d}.h5'
