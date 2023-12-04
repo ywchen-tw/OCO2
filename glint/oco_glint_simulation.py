@@ -187,6 +187,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
     if sza_abs is not None:
         sza = sza_abs
+        vza = sza_abs
     
     # print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
     # cpu number used
@@ -410,7 +411,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     if sfc_alb != None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}/{band_tag}')
     elif sza != None:
-        fdir_tmp = path_dir(f'tmp-data/{name_tag}_sza_{sza:.1f}/{band_tag}')
+        fdir_tmp = path_dir(f'tmp-data/{name_tag}_sza_{sza:.1f}_vza_{sza:.1f}/{band_tag}')
     elif sfc_alb != None and sza != None:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
     else:

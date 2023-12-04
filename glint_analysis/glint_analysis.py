@@ -55,10 +55,10 @@ def near_rad_calc(OCO_class):
     OCO_class.sls_13 = (OCO_class.rad_c3ds_13/OCO_class.rad_clr_13 + OCO_class.rad_clrs_13/OCO_class.rad_clr_13)
 
 def coarsening(OCO_class, size=3):
-    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='no_cloud')
-    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='no_cloud')
-    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='no_cloud')
-    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='no_cloud')
+    ipa0 = coarsening_subfunction(OCO_class.rad_clr, OCO_class.cld_location, size, option='all')
+    c3d  = coarsening_subfunction(OCO_class.rad_c3d, OCO_class.cld_location, size, option='all')
+    ipa0_std = coarsening_subfunction(OCO_class.rad_clrs, OCO_class.cld_location, size, option='all')
+    c3d_std   = coarsening_subfunction(OCO_class.rad_c3ds, OCO_class.cld_location, size, option='all')
     
     return ipa0, c3d, ipa0_std, c3d_std
 
@@ -213,7 +213,7 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     filename = '../glint/data/{}/{}'
     
     pkl_filename = '20151201_amazon_{}_lbl_with_aod.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc(case_name_tag, 'o2a', cfg_info['o2'], filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc(case_name_tag, 'wco2', cfg_info['wco2'], filename, pkl_filename, cld_location)
@@ -241,46 +241,46 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     weighted_cld_dist = weighted_cld_data['cld_dis']
     #--------------------------------------
 
-    mask = weighted_cld_dist<10
-    fig = plt.figure(figsize=(8, 4))
-    ax1 = fig.add_subplot(121)
-    ax1.hist(o1.slope_5avg[:,:,0].flatten()[mask], bins=100)
-    ax1.set_xlabel('o2-a slope')
-    ax2 = fig.add_subplot(122)
-    ax2.hist(o1.inter_5avg[:,:,0].flatten()[mask], bins=100)
-    ax2.set_xlabel('o2-a intercept')
-    ylim = ax1.get_ylim()
-    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    ylim = ax2.get_ylim()
-    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    fig.savefig(f'{cfg_name}_o2a_slope_inter_hist_without_cloud_cld_lt_10.png')
-    plt.show()
-    fig = plt.figure(figsize=(8, 4))
-    ax1 = fig.add_subplot(121)
-    ax1.hist(o2.slope_5avg[:,:,0].flatten()[mask], bins=100)
-    ax1.set_xlabel('wco2 slope')
-    ax2 = fig.add_subplot(122)
-    ax2.hist(o2.inter_5avg[:,:,0].flatten()[mask], bins=100)
-    ax2.set_xlabel('wco2 intercept')
-    ylim = ax1.get_ylim()
-    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    ylim = ax2.get_ylim()
-    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    fig.savefig(f'{cfg_name}_wco2_slope_inter_hist_without_cloud_cld_lt_10.png')
-    plt.show()
-    fig = plt.figure(figsize=(8, 4))
-    ax1 = fig.add_subplot(121)
-    ax1.hist(o3.slope_5avg[:,:,0].flatten()[mask], bins=100)
-    ax1.set_xlabel('sco2 slope')
-    ax2 = fig.add_subplot(122)
-    ax2.hist(o3.inter_5avg[:,:,0].flatten()[mask], bins=100)
-    ax2.set_xlabel('sco2 intercept')
-    ylim = ax1.get_ylim()
-    ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    ylim = ax2.get_ylim()
-    ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
-    fig.savefig(f'{cfg_name}_sco2_slope_inter_hist_without_cloud_cld_lt_10.png')
-    plt.show()
+    # mask = weighted_cld_dist<10
+    # fig = plt.figure(figsize=(8, 4))
+    # ax1 = fig.add_subplot(121)
+    # ax1.hist(o1.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax1.set_xlabel('o2-a slope')
+    # ax2 = fig.add_subplot(122)
+    # ax2.hist(o1.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax2.set_xlabel('o2-a intercept')
+    # ylim = ax1.get_ylim()
+    # ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # ylim = ax2.get_ylim()
+    # ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # fig.savefig(f'{cfg_name}_o2a_slope_inter_hist_without_cloud_cld_lt_10.png')
+    # plt.show()
+    # fig = plt.figure(figsize=(8, 4))
+    # ax1 = fig.add_subplot(121)
+    # ax1.hist(o2.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax1.set_xlabel('wco2 slope')
+    # ax2 = fig.add_subplot(122)
+    # ax2.hist(o2.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax2.set_xlabel('wco2 intercept')
+    # ylim = ax1.get_ylim()
+    # ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # ylim = ax2.get_ylim()
+    # ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # fig.savefig(f'{cfg_name}_wco2_slope_inter_hist_without_cloud_cld_lt_10.png')
+    # plt.show()
+    # fig = plt.figure(figsize=(8, 4))
+    # ax1 = fig.add_subplot(121)
+    # ax1.hist(o3.slope_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax1.set_xlabel('sco2 slope')
+    # ax2 = fig.add_subplot(122)
+    # ax2.hist(o3.inter_5avg[:,:,0].flatten()[mask], bins=100)
+    # ax2.set_xlabel('sco2 intercept')
+    # ylim = ax1.get_ylim()
+    # ax1.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # ylim = ax2.get_ylim()
+    # ax2.vlines(0, ylim[0], ylim[1], color='k', linestyle='--')
+    # fig.savefig(f'{cfg_name}_sco2_slope_inter_hist_without_cloud_cld_lt_10.png')
+    # plt.show()
     
     # fig = plt.figure(figsize=(5, 4))
     # ax1 = fig.add_subplot(111)
@@ -310,7 +310,7 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     #              xerr=np.nanstd(y2_ref, axis=(0)), label='away cloud')
     # ax1.legend()
     # plt.show()
-    sys.exit()
+    # sys.exit()
 
     #cld_dist = weighted_cld_dist
     xco2 = o1.co2
@@ -340,6 +340,7 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     parameters_cld_distance_list = fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, img_dir=img_dir)
     parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, shadow=True, img_dir=img_dir)
+    parameters_cld_distance_list = fitting_3bands_with_weighted_dis(weighted_cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, shadow=True, all=True, img_dir=img_dir)
 
 
     # fitting_3bands(cld_dist, o1, o2, o3, rad_c3d_compare, rad_clr_compare, slope_compare, inter_compare, mask, weighted=True)
@@ -584,7 +585,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
     f.savefig(f'{img_dir}/{file_tag}_{slope_compare}.png', dpi=300)
 
 
-def continuum_fp_compare_plot(o1, o2, o3, 
+def  continuum_fp_compare_plot(o1, o2, o3, 
                               img, wesn, lon_dom, lat_dom, 
                               lon_2d, lat_2d, cth0, 
                               tick_size=12, label_size=14, img_dir='.'):
@@ -611,7 +612,7 @@ def continuum_fp_compare_plot(o1, o2, o3,
     cc1 = ax1.contourf(o1.lon2d, o1.lat2d, rad_to_plot, lev, cmap='jet',
                        vmin=vmin, vmax=vmax, extend='both', alpha=1)
     scatter_arg = {'s': 60, 'cmap': 'jet', 'marker': 'o', 'edgecolors': 'k'}
-    mask = (o1.lat.flatten()*1e6)>0
+    mask = (o1.lon.flatten()*1e6)>0
     ax1.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
                 vmin=vmin, vmax=vmax, **scatter_arg)
@@ -632,7 +633,7 @@ def continuum_fp_compare_plot(o1, o2, o3,
             l1b_continuum.append(o2.l1b[i, j, np.argmin(np.abs(o2.wvl[i, j, :]-o2.lam[10]))])
     cc2 = ax2.contourf(o2.lon2d, o2.lat2d, rad_to_plot, lev, cmap='jet',
                     vmin=vmin, vmax=vmax, extend='both', alpha=1)
-    mask = (o2.lat.flatten()*1e6)>0
+    mask = (o2.lon.flatten()*1e6)>0
     ax2.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
                 vmin=vmin, vmax=vmax, **scatter_arg)
@@ -653,7 +654,7 @@ def continuum_fp_compare_plot(o1, o2, o3,
             l1b_continuum.append(o3.l1b[i, j, np.argmin(np.abs(o3.wvl[i, j, :]-o3.lam[10]))])
     cc3 = ax3.contourf(o3.lon2d, o3.lat2d, rad_to_plot, lev, cmap='jet',
                     vmin=vmin, vmax=vmax, extend='both', alpha=1)
-    mask = (o3.lat.flatten()*1e6)>0
+    mask = (o3.lon.flatten()*1e6)>0
     ax3.scatter(np.array(l1b_lon)[mask], np.array(l1b_lat)[mask],
                 c=np.array(l1b_continuum)[mask],
                 vmin=vmin, vmax=vmax, **scatter_arg)
@@ -911,7 +912,7 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare,
 
 def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, 
                                      rad_3d_compare, rad_clr_compare, slope_compare, inter_compare, region_mask,
-                                     shadow=False, img_dir='.'):
+                                     shadow=False, all=False, img_dir='.'):
     return_list = []
     fig, ((ax11, ax12), 
             (ax21, ax22),
@@ -931,6 +932,8 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
             mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d<rad_clr), region_mask)
         else:
             mask = np.logical_and(np.logical_and(cloud_dist > 0, rad_3d>rad_clr), region_mask)
+        if all:
+            mask = np.logical_and(cloud_dist > 0, region_mask)
         # mask = np.logical_and(rad_3d<rad_clr, region_mask)
         
         slope = getattr(oco_band, slope_compare)[:,:,0].flatten()
@@ -951,17 +954,17 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_ylim(-limit_2, limit_2)
 
     ax11.set_ylim(-0.3, 0.3)
-    ax21.set_ylim(-0.3, 0.2)
-    ax31.set_ylim(-0.3, 0.2)
+    ax21.set_ylim(-0.3, 0.3)
+    ax31.set_ylim(-0.3, 0.3)
 
-    if shadow:
-        ax12.set_ylim(-0.25, 0.05)
-        ax22.set_ylim(-0.25, 0.05)
-        ax32.set_ylim(-0.2, 0.05)
+    if shadow or all:
+        ax12.set_ylim(-0.3, 0.05)
+        ax22.set_ylim(-0.3, 0.05)
+        ax32.set_ylim(-0.25, 0.05)
     else:
-        ax12.set_ylim(-0.05, 0.25)
-        ax22.set_ylim(-0.05, 0.25)
-        ax32.set_ylim(-0.05, 0.2)
+        ax12.set_ylim(-0.05, 0.3)
+        ax22.set_ylim(-0.05, 0.3)
+        ax32.set_ylim(-0.05, 0.25)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']
     ax_list = [ax11, ax12, ax21, ax31, ax22, ax32]
@@ -978,7 +981,9 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
         ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
         ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    if shadow:
+    if all:
+        fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}_all.png', dpi=150, bbox_inches='tight')
+    elif shadow:
         fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}_shadow.png', dpi=150, bbox_inches='tight')
     else:
         fig.savefig(f'{img_dir}/all_band_weighted_dis_{slope_compare.split("_")[-1]}_bright.png', dpi=150, bbox_inches='tight')
