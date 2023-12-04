@@ -8,6 +8,7 @@
 #SBATCH --mail-user=Yu-Wen.Chen@colorado.edu
 #SBATCH --output=sbatch-output_%x_%j.txt
 #SBATCH --job-name=OCO2_test
+#BATCH --account=ucb427_asc1
 
 import os
 from pathlib import Path
