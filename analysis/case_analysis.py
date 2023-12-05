@@ -209,12 +209,16 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
-    alb = 0.05
+    alb = 0.3
     sza = 45
     cot = 5
     cer = 25
     cth = 5
     aod = 0
+
+    img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
+    if not os.path.exists(img_dir):
+        os.makedirs(img_dir)
 
     # data_all_20181018_o2a_6170_6209_sfc_alb_0.050_sza_45.0_aod550_0.000_cot_5.0_cer_25_cth_5
     filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \

@@ -175,7 +175,7 @@ def cld_rad_slope_calc(case_name_tag, band_tag, h5_output, filename, pkl_filenam
     return OCO_class
 
 
-def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
+def main(cfg_csv='20151201_ocean_2_cal_para.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -457,7 +457,12 @@ def main(cfg_csv='20151201_ocean_1_cal_para.csv'):
     continuum_fp_compare_plot(o1, o2, o3,
                               img, wesn, lon_dom, lat_dom, 
                               lon_2d, lat_2d, cth0, img_dir=img_dir)
-    
+    continuum_1d3d_compare_plot(o1, o2, o3,
+                              img, wesn, lon_dom, lat_dom, 
+                              lon_2d, lat_2d, cth0, img_dir=img_dir)
+    continuum_1d3d_compare_plot_abs(o1, o2, o3,
+                              img, wesn, lon_dom, lat_dom, 
+                              lon_2d, lat_2d, cth0, img_dir=img_dir)
     # o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir=img_dir)
     
 
@@ -670,6 +675,143 @@ def  continuum_fp_compare_plot(o1, o2, o3,
     f.tight_layout()
     f.savefig(f'{img_dir}/continuum_fp_compare.png', dpi=300)
 
+def  continuum_1d3d_compare_plot(o1, o2, o3, 
+                              img, wesn, lon_dom, lat_dom, 
+                              lon_2d, lat_2d, cth0, 
+                              tick_size=12, label_size=14, img_dir='.'):
+    f, (ax1, ax2, ax3)=plt.subplots(1, 3, figsize=(24, 7.5))
+    for ax in [ax1, ax2, ax3]:
+        ax.imshow(img, extent=wesn)
+        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+        ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    
+    # ax1
+    vmin, vmax = -0.1, 0.1
+    lev = np.arange(vmin, vmax+1e-7, 0.01)
+    rad_to_plot = o1.rad_c3d[:,:,10]-o1.rad_clr[:,:,10].copy()
+
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o1.lon.shape[0]):
+        for j in range(o1.lon.shape[1]):
+            l1b_lon.append(o1.lon[i, j])
+            l1b_lat.append(o1.lat[i, j])
+            l1b_continuum.append(o1.l1b[i, j, np.argmin(np.abs(o1.wvl[i, j, :]-o1.lam[10]))])
+    cc1 = ax1.contourf(o1.lon2d, o1.lat2d, rad_to_plot, lev, cmap='RdBu_r',
+                       vmin=vmin, vmax=vmax, extend='both', alpha=1)
+    cbar1 = f.colorbar(cc1, ax=ax1)
+    ax1.set_title(f'{o1.lam[10]:.4f}nm')
+
+    # ax2
+    vmin, vmax = -0.025, 0.025
+    lev = np.arange(vmin, vmax+1e-7, 0.0025)
+    rad_to_plot = o2.rad_c3d[:,:,10]-o2.rad_clr[:,:,10].copy()
+
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o2.lon.shape[0]):
+        for j in range(o2.lon.shape[1]):
+            l1b_lon.append(o2.lon[i, j])
+            l1b_lat.append(o2.lat[i, j])
+            l1b_continuum.append(o2.l1b[i, j, np.argmin(np.abs(o2.wvl[i, j, :]-o2.lam[10]))])
+    cc2 = ax2.contourf(o2.lon2d, o2.lat2d, rad_to_plot, lev, cmap='RdBu_r',
+                    vmin=vmin, vmax=vmax, extend='both', alpha=1)
+    cbar2 = f.colorbar(cc2, ax=ax2)
+    ax2.set_title(f'{o2.lam[10]:.4f}nm')
+
+    # ax3
+    vmin, vmax = -0.01, 0.01
+    lev = np.arange(vmin, vmax+1e-7, 0.001)
+    rad_to_plot = o3.rad_c3d[:,:,10]-o3.rad_clr[:,:,10].copy()
+
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o1.lon.shape[0]):
+        for j in range(o3.lon.shape[1]):
+            l1b_lon.append(o3.lon[i, j])
+            l1b_lat.append(o3.lat[i, j])
+            l1b_continuum.append(o3.l1b[i, j, np.argmin(np.abs(o3.wvl[i, j, :]-o3.lam[10]))])
+    cc3 = ax3.contourf(o3.lon2d, o3.lat2d, rad_to_plot, lev, cmap='RdBu_r',
+                    vmin=vmin, vmax=vmax, extend='both', alpha=1)
+    cbar3 = f.colorbar(cc3, ax=ax3)
+    ax3.set_title(f'{o3.lam[10]:.4f}nm')
+
+    for cbar in [cbar1, cbar2, cbar3]:
+        cbar.set_label('$\mathrm{Radiance_{3D}}$-$\mathrm{Radiance_{1D}}$', fontsize=16)
+    for ax, label in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=3, color='g')
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+    f.tight_layout()
+    f.savefig(f'{img_dir}/continuum_1d3d_diff_compare.png', dpi=300)
+
+def  continuum_1d3d_compare_plot_abs(o1, o2, o3, 
+                              img, wesn, lon_dom, lat_dom, 
+                              lon_2d, lat_2d, cth0, 
+                              tick_size=12, label_size=14, img_dir='.'):
+    f, (ax1, ax2, ax3)=plt.subplots(1, 3, figsize=(24, 7.5))
+    for ax in [ax1, ax2, ax3]:
+        ax.imshow(img, extent=wesn)
+        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+        ax.scatter(lon_2d[~cth0>0], lat_2d[~cth0>0], s=3, color='k')
+        ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=3, color='white')
+        ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    scatter_arg = {'s': 2, 'marker': 'o', 'alpha': 0.35}
+    # ax1
+    vmin, vmax = -0.1, 0.1
+    lev = np.arange(vmin, vmax+1e-7, 0.01)
+    rad_to_plot = o1.rad_c3d[:,:,10]-o1.rad_clr[:,:,10].copy()
+    
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o1.lon.shape[0]):
+        for j in range(o1.lon.shape[1]):
+            l1b_lon.append(o1.lon[i, j])
+            l1b_lat.append(o1.lat[i, j])
+            l1b_continuum.append(o1.l1b[i, j, np.argmin(np.abs(o1.wvl[i, j, :]-o1.lam[10]))])
+    ax1.scatter(o1.lon2d[rad_to_plot>0], o1.lat2d[rad_to_plot>0], c='r', **scatter_arg)
+    ax1.scatter(o1.lon2d[rad_to_plot<0], o1.lat2d[rad_to_plot<0], c='b', **scatter_arg)
+    ax1.scatter(o1.lon2d[rad_to_plot==0], o1.lat2d[rad_to_plot==0], c='g', **scatter_arg)
+    ax1.set_title(f'{o1.lam[10]:.4f}nm')
+
+    # ax2
+    vmin, vmax = -0.025, 0.025
+    lev = np.arange(vmin, vmax+1e-7, 0.0025)
+    rad_to_plot = o2.rad_c3d[:,:,10]-o2.rad_clr[:,:,10].copy()
+
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o2.lon.shape[0]):
+        for j in range(o2.lon.shape[1]):
+            l1b_lon.append(o2.lon[i, j])
+            l1b_lat.append(o2.lat[i, j])
+            l1b_continuum.append(o2.l1b[i, j, np.argmin(np.abs(o2.wvl[i, j, :]-o2.lam[10]))])
+    ax2.scatter(o2.lon2d[rad_to_plot>0], o2.lat2d[rad_to_plot>0], c='r', **scatter_arg)
+    ax2.scatter(o2.lon2d[rad_to_plot<0], o2.lat2d[rad_to_plot<0], c='b', **scatter_arg)
+    ax2.scatter(o2.lon2d[rad_to_plot==0], o2.lat2d[rad_to_plot==0], c='g', **scatter_arg)
+    ax2.set_title(f'{o2.lam[10]:.4f}nm')
+
+    # ax3
+    vmin, vmax = -0.01, 0.01
+    lev = np.arange(vmin, vmax+1e-7, 0.001)
+    rad_to_plot = o3.rad_c3d[:,:,10]-o3.rad_clr[:,:,10].copy()
+
+    l1b_lon, l1b_lat, l1b_continuum = [], [], []
+    for i in range(o1.lon.shape[0]):
+        for j in range(o3.lon.shape[1]):
+            l1b_lon.append(o3.lon[i, j])
+            l1b_lat.append(o3.lat[i, j])
+            l1b_continuum.append(o3.l1b[i, j, np.argmin(np.abs(o3.wvl[i, j, :]-o3.lam[10]))])
+    ax3.scatter(o3.lon2d[rad_to_plot>0], o3.lat2d[rad_to_plot>0], c='r', **scatter_arg)
+    ax3.scatter(o3.lon2d[rad_to_plot<0], o3.lat2d[rad_to_plot<0], c='b', **scatter_arg)
+    ax3.scatter(o3.lon2d[rad_to_plot==0], o3.lat2d[rad_to_plot==0], c='g', **scatter_arg)
+    ax3.set_title(f'{o3.lam[10]:.4f}nm')
+
+    for ax, label in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        # ax.scatter(lon_2d[cth0>0], lat_2d[cth0>0], s=15, color='r')
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+    f.tight_layout()
+    f.savefig(f'{img_dir}/continuum_1d3d_diff_compare_abs.png', dpi=300)
 
 def cld_position(cfg_name):
     cldfile = f'../glint/data/{cfg_name}_{cfg_name[:8]}/pre-data.h5'

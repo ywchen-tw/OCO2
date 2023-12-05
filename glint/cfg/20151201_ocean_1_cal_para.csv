@@ -48,9 +48,9 @@ cbt_high,,,,,,,
 ,,,,,,,
 # output information,,,,,,,
 path_out,/Users/schmidt/rtm/er3toco/oco/,,,,,,
-o2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_o2a_5014_5057_sfc_alb_0.216_sza_60.0_aod550_0.000.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
-wco2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_wco2_5014_5057_sfc_alb_0.101_sza_60.0_aod550_0.000.h5,,,,,,
-sco2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_sco2_5014_5057_sfc_alb_0.053_sza_60.0_aod550_0.000.h5,,,,,,
+o2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_o2a_5014_5057_sfc_alb_0.216_sza_27.7_aod550_0.000.h5,,,,,,#data_all_20181018_o2a_6170_6209_sfc_alb_0.288_sza_48.5.h5
+wco2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_wco2_5014_5057_sfc_alb_0.101_sza_27.7_aod550_0.000.h5,,,,,,
+sco2,../glint/data/20151201_ocean_1_cal_para_20151201/data_all_20151201_sco2_5014_5057_sfc_alb_0.053_sza_27.7_aod550_0.000.h5,,,,,,
 ,,,,,,,
 # full physics retrieval information,,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
