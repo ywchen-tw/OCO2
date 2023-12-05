@@ -209,7 +209,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
-    alb = 0.3
+    alb = 0.5
     sza = 45
     cot = 5
     cer = 25
