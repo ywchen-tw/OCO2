@@ -209,12 +209,12 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
-    alb = 0.5
+    alb = 0.3
     sza = 45
     cot = 5
     cer = 25
     cth = 5
-    aod = 0
+    aod = 0.0
 
     img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
     if not os.path.exists(img_dir):
@@ -225,7 +225,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
         %(case_name_tag, alb, sza, aod, cot, cer, cth)
 
     pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -238,14 +238,14 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
         with open(pkl_filename.format('sco2'), 'rb') as f:
             o3 = pickle.load(f)
 
-    if not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
+    if 1:#not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
         cld_dist_calc(cfg_name, o2, slope_compare)
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
     # weighted_cld_dist_calc
     #--------------------------------------
-    if not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
         weighted_cld_dist_calc(cfg_name, o2, slope_compare)
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -400,7 +400,8 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
         lon_2d = f['lon'][...]
         lat_2d = f['lat'][...]
         sfh_2d = f['mod/geo/sfh'][...]
-        cth0 = f['mod/cld/cth_ipa'][...]
+        # cth0 = f['mod/cld/cth_ipa'][...]
+        cth0 = f['mod/cld/cot_ipa'][...]
     
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
@@ -681,7 +682,7 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/cot_ipa'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]

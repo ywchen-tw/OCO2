@@ -51,16 +51,19 @@ def main(result_csv='20181018_central_asia_zpt_test_fitting_result.txt'):
     # print(df.columns.shape)
     # print(df.shape)
     # print(df.head())
-    # df_select = df[(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['aod']==0)]
-    var = 'sza'
+    # df_select = df[(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), 
+    #                                np.logical_and(df['cot']==5, df['cer']==25)),
+    #                 df['aod']==0)]
+    # var = 'sza'
     # sza
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['aod']==0)]
+    # var = 'sza'
     # aod
-    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
-    var = 'aod'
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    # var = 'aod'
     # alb
-    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
-    # var = 'alb'
+    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    var = 'alb'
     # cth_high cloud
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
     # var = 'cth'
@@ -71,8 +74,8 @@ def main(result_csv='20181018_central_asia_zpt_test_fitting_result.txt'):
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==5, df['cer']==25)), df['sza']==45)]
     # var = 'cot'
     # cot_low cloud
-    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
-    var = 'cot'
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
+    # var = 'cot'
 
     print(df_select.shape)
     df_plot(df_select, var)
