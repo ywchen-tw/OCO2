@@ -210,10 +210,10 @@ def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
     alb = 0.3
-    sza = 45
-    cot = 1
-    cer = 12
-    cth = 4
+    sza = 75
+    cot = 5
+    cer = 25
+    cth = 5
     aod = 0.0
 
     img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
@@ -312,7 +312,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
     #         write_data += f'{parameters_cld_distance_list_unc[i][2]:<20.5e}{parameters_cld_distance_list_unc[i][3]:<20.5e}'
     #     f.write(write_data+'\n')
     if not os.path.isfile(f'{img_dir}/{cfg_name}_fitting_result.txt'):
-        with open(f'{cfg_name}_fitting_result.txt', 'w') as f:
+        with open(f'{img_dir}/{cfg_name}_fitting_result.txt', 'w') as f:
             head = 'alb,sza,aod,cot,cer,cth,'
             for i in range(3):
                 head += 'slope_%s_amp,slope_%s_dec,inter_%s_amp,inter_%s_dec,' %(channel_list[i], channel_list[i], channel_list[i], channel_list[i])
@@ -777,7 +777,7 @@ def heatmap_xy_3(x, y, ax):
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(10)] 
+    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(15)] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):
