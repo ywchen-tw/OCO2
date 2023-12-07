@@ -56,14 +56,14 @@ def main(result_csv='20181018_central_asia_zpt_test_fitting_result.txt'):
     #                 df['aod']==0)]
     # var = 'sza'
     # sza
-    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['aod']==0)]
-    # var = 'sza'
+    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['aod']==0)]
+    var = 'sza'
     # aod
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
     # var = 'aod'
     # alb
-    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
-    var = 'alb'
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    # var = 'alb'
     # cth_high cloud
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
     # var = 'cth'

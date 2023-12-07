@@ -170,7 +170,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
+def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -211,9 +211,9 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
 
     alb = 0.3
     sza = 45
-    cot = 5
-    cer = 25
-    cth = 5
+    cot = 1
+    cer = 12
+    cth = 4
     aod = 0.0
 
     img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
@@ -223,9 +223,9 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     # data_all_20181018_o2a_6170_6209_sfc_alb_0.050_sza_45.0_aod550_0.000_cot_5.0_cer_25_cth_5
     filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
         %(case_name_tag, alb, sza, aod, cot, cer, cth)
-
+    print('filename:', filename)
     pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -238,14 +238,14 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
         with open(pkl_filename.format('sco2'), 'rb') as f:
             o3 = pickle.load(f)
 
-    if 1:#not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
+    if not os.path.isfile(f'{cfg_name}_cld_distance.pkl'):
         cld_dist_calc(cfg_name, o2, slope_compare)
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
     # weighted_cld_dist_calc
     #--------------------------------------
-    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+    if not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
         weighted_cld_dist_calc(cfg_name, o2, slope_compare)
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -311,7 +311,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     #         write_data += f'{parameters_cld_distance_list_unc[i][0]:<20.5e}{parameters_cld_distance_list_unc[i][1]:<20.5e}'
     #         write_data += f'{parameters_cld_distance_list_unc[i][2]:<20.5e}{parameters_cld_distance_list_unc[i][3]:<20.5e}'
     #     f.write(write_data+'\n')
-    if not os.path.isfile(f'{cfg_name}_fitting_result.txt'):
+    if not os.path.isfile(f'{img_dir}/{cfg_name}_fitting_result.txt'):
         with open(f'{cfg_name}_fitting_result.txt', 'w') as f:
             head = 'alb,sza,aod,cot,cer,cth,'
             for i in range(3):
@@ -321,7 +321,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
     
     # e_fold_dist = 1/popt[1]
     # e_fold_dist_err = perr[1]/(popt[1]**2)
-    with open(f'{cfg_name}_fitting_result.txt', 'a') as f:
+    with open(f'{img_dir}/{cfg_name}_fitting_result.txt', 'a') as f:
         write_data = f'{alb},{sza},{aod},{cot},{cer},{cth},'
         for i in range(3):
             for j in range(4):
@@ -400,8 +400,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test.csv'):
         lon_2d = f['lon'][...]
         lat_2d = f['lat'][...]
         sfh_2d = f['mod/geo/sfh'][...]
-        # cth0 = f['mod/cld/cth_ipa'][...]
-        cth0 = f['mod/cld/cot_ipa'][...]
+        cth0 = f['mod/cld/cth_ipa'][...]
     
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
@@ -682,7 +681,7 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cot_ipa'][...]
+        cth = f[f'mod/cld/cth_ipa'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
@@ -786,7 +785,7 @@ def heatmap_xy_3(x, y, ax):
             xx = cld_val[mask]
             yy = value_avg[val_mask][mask]
             if len(yy) > 0:
-                popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([-5, 1e-3], [15, 15,]),
+                popt, pcov = curve_fit(exp_decay_func, xx, yy, bounds=([1e-5, 1e-5], [15, 15,]),
                                        p0=(0.1, 0.7),
                                        maxfev=5000,
                                        sigma=value_std[val_mask][mask], 
