@@ -4,7 +4,7 @@ date,20181018,,,,,,
 juld,291,,,,,,# Julian Day
 ,,,,,,,
 domain info,,,,,,,
-png,20181004.png,,,,,,# PNG file
+png,aqua_rgb_2018-10-18_55.00-55.60-33.70-34.45.png,,,,,,# PNG file
 pngwesn,55.15,55.45,33.85,34.3,,,# PNG file extent
 subdomain,55.15,55.45,33.85,34.3,,,# sub-domain to zoom into (this is processed by the OCO simulator)
 ,,,,,,,
@@ -28,7 +28,7 @@ ils_min,0.05,,,,,,# minimum relative ils weight for calculating absorbance
 nx,10,,,,,,# number of transmittance interval
 Trn_min,0.4,,,,,,# minimum transmittance for selecting the wavelength
 abs_interpolation,trilinear,,,,,,"# single, linear, or trilinear"
-g_mode,TRUE,,,,,,# TRUE or FALSE
+g_mode,FALSE,,,,,,# TRUE or FALSE
 ,,,,,,,
 # aerosol setting,,,,,,,
 _aerosol,FALSE,,,,,,# TRUE or FALSE
@@ -56,7 +56,7 @@ sco2,data_all_20181018_sco2_6170_6209_sfc_alb_0.357_sza_48.5.h5,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 ,,,,,,,
 # simulation parameters,,,,,,,
-ref_threshold,0.05,,,,,,
+ref_threshold,0.09,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
 oco_N_photons,5.00E+09,,,,,,
 Ncpu,32,,,,,,

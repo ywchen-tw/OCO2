@@ -170,7 +170,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
+def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -200,32 +200,33 @@ def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 5
+    compare_num = 9
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_with_aod.h5' %case_name_tag
+    filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
-    alb = 0.3
-    sza = 75
-    cot = 5
-    cer = 25
-    cth = 5
+    alb = 0.5
+    sza = 45
+    cot = 1
+    cer = 12
+    cth = 3
     aod = 0.0
 
-    img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
+    # img_dir = f'output/{case_name_tag}_alb_{alb}_sza_{sza}_aod_{aod}_cot_{cot}_cer_{cer}_cth_{cth}'
+    img_dir = f'output/{case_name_tag}'
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
     # data_all_20181018_o2a_6170_6209_sfc_alb_0.050_sza_45.0_aod550_0.000_cot_5.0_cer_25_cth_5
-    filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
-        %(case_name_tag, alb, sza, aod, cot, cer, cth)
+    # filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
+    #     %(case_name_tag, alb, sza, aod, cot, cer, cth)
     print('filename:', filename)
     pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
-    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
+    if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -245,7 +246,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
 
     # weighted_cld_dist_calc
     #--------------------------------------
-    if not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
+    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
         weighted_cld_dist_calc(cfg_name, o2, slope_compare)
     weighted_cld_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance.pkl')
     weighted_cld_dist = weighted_cld_data['cld_dis']
@@ -400,7 +401,7 @@ def main(cfg_csv='20181018_central_asia_zpt_test2.csv'):
         lon_2d = f['lon'][...]
         lat_2d = f['lat'][...]
         sfh_2d = f['mod/geo/sfh'][...]
-        cth0 = f['mod/cld/cth_ipa'][...]
+        cth0 = f['mod/cld/logic_cld'][...]
     
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(lon_2d >= extent[0], lon_2d <= extent[1]),
@@ -523,7 +524,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, pxl_by_pxl_outp
     mask = ~(cth0>0)
     c1 = ax1.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
                    c=getattr(OCO_class, slope_compare)[:,:,0][mask], s=10,
-                   cmap='RdBu_r', vmin=-0.3, vmax=0.3)
+                   cmap='RdBu_r', vmin=-0.15, vmax=0.15)
     idx = 91
     print(pxl_by_pxl_output_csv['SND'][idx])
     print('lon ind:', np.argmin(np.abs(pxl_by_pxl_output_csv['LON'][idx]-OCO_class.lon2d[:, 0])))
@@ -534,7 +535,7 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, pxl_by_pxl_outp
 
     c2 = ax2.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
                    c=getattr(OCO_class, inter_compare)[:,:,0][mask], s=10,
-                   cmap='RdBu_r', vmin=-0.15, vmax=0.15)
+                   cmap='RdBu_r', vmin=-0.2, vmax=0.2)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('$\mathrm{%s}$ intercept' %(label_tag), fontsize=label_size)
     
@@ -642,7 +643,7 @@ def cld_position(cfg_name):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/logic_cld'][...]
         cld_list = cth>0
     return lon_cld, lat_cld, cld_list
 
@@ -681,7 +682,7 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/cth_ipa'][...]
+        cth = f[f'mod/cld/logic_cld'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
@@ -777,7 +778,7 @@ def heatmap_xy_3(x, y, ax):
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(15)] 
+    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(3)] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):
@@ -949,11 +950,11 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax_r.set_xlim(cld_low, cld_max)
         ax_r.set_ylim(-limit_2, limit_2)
 
-    ax11.set_ylim(-0.3, 0.5)
+    ax11.set_ylim(-0.1, 0.2)
     ax12.set_ylim(-0.05, 0.35)
-    ax21.set_ylim(-0.3, 0.35)
+    ax21.set_ylim(-0.05, 0.1)
     ax22.set_ylim(-0.05, 0.35)
-    ax31.set_ylim(-0.3, 0.35)
+    ax31.set_ylim(-0.05, 0.1)
     ax32.set_ylim(-0.05, 0.3)
 
     label_list = ['a', 'b', 'c', 'd', 'e', 'f']

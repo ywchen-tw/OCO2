@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import datetime
 import pickle
 from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_09a1, modis_43a3, download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.oco2 import oco2_std, download_oco2_https
+from er3t.util.daac import download_oco2_https
 import h5py
 
 

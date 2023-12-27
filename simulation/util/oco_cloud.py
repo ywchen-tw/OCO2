@@ -202,7 +202,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         extent, ref_2d, ref_470_2d, rgb, cot_l2, cer_l2, lon_2d, lat_2d, cth, sfh, sza, saa, vza, vaa, alb_650, alb_470, u_10m, v_10m, delta_t = \
             [np.array(f0[k][...]) for k in ['extent', 'mod/rad/ref_650', 'mod/rad/ref_470', 'mod/rgb', 'mod/cld/cot_l2', 'mod/cld/cer_l2', 
                                             'lon', 'lat', 'mod/cld/cth_l2', 'mod/geo/sfh', 'mod/geo/sza', 'mod/geo/saa', 'mod/geo/vza', 
-                                            'mod/geo/vaa', f"mod/sfc/alb_43_650", 'mod/sfc/alb_43_470', 
+                                            'mod/geo/vaa', "mod/sfc/alb_43_650", 'mod/sfc/alb_43_470', 
                                             'oco/met/u_10m', 'oco/met/v_10m', 'oco/met/delta_t']]
     ref_threshold = float(cfg_info['ref_threshold'])
     photons=float(cfg_info['cot_Nphotons'])
@@ -378,7 +378,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     ref_cld_norm = ref_2d[indices_x, indices_y]/np.cos(np.deg2rad(sza.mean()))
 
     logic_thick = (cth_ipa0[indices_x, indices_y] > 4.0)
-    logic_thin  = (cth_ipa0[indices_x, indices_y] <= 4.0)
+    logic_thin  = (cth_ipa0[indices_x, indices_y] <= 4.0) & (cth_ipa0[indices_x, indices_y] > 0.0)
 
     cot_ipa0 = np.zeros_like(ref_2d)
 

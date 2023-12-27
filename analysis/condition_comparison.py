@@ -61,8 +61,11 @@ def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
     # aod
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
     # var = 'aod'
-    # alb
-    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    # alb high cloud
+    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    var = 'alb'
+    # alb low cloud
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==3, df['aod']==0.0), np.logical_and(df['cot']==1, df['cer']==12)), df['sza']==45)]
     # var = 'alb'
     # cth_high cloud
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
@@ -74,8 +77,8 @@ def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==5, df['cer']==25)), df['sza']==45)]
     # var = 'cot'
     # cot_low cloud
-    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
-    var = 'cot'
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
+    # var = 'cot'
 
     print(df_select.shape)
     df_plot_o2a(df_select, var)

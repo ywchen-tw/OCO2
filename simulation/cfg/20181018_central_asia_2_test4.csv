@@ -56,7 +56,7 @@ sco2,data_all_20181018_sco2_6170_6209_sfc_alb_0.357_sza_48.5.h5,,,,,,
 retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 ,,,,,,,
 # simulation parameters,,,,,,,
-ref_threshold,0.05,,,,,,
+ref_threshold,0.09,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
 oco_N_photons,5.00E+09,,,,,,
 Ncpu,32,,,,,,

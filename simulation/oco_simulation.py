@@ -360,8 +360,8 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
-        cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag)
+        # cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
+        #                 overwrite=True, case_name_tag=name_tag)
         modis_650_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_650,
                                    solver=solver, wvl=650, plot=True)
     # ======================================================================
@@ -430,7 +430,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
     preprocess_info = preprocess(cfg_info)
     # sys.exit()
     # run_case_modis_650(cfg_info, preprocess_info)
-
+    #"""
     if 1:#not check_h5_info(cfg, 'o2'): 
         o2_h5 = run_case_oco('o2a', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
                              cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550)
@@ -445,11 +445,12 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
         sco2_h5 = run_case_oco('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza,
                              cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550)
         save_h5_info(cfg, 'sco2', sco2_h5)
+    #"""
 
 if __name__ == '__main__':
     
-    cfg = 'cfg/20181018_central_asia_zpt_test2.csv'
-    # cfg = 'cfg/20181018_central_asia_2_test6.csv'
+    # cfg = 'cfg/20181018_central_asia_zpt_test2.csv'
+    cfg = 'cfg/20181018_central_asia_2_test6.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
@@ -459,7 +460,11 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    # run_simulation(cfg)
+    run_simulation(cfg)
+
+    cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    print(cfg)
+    run_simulation(cfg)
     
     # run_simulation(cfg, sfc_alb=0.05, sza=45, aod550=0) #done
     # run_simulation(cfg, sfc_alb=0.1, sza=45, aod550=0) #done
@@ -471,20 +476,20 @@ if __name__ == '__main__':
     # run_simulation(cfg, sfc_alb=0.3, sza=60, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
     # run_simulation(cfg, sfc_alb=0.3, sza=75, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
-    run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.1, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.2, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.4, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.1, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.2, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.4, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=1, cer=12, cth=3, aod550=0) #done
 
 
-    run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.1, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.2, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.4, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.05, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.1, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.2, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.3, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.4, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    # run_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
 
     # run_simulation(cfg, sfc_alb=0.3, sza=15, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
     # run_simulation(cfg, sfc_alb=0.3, sza=30, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done

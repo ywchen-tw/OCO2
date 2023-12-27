@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import datetime
 from er3t.util.modis import download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.oco2 import download_oco2_https
+from er3t.util.daac import download_oco2_https
 
 
 

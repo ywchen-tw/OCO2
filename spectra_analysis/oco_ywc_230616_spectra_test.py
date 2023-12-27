@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from er3t.util.modis import download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.oco2 import download_oco2_https
+from er3t.util.daac import download_oco2_https
 from er3t.util import upscale_modis_lonlat
 
 from oco_subroutine.oco_cfg import grab_cfg, save_h5_info
@@ -414,7 +414,7 @@ def plt_map_cld_dis(sat, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data
     f.tight_layout()
     f.savefig(f'{fdir_data}/modis_cth_oco_cld_distance.png')
     # plt.show()
-
+ 
 def run_case_modis_650(cfg_info):
     # define date and region to study
     # ===============================================================
@@ -433,11 +433,11 @@ def run_case_modis_650(cfg_info):
     sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent,
                               fname=fname_sat, overwrite=False)
     
-    oco_l1b_file = sat0.fnames['oco_l1b'][0]
+    oco_l1b_file = sat0.fnames['oco_l1b'][0].replace('../simulation/data/', '../sat_data/')
     l1b = h5py.File(oco_l1b_file, 'r')
-    oco_l2_file = sat0.fnames['oco_std'][0]
+    oco_l2_file = sat0.fnames['oco_std'][0].replace('../simulation/data/', '../sat_data/')
     l2 = h5py.File(oco_l2_file, 'r')
-    oco_met_file = sat0.fnames['oco_met'][0]
+    oco_met_file = sat0.fnames['oco_met'][0].replace('../simulation/data/', '../sat_data/')
     met = h5py.File(oco_met_file, 'r')
 
     dis = l1b["InstrumentHeader/dispersion_coef_samp"][...]
@@ -452,21 +452,42 @@ def run_case_modis_650(cfg_info):
     s_wl, s_fx = solar('solar.txt')
     oxs, wcs, scs = add_solar(s_wl, s_fx, lam, ilsx, ilsy)
 
-    o2a_rad = l1b['SoundingMeasurements']['radiance_o2'][...]
-    wco2_rad = l1b['SoundingMeasurements']['radiance_weak_co2'][...]
-    sco2_rad = l1b['SoundingMeasurements']['radiance_strong_co2'][...]
+    o2a_rad = l1b['SoundingMeasurements/radiance_o2'][...]
+    wco2_rad = l1b['SoundingMeasurements/radiance_weak_co2'][...]
+    sco2_rad = l1b['SoundingMeasurements/radiance_strong_co2'][...]
 
-    o2a_qf = l1b['FootprintGeometry']['footprint_o2_qual_flag'][...]
+    o2a_qf = l1b['FootprintGeometry/footprint_o2_qual_flag'][...]
 
     c = 299792458.0
     h = 6.62607015e-34
 
     o2a_con = l1b['SoundingMeasurements']['rad_continuum_o2'][...]
-    o2a_sza = l1b['SoundingGeometry/sounding_solar_zenith'][...]
-    o2a_vza = l1b['SoundingGeometry/sounding_zenith'][...]
+    o2a_sza = l1b['FootprintGeometry/footprint_solar_zenith'][...][:, :, 0]
+    o2a_vza = l1b['FootprintGeometry/footprint_zenith'][...][:, :, 0]
+    o2a_alt = l1b['FootprintGeometry/footprint_altitude'][...][:, :, 0]
+
+    wco2_sza = l1b['FootprintGeometry/footprint_solar_zenith'][...][:, :, 1]
+    wco2_vza = l1b['FootprintGeometry/footprint_zenith'][...][:, :, 1]
+    wco2_alt = l1b['FootprintGeometry/footprint_altitude'][...][:, :, 1]
+
+    sco2_sza = l1b['FootprintGeometry/footprint_solar_zenith'][...][:, :, 2]
+    sco2_vza = l1b['FootprintGeometry/footprint_zenith'][...][:, :, 2]
+    sco2_alt = l1b['FootprintGeometry/footprint_altitude'][...][:, :, 2]
+
     o2a_mu = np.cos(o2a_sza/180*np.pi)
+    wco2_mu = np.cos(wco2_sza/180*np.pi)
+    sco2_mu = np.cos(sco2_sza/180*np.pi)
+
+    o2a_mu_v = np.cos(o2a_vza/180*np.pi)
+    wco2_mu_v = np.cos(wco2_vza/180*np.pi)
+    sco2_mu_v = np.cos(sco2_vza/180*np.pi)
 
     o2a_mu_r = o2a_mu.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
+    wco2_mu_r = wco2_mu.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
+    sco2_mu_r = sco2_mu.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
+    o2a_mu_v_r = o2a_mu_v.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
+    wco2_mu_v_r = wco2_mu_v.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
+    sco2_mu_v_r = sco2_mu_v.repeat(1016).reshape((o2a_mu.shape[0], o2a_mu.shape[1], 1016))
 
     # modl2 = modis_l2(fnames=sat0.fnames['mod_l2'], extent=sat0.extent, vnames=['cloud_top_height_1km'])
     # lon0, lat0 = [modl2.data[var]['data'] for var in ['lon', 'lat']]
@@ -474,7 +495,7 @@ def run_case_modis_650(cfg_info):
     # cth0  = modl2.data['cloud_top_height_1km']['data']/1000.0 # units: km
     # cth0[cth0<=0.0] = np.nan
     from pyhdf.SD import SD, SDC
-    f     = SD(sat0.fnames['mod_l2'][0], SDC.READ)
+    f     = SD(sat0.fnames['mod_l2'][0].replace('../simulation/data/', '../sat_data/'), SDC.READ)
     lat0       = f.select('Latitude')
     lon0       = f.select('Longitude')
     cth0 = f.select('cloud_top_height_1km')
@@ -483,9 +504,10 @@ def run_case_modis_650(cfg_info):
     snd_id = l1b['SoundingGeometry']['sounding_id'][...]
     snd_lon = l1b['SoundingGeometry']['sounding_longitude'][...]
     snd_lat = l1b['SoundingGeometry']['sounding_latitude'][...]
-    sfc_p = met["Meteorology"]["surface_pressure_met"][...]
-    sfc_p[sfc_p<0] = np.nan
-    sfc_T = met["Meteorology"]["skin_temperature_met"][...]
+    sfc_p_met = met["Meteorology"]["surface_pressure_met"][...]
+    sfc_p_met[sfc_p_met<0] = np.nan
+    
+    sfc_T_met = met["Meteorology"]["skin_temperature_met"][...]
 
     cloud_dist = weighted_cld_dist_calc(snd_lon, snd_lat, cth0[:], lon, lat, cfg_info, fdir_data)
     plt_map_cld_dis(sat0, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data)
@@ -494,10 +516,10 @@ def run_case_modis_650(cfg_info):
     o2a_ref_convert = o2a_rad_convert*np.pi/(oxs*o2a_mu_r)
 
     wco2_rad_convert = convert_photon_unit(wco2_rad, lam[:, :, 1]*1e3)
-    wco2_ref_convert = wco2_rad_convert*np.pi/(wcs*o2a_mu_r)
+    wco2_ref_convert = wco2_rad_convert*np.pi/(wcs*wco2_mu_r)
 
     sco2_rad_convert = convert_photon_unit(sco2_rad, lam[:, :, 2]*1e3)
-    sco2_ref_convert = sco2_rad_convert*np.pi/(scs*o2a_mu_r)
+    sco2_ref_convert = sco2_rad_convert*np.pi/(scs*sco2_mu_r)
 
     ref_min, ref_max = 92, 95
     o2a_ref_con_convert = np.percentile(o2a_ref_convert, np.linspace(ref_min, ref_max, 11), axis=2).mean(axis=0)
@@ -526,9 +548,10 @@ def run_case_modis_650(cfg_info):
     wco2_fwhm = wco2_fwhm_calc(A_wco2, lam, fdir_data)
     sco2_fwhm = sco2_fwhm_calc(A_sco2, lam, fdir_data)
 
-    litefile = sat0.fnames['oco_lite'][0]
+    litefile = sat0.fnames['oco_lite'][0].replace('../simulation/data/', '../sat_data/')
     lite = xr.open_dataset(litefile)
     lite_snd = xr.open_dataset(litefile, group='Sounding')
+    lite_retrieve = xr.open_dataset(litefile, group='Retrieval')
     lon_w, lon_e = extent[0], extent[1]
     lat_s, lat_n = extent[2], extent[3]
     lon_range = np.logical_and(lite.longitude >= lon_w, lite.longitude <= lon_e)
@@ -538,9 +561,11 @@ def run_case_modis_650(cfg_info):
     lite_snd_list = np.array(lite.sounding_id[select], dtype=int)
     xco2_array = np.zeros((A.shape[0], A.shape[1]))
     qf_array = np.zeros((A.shape[0], A.shape[1], 3))
-    alt_array = np.zeros((A.shape[0], A.shape[1]), dtype=float)
+    sfc_p = np.zeros((A.shape[0], A.shape[1]), dtype=float)
     qf_lon, qf_lat = np.zeros((A.shape[0], A.shape[1])), np.zeros((A.shape[0], A.shape[1]))
     # qf, qf_bitflag, qf_simpleflag\
+    sfc_p_l2 = l2["RetrievalResults/surface_pressure_fph"][...]
+    sfc_p_l2[sfc_p_l2<0] = np.nan
     for i in range(A.shape[0]):
         for j in range(A.shape[1]):
             snd = snd_id[i, j]
@@ -556,18 +581,25 @@ def run_case_modis_650(cfg_info):
                 qf_array[i, j, :] = (xco2_quality_flag, xco2_qf_bitflag, xco2_qf_simple_bitflag)
                 qf_lat[i, j] = float(lite.latitude[select][index])
                 qf_lon[i, j] = float(lite.longitude[select][index])
-                alt_array[i, j] = float(lite_snd.altitude[select][index])
+                sfc_p[i, j] = float(lite_retrieve.psurf[select][index])
+                # alt_array[i, j] = float(lite_snd.altitude[select][index])
             else:
                 xco2_array[i, j] = np.nan
                 qf_array[i, j, :] = (np.nan,)*3
                 qf_lat[i, j] = np.nan
                 qf_lon[i, j] = np.nan
-                alt_array[i, j] = np.nan
+                sfc_p[i, j] = np.nan
+                # alt_array[i, j] = np.nan
 
     vmin = 10
     vmax = 500
     select = np.isnan(snd_lat[:, :])==False
     marker_list = ['o', 's', 'd', 'v', '^', '<', '>', 'p', 'h', '8', 'D', 'P', 'X']
+    
+    plt.clf()
+    plt.scatter(sfc_p.flatten(), sfc_p_met.flatten(), alpha=0.7)
+    plt.show()
+
     ### with valid sfc_p
     plt.clf()
     plt.figure(figsize=(8, 6))
@@ -581,6 +613,34 @@ def run_case_modis_650(cfg_info):
     plt.colorbar(extend='both')
     plt.title(f'counts: {np.sum(effective)}')
     plt.savefig(f'fig/{cfg_info["cfg_name"]}_valid_pressure_o2a_fwhm_cloud_dist_{extent[0]:.2f}_{extent[1]:.2f}_{extent[2]:.2f}_{extent[3]:.2f}.png')
+
+    plt.clf()
+    plt.figure(figsize=(8, 6))
+    for i in range(8):
+        select_fp = np.isnan(snd_lat[:, i])==False
+        plt.scatter(((o2a_fwhm)/(o2a_mu+o2a_mu_v))[:, i][select_fp], sfc_p[:, i][select_fp], c=xco2_array[:, i][select_fp],
+                    marker=marker_list[i],
+                    # norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax), 
+                    alpha=0.7)
+    effective = np.logical_and(np.logical_and((o2a_fwhm)[:, :][select]>0, sfc_p[:, :][select]>0),
+                            cloud_dist[:, :][select]>0)
+    plt.colorbar(extend='both')
+    plt.title(f'counts: {np.sum(effective)}')
+    plt.savefig(f'fig/{cfg_info["cfg_name"]}_valid_pressure_o2a_fwhm_cloud_dist_{extent[0]:.2f}_{extent[1]:.2f}_{extent[2]:.2f}_{extent[3]:.2f}_test_xco2.png')
+
+    plt.clf()
+    plt.figure(figsize=(8, 6))
+    for i in range(1):
+        select_fp = np.isnan(snd_lat[:, i])==False
+        plt.scatter(((o2a_fwhm)/(o2a_mu+o2a_mu_v))[:, i][select_fp], sfc_p[:, i][select_fp], c=cloud_dist[:, i][select_fp],
+                    marker=marker_list[i],
+                    norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax), alpha=0.7)
+    effective = np.logical_and(np.logical_and((o2a_fwhm)[:, :][select]>0, sfc_p[:, :][select]>0),
+                            cloud_dist[:, :][select]>0)
+    plt.colorbar(extend='both')
+    plt.title(f'counts: {np.sum(effective)}')
+    plt.savefig(f'fig/{cfg_info["cfg_name"]}_valid_pressure_o2a_fwhm_cloud_dist_{extent[0]:.2f}_{extent[1]:.2f}_{extent[2]:.2f}_{extent[3]:.2f}_test.png')
+
 
     plt.clf()
     plt.figure(figsize=(8, 6))
@@ -624,6 +684,21 @@ def run_case_modis_650(cfg_info):
     plt.colorbar(extend='both')
     plt.title(f'counts: {np.sum(effective)}')
     plt.savefig(f'fig/{cfg_info["cfg_name"]}_valid_xco2_o2a_fwhm_cloud_dist_{extent[0]:.2f}_{extent[1]:.2f}_{extent[2]:.2f}_{extent[3]:.2f}.png')
+
+    plt.clf()
+    plt.figure(figsize=(8, 6))
+    for i in range(8):
+        select_fp = np.logical_and(np.isnan(snd_lat[:, i])==False, 
+                                   np.isnan(xco2_array[:, i])==False)
+        plt.scatter(((o2a_fwhm)/(o2a_mu+o2a_mu_v))[:, i][select_fp], sfc_p[:, i][select_fp], c=cloud_dist[:, i][select_fp],
+                    marker=marker_list[i],
+                    norm=mpl.colors.LogNorm(vmin=vmin, vmax=vmax), alpha=0.7)
+    effective = np.logical_and(np.logical_and((o2a_fwhm)[:, :][select]>0, sfc_p[:, :][select]>0),
+                            cloud_dist[:, :][select]>0)
+    plt.colorbar(extend='both')
+    plt.title(f'counts: {np.sum(effective)}')
+    plt.savefig(f'fig/{cfg_info["cfg_name"]}_valid_xco2_o2a_fwhm_cloud_dist_{extent[0]:.2f}_{extent[1]:.2f}_{extent[2]:.2f}_{extent[3]:.2f}_test.png')
+
 
     plt.clf()
     plt.figure(figsize=(8, 6))
@@ -937,10 +1012,10 @@ if __name__ == '__main__':
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20170605_amazon.csv'
-    # cfg = 'cfg/20190209_dryden.csv'
+    cfg = 'cfg/20190209_dryden.csv'
     # cfg = 'cfg/20181018_central_asia.csv'
     # cfg = 'cfg/20190621_australia.csv'
-    cfg = 'cfg/20151220_afric_east.csv'
+    # cfg = 'cfg/20151220_afric_east.csv'
     print(cfg)
     run_simulation(cfg) #done
     

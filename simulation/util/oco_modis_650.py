@@ -285,29 +285,35 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         label_size = 16
         tick_size = 12
         plt.clf()
-        fig = plt.figure(figsize=(15, 6))
+        fig = plt.figure(figsize=(16, 6))
         ax1 = fig.add_axes([0.05, 0.05, 0.21, 0.9])
         ax1.imshow(mod_img, extent=mod_img_wesn)
-        ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
-                
-        ax2 = fig.add_axes([0.35, 0.05, 0.21, 0.9])
+        c1 = ax1.pcolormesh(lon_mod, lat_mod, rad_mod, cmap='Greys_r', vmin=0.0, vmax=0.5)
+        cbar = fig.colorbar(c1, ax=ax1, orientation='vertical', pad=0.05, fraction=0.0665)
+        cbar.set_label('MODIS Measured Radiance ($\mathrm{W\;m^{-2}\;\mu\;m^{-1}\;sr^{-1}}$)', fontsize=label_size-2  )
+
+        ax2 = fig.add_axes([0.37, 0.05, 0.21, 0.9])
         ax2.imshow(mod_img, extent=mod_img_wesn)
-        ax2.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
-                        
-        ax3 = fig.add_axes([0.65, 0.05, 0.315, 0.9])
+        c2 = ax2.pcolormesh(lon_mod, lat_mod, rad_rtm_3d, cmap='Greys_r', vmin=0.0, vmax=0.5)
+        cbar2 = fig.colorbar(c2, ax=ax2, orientation='vertical', pad=0.05,fraction=0.0665)
+        cbar2.set_label('Simulated %s Radiance ($\mathrm{W\;m^{-2}\;\mu\;m^{-1}\;sr^{-1}}$)' %solver, fontsize=label_size-2)
+                       
+        ax3 = fig.add_axes([0.70, 0.05, 0.275, 0.9])
         ax3.set_aspect('equal', 'box')
         cs = ax3.contourf(XX, YY, heatmap, levels, extend='both', locator=ticker.LogLocator(), cmap='jet')
         ax3.plot([0.0, 1.0], [0.0, 1.0], lw=1.0, ls='--', color='gray', zorder=3)
         ax3.set_xlim(0.0, 0.6)
         ax3.set_ylim(0.0, 0.6)
-        ax3.set_xlabel('MODIS Measured Radiance', fontsize=label_size)
-        ax3.set_ylabel(f'Simulated {solver} Radiance', fontsize=label_size)
+        ax3.set_xlabel(r'MODIS Measured Radiance ($\mathrm{W\;m^{-2}\;\mu\;m^{-1}\;sr^{-1}}$)', fontsize=label_size)
+        ax3.set_ylabel(r'Simulated %s Radiance ($\mathrm{W\;m^{-2}\;\mu\;m^{-1}\;sr^{-1}}$)' %solver, fontsize=label_size)
 
         for ax in [ax1, ax2]:
             ax.set_xlim(extent_analysis[0], extent_analysis[1])
             ax.set_ylim(extent_analysis[2], extent_analysis[3])
             ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
             ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+            ax.set_xlabel('Longititude ($^\circ$E)', fontsize=label_size)
+            ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
 
         for ax, label_ord in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
             xmin, xmax = ax.get_xlim()
@@ -317,7 +323,7 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
                     label_ord, fontsize=label_size, color='k')
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
-        plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}_comparison.png', bbox_inches='tight')
+        plt.savefig(f'{sat.fdir_pre_data}/modis_650_{case_name_tag}_{solver}_comparison.png', bbox_inches='tight', dpi=300)
         # ==================================================================================================
 
         # ==================================================================================================
