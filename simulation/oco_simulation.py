@@ -462,9 +462,9 @@ if __name__ == '__main__':
     print(cfg)
     run_simulation(cfg)
 
-    cfg = 'cfg/20181018_central_asia_2_test4.csv'
-    print(cfg)
-    run_simulation(cfg)
+    # cfg = 'cfg/20181018_central_asia_2_test4.csv'
+    # print(cfg)
+    # run_simulation(cfg)
     
     # run_simulation(cfg, sfc_alb=0.05, sza=45, aod550=0) #done
     # run_simulation(cfg, sfc_alb=0.1, sza=45, aod550=0) #done

@@ -58,5 +58,5 @@ retrieval,B10.04,,,,,,# python that is used for retrieval sub-process
 # simulation parameters,,,,,,,
 ref_threshold,0.09,,,,,,
 modis_650_N_photons,1.00E+08,,,,,,
-oco_N_photons,5.00E+09,,,,,,
+oco_N_photons,2.00E+09,,,,,,
 Ncpu,32,,,,,,
