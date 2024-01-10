@@ -412,7 +412,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
                                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550,
-                                            overwrite=False)
+                                            overwrite=True)
     # ===============================================================
 
     # post-processing - combine the all the calculations into one dataset
