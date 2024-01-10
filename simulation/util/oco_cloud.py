@@ -7,6 +7,7 @@ import h5py
 import numpy as np
 import datetime
 from scipy import interpolate
+from scipy import stats
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
 import platform
@@ -169,9 +170,9 @@ def crack_adjustment(indices_x, indices_y, Nx, Ny, cot_ipa, cer_ipa, cth_ipa, cl
     :param percent_a: float
     :param percent_b: float
     """
-    Npixel = 2
-    percent_a = 0.7
-    percent_b = 0.7
+    Npixel = Npixel
+    percent_a = percent_a
+    percent_b = percent_b
     for i in range(indices_x.size):
         ix = indices_x[i]
         iy = indices_y[i]
@@ -275,7 +276,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     data = np.zeros_like(cth)
     data[cth>0.0] = 1
     dx, dy = 250, 250 # in meter
-    offset_nx, offset_ny = move_correlate(data0, data)
+    offset_nx, offset_ny = 0, 0#move_correlate(data0, data)
     if offset_nx > 0:
         dist_x = dx * offset_nx
         lon_2d_, _ = cal_geodesic_lonlat(lon_2d, lat_2d, dist_x, 90.0)
@@ -293,12 +294,18 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
 
     # cth_ = cth.copy()
     cth_ = cth[indices_x, indices_y]
-    cth_[cth_==0.0] = np.nan
+    print(cth_.shape)
+    cth_mode = stats.mode(cth_[np.logical_and(cth_>0, cth_<4)])
+    print(cth_mode.mode[0])
+    cth_[cth_==0.0] = cth_mode.mode[0] 
+    cth_[np.isnan(cth_)] = cth_mode.mode[0]
+
 
     cth_ipa0 = np.zeros_like(ref_2d)
     # cth_ipa0[indices_x, indices_y] = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
-    cth_ipa0 = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_)
+    cth_ipa0 = find_nearest(lon_cld, lat_cld, cth_, lon_2d_, lat_2d_, Ngrid_limit=2)    
     cth_ipa0[np.isnan(cth_ipa0)] = 0.0
+
     #\--------------------------------------------------------------/#
 
     # cer_ipa0
@@ -496,7 +503,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
     # fill-in the empty cracks 
     crack_adjustment(indices_x, indices_y, Nx, Ny, cot_3d_650, cer_3d_650, cth_3d_650, 
                      cld_msk_3d_650, cot_ipa_,
-                     Npixel=2, percent_a=0.7, percent_b=0.7)
+                     Npixel=1, percent_a=0.7, percent_b=0.7)
     
 
     # wind correction
@@ -527,7 +534,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
             cld_msk[ix_corr, iy_corr] = 1
     # fill-in the empty cracks 
     crack_adjustment(indices_x, indices_y, Nx, Ny, cot_ipa, cer_ipa, cth_ipa, cld_msk, cot_ipa_,
-                     Npixel=2, percent_a=0.7, percent_b=0.7)
+                     Npixel=5, percent_a=0.7, percent_b=0.7)
     #\--------------------------------------------------------------/#
     #\----------------------------------------------------------------------------/#
 
@@ -683,6 +690,18 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         cbar = fig.colorbar(cs, cax=cax)
         #\----------------------------------------------------------------------------/#
 
+        # surface albedo (MYD43A3, white sky albedo)
+        #/----------------------------------------------------------------------------\#
+        ax18 = fig.add_subplot(4, 4, 13)
+        cs = ax18.imshow(alb_650.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=1)
+        ax18.set_title('43A3 WSA  650nm(filled and scaled)')
+
+        divider = make_axes_locatable(ax18)
+        cax = divider.append_axes('right', '5%', pad='3%')
+        cbar = fig.colorbar(cs, cax=cax)
+        #\----------------------------------------------------------------------------/#
+
+
         # cot l2
         #/----------------------------------------------------------------------------\#
         ax5 = fig.add_subplot(446)
@@ -783,7 +802,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         #\----------------------------------------------------------------------------/#
 
         
-        ax_list = [f'ax{num}' for num in range(1, 17)]
+        ax_list = [f'ax{num}' for num in range(1, 18)]
         ax_list.remove('ax8')
         ax_list.remove('ax12')
         for num in range(len(ax_list)):
@@ -1274,11 +1293,21 @@ def cdata_cld_modis_only(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         cbar = fig.colorbar(cs, cax=cax)
         #\----------------------------------------------------------------------------/#
 
-       
+       # surface albedo (MYD43A3, white sky albedo)
+        #/----------------------------------------------------------------------------\#
+        ax12 = fig.add_subplot(4, 4, 13)
+        cs = ax16.imshow(alb_650.T, origin='lower', cmap='jet', zorder=0, extent=extent, vmin=0.0, vmax=0.4)
+        ax16.set_title('43A3 WSA  650nm(filled and scaled)')
+
+        divider = make_axes_locatable(ax16)
+        cax = divider.append_axes('right', '5%', pad='3%')
+        cbar = fig.colorbar(cs, cax=cax)
+        #\----------------------------------------------------------------------------/#
+
         
-        ax_list = [f'ax{num}' for num in range(1, 13)]
+        ax_list = [f'ax{num}' for num in range(1, 13  )]
         ax_list.remove('ax8')
-        ax_list.remove('ax12')
+        # ax_list.remove('ax12')
         for num in range(len(ax_list)):
             ax = vars()[ax_list[num]]
             ax.set_xlim((extent[:2]))

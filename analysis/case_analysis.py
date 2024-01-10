@@ -200,13 +200,13 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 9
+    compare_num = 13
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl.h5' %case_name_tag
+    filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_2.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
     alb = 0.5
@@ -778,7 +778,7 @@ def heatmap_xy_3(x, y, ax):
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1+0.25*i for i in range(10)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.25*i for i in range(3)] 
+    cld_min_list = [1+0.5*i for i in range(2)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.5*i for i in range(2)] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):

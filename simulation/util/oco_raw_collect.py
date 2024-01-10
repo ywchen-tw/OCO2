@@ -135,11 +135,11 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         sfh0 = sfh0/1000.0 # units: km
         sfh0[sfh0<0.0] = np.nan
 
-        _, _, sza_2d = grid_by_dxdy(lon0, lat0, sza0, **grid_by_dxdy_nearest_args)
-        _, _, saa_2d = grid_by_dxdy(lon0, lat0, saa0, **grid_by_dxdy_nearest_args)
-        _, _, vza_2d = grid_by_dxdy(lon0, lat0, vza0, **grid_by_dxdy_nearest_args)
-        _, _, vaa_2d = grid_by_dxdy(lon0, lat0, vaa0, **grid_by_dxdy_nearest_args)
-        _, _, sfh_2d = grid_by_dxdy(lon0, lat0, sfh0, **grid_by_dxdy_nearest_args)
+        _, _, sza_2d = grid_by_dxdy(lon0, lat0, sza0, **grid_by_dxdy_linear_args)
+        _, _, saa_2d = grid_by_dxdy(lon0, lat0, saa0, **grid_by_dxdy_linear_args)
+        _, _, vza_2d = grid_by_dxdy(lon0, lat0, vza0, **grid_by_dxdy_linear_args)
+        _, _, vaa_2d = grid_by_dxdy(lon0, lat0, vaa0, **grid_by_dxdy_linear_args)
+        _, _, sfh_2d = grid_by_dxdy(lon0, lat0, sfh0, **grid_by_dxdy_linear_args)
 
         g0.update({'sza': sza_2d, 'saa': saa_2d, 'vza': vza_2d, 'vaa': vaa_2d, 'sfh': sfh_2d})
 

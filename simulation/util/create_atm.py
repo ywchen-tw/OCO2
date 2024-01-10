@@ -2,6 +2,7 @@ import h5py
 import sys
 import os
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 import bisect as bs
 
@@ -140,7 +141,7 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5', new_h_edge=None):
 
     p_edge, t_edge, _, _, d_o2_lev, d_co2_lev, d_h2o_lev, d_o3_lev = atm_interp(pprf_lay_mean, hprf_lay_mean, tprf_lay_mean, h_edge, uprf_lay_mean, vprf_lay_mean, d_o2_lay_mean, d_co2_lay_mean, d_h2o_lay_mean, d_o3_lay_mean, layer=True)
     p_lay, t_lay, u_lay, v_lay, d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay = atm_interp(pprf_lay_mean, hprf_lay_mean, tprf_lay_mean, h_lay, uprf_lay_mean, vprf_lay_mean, d_o2_lay_mean, d_co2_lay_mean, d_h2o_lay_mean, d_o3_lay_mean, layer=True)
-    h2o_vmr = d_h2o_lay/(d_o2_lay/0.20935)
+    h2o_vmr = d_h2o_lay/(d_o2_lay/o2mix)
 
     if os.path.isfile(output): 
         print(f'[Warning] Output file {output} exists - overwriting!')
@@ -170,7 +171,78 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5', new_h_edge=None):
     h5_output.create_dataset('sza',         data=sza)
     h5_output.create_dataset('vza',         data=vza)
 
+    zpt_plot(p_lay, t_lay, h_lay, u_lay, v_lay, d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay, h2o_vmr, o2mix, output=output.replace('.h5', '.png'))
     return None
+
+
+def zpt_plot(p_lay, t_lay, h_lay, u_lay, v_lay, d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay, h2o_vmr, o2mix, output):
+    import metpy.calc as mpcalc
+    from metpy.cbook import get_test_data
+    from metpy.plots import add_metpy_logo, SkewT
+    from metpy.calc import dewpoint
+    from metpy.units import units
+
+    p = p_lay * units.hPa
+    T = (t_lay * units.kelvin).to(units.degC)
+    Td = dewpoint(p_lay * h2o_vmr * units.hPa).to(units.degC)
+    u, v = u_lay * units('m/s'), v_lay * units('m/s')
+    mask = p_lay >= 100
+    p_100 = p[mask]
+    u_100 = u[mask]
+    v_100 = v[mask]
+
+    fig, (ax1, ax2) =plt.subplots(1, 2, figsize=(12, 6.75))
+    # fig = plt.figure(figsize=(4, 6.75))
+    ax1.set_visible(False)
+    # ax2.set_visible(False)
+    skew = SkewT(fig=fig, subplot=(1, 2, 1), aspect=120.5)
+    skew.plot(p, T, 'r', label='Temperature', linewidth=3)
+    skew.plot(p, Td, 'g', label='Dew Point', linewidth=3)
+    skew.plot_barbs(p_100, u_100, v_100)
+
+    # Set some better labels than the default
+    skew.ax.set_xlabel('Temperature ($\N{DEGREE CELSIUS}$)', fontsize=14)
+    skew.ax.set_ylabel('Pressure (hPa)', fontsize=14)
+    # Add the relevant special lines
+    skew.plot_dry_adiabats()
+    skew.plot_moist_adiabats()
+    skew.plot_mixing_lines()
+    skew.ax.set_ylim(1000, 100)
+    skew.ax.legend()
+    skew.ax.text(0.02, 1.07, '(a)', transform=skew.ax.transAxes, fontsize=16, fontweight='bold', va='center', ha='left')
+
+
+    
+    lns1 = ax2.plot(d_co2_lay/(d_o2_lay/o2mix)*1e6, p, 'dimgrey', label='$\mathrm{CO_2}$', linewidth=3)
+    ax2_2 = ax2.twiny()
+    lns2 = ax2_2.plot(h2o_vmr, p, 'b:', label='H$_2$O', linewidth=3)
+
+    # Set some better labels than the default
+    
+    # Add the relevant special lines
+    ax2.set_ylim(1000, 100)
+    ax2.set_xlim(406, 409)
+    #// set yaxis to log scale
+    ax2.set_yscale('log')
+    ax2_2.set_xscale('log')
+    #// set y ticks format in integer
+    ax2.yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:.0f}'))
+    ax2.yaxis.set_minor_formatter(ticker.StrMethodFormatter('{x:.0f}'))
+    ax2.set_ylabel('Pressure (hPa)', fontsize=14)
+    ax2_2.set_xlabel('H$_2$O mixing ratio', fontsize=14, color='b')
+    ax2.set_xlabel('$\mathrm{CO_2}$ mixing ratio (ppmv)', fontsize=14, color='k')
+    # added these three lines
+    lns = lns1+lns2
+    labs = [l.get_label() for l in lns]
+    ax2.legend(lns, labs)
+    ax2.text(1.28, 1.07, '(b)', transform=skew.ax.transAxes, fontsize=16, fontweight='bold', va='center', ha='left')
+    #// set y grid line
+    ax2.grid(which='minor', axis='y', linestyle='-', linewidth=1, color='lightgrey')
+    #// combi
+
+    fig.tight_layout()
+    fig.savefig(output, dpi=300)
+
 
 
 def atm_interp(pressure, altitude, temperature, 
@@ -291,4 +363,3 @@ def atm_interp(pressure, altitude, temperature,
             return pn, tn, u_lay, v_lay, d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay
         #except:
         #    sys.exit("[Error] Must provide u, v, O2, CO2, H2O number densities!")
-        

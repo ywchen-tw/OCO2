@@ -40,6 +40,18 @@ def cal_mca_rad_650(sat, zpt_file, wavelength, cfg_info, fdir='tmp-data', solver
     abs0      = abs_16g(wavelength=wavelength, fname=fname_abs, atm_obj=atm0, overwrite=overwrite)
     # =================================================================================
 
+    # solar zenith/azimuth angles and sensor zenith/azimuth angles
+    # =================================================================================
+    with h5py.File(f'{sat.fdir_pre_data}/pre-data.h5', 'r') as f:
+        sza = f['mod/geo/sza'][...].mean()
+        saa = f['mod/geo/saa'][...].mean()
+        vza = f['mod/geo/vza'][...].mean()
+        vaa = f['mod/geo/vaa'][...].mean()
+    # =================================================================================
+    print('sza: %.2f, saa: %.2f, vza: %.2f, vaa: %.2f' % (sza, saa, vza, vaa))
+    print(np.cos(sza/180*np.pi))
+    # sys.exit()
+
     # sfc object
     # =================================================================================
     data = {}
@@ -189,6 +201,10 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         cot_3d_650 = f['mod/cld/cot_3d_650'][...]
         cer_3d_650 = f['mod/cld/cer_3d_650'][...]
         cth_3d_650 = f['mod/cld/cth_3d_650'][...]
+        cot_3d_ipa = f['mod/cld/cot_ipa'][...]
+        cer_3d_ipa = f['mod/cld/cer_ipa'][...]
+        cth_3d_ipa = f['mod/cld/cth_ipa'][...]
+        sza = f['mod/geo/sza'][...].mean()
         if solver.lower() == 'ipa':
             cth_mod = f['mod/cld/cth_ipa_650'][...]
         elif solver.lower() == '3d':
@@ -203,7 +219,14 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         rad_rtm_3d_std = f['mean/rad_std'][...]
         toa = f['mean/toa'][...]
     # ==================================================================================================
+    # plt.scatter(lon_mod, lat_mod, c=rad_rtm_3d/toa, cmap='jet', vmin=0, vmax=1)
+    # plt.colorbar()
+    # plt.show()
 
+    # plt.scatter(lon_mod, lat_mod, c=rad_rtm_3d/(toa*np.cos(sza/180)*np.pi)*np.pi, cmap='jet', vmin=0, vmax=1)
+    # plt.colorbar()
+    # plt.show()
+    # sys.exit()
     # save data
     # ==================================================================================================
     with h5py.File('data/%s/post-data.h5' % case_name_tag, 'w') as f:
@@ -216,7 +239,7 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         f['rad_sim_3d_std'] = rad_rtm_3d_std
         f['ref_threshold']  = ref_threshold
     # ==================================================================================================
-
+    
     if plot:
         # ==================================================================================================
         fig = plt.figure(figsize=(15, 10))
@@ -335,17 +358,17 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
         ax2 = fig.add_axes([0.40, 0.05, 0.25, 0.9])
         ax3 = fig.add_axes([0.75, 0.05, 0.25, 0.9])
         
-        cs1 = ax1.pcolormesh(lon_mod, lat_mod, cot_3d_650, cmap='jet',
+        cs1 = ax1.scatter(lon_mod, lat_mod, c=cot_3d_650, cmap='jet',
                        vmin=0.0, vmax=50.0)
         cb1 = fig.colorbar(cs1, ax=ax1, orientation='vertical', pad=0.05)
         cb1.set_label('COT', fontsize=label_size)
 
-        cs2 = ax2.pcolormesh(lon_mod, lat_mod, cer_3d_650, cmap='jet',
+        cs2 = ax2.scatter(lon_mod, lat_mod, c=cer_3d_650, cmap='jet',
                              vmin=0.0, vmax=30.0)
         cb2 = fig.colorbar(cs2, ax=ax2, orientation='vertical', pad=0.05)
         cb2.set_label('CER ($\mathrm{\mu m}$)', fontsize=label_size)
 
-        cs3 = ax3.pcolormesh(lon_mod, lat_mod, cth_3d_650, cmap='jet',
+        cs3 = ax3.scatter(lon_mod, lat_mod, c=cth_3d_650, cmap='jet',
                              vmin=0.0, vmax=10.0)
         cb3 = fig.colorbar(cs3, ax=ax3, orientation='vertical', pad=0.05)
         cb3.set_label('CTH (km)', fontsize=label_size)
@@ -366,4 +389,42 @@ def modis_650_simulation_plot(sat, cfg_info, case_name_tag='default', fdir='tmp'
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         plt.savefig(f'{sat.fdir_pre_data}/modis_650_cloud_information.png', bbox_inches='tight')
+        plt.clf()
+        fig = plt.figure(figsize=(15, 5))
+        ax1 = fig.add_axes([0.05, 0.05, 0.25, 0.9])
+        ax2 = fig.add_axes([0.40, 0.05, 0.25, 0.9])
+        ax3 = fig.add_axes([0.75, 0.05, 0.25, 0.9])
+        
+        cs1 = ax1.scatter(lon_mod, lat_mod, c=cot_3d_ipa, cmap='jet',
+                       vmin=0.0, vmax=50.0)
+        cb1 = fig.colorbar(cs1, ax=ax1, orientation='vertical', pad=0.05)
+        cb1.set_label('COT', fontsize=label_size)
+
+        cs2 = ax2.scatter(lon_mod, lat_mod, c=cer_3d_ipa, cmap='jet',
+                             vmin=0.0, vmax=30.0)
+        cb2 = fig.colorbar(cs2, ax=ax2, orientation='vertical', pad=0.05)
+        cb2.set_label('CER ($\mathrm{\mu m}$)', fontsize=label_size)
+
+        cs3 = ax3.scatter(lon_mod, lat_mod, c=cth_3d_ipa, cmap='jet',
+                             vmin=0.0, vmax=10.0)
+        cb3 = fig.colorbar(cs3, ax=ax3, orientation='vertical', pad=0.05)
+        cb3.set_label('CTH (km)', fontsize=label_size)
+
+        for ax, label_ord in zip([ax1, ax2, ax3], ['(a)', '(b)', '(c)']):
+            ax.imshow(mod_img, extent=mod_img_wesn)
+            ax.set_xlim(extent_analysis[0], extent_analysis[1])
+            ax.set_ylim(extent_analysis[2], extent_analysis[3])
+            ax.set_xlabel('Longititude ($^\circ$)', fontsize=label_size)
+            ax.set_ylabel('Latitude ($^\circ$)', fontsize=label_size)
+            ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+            ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+            xmin, xmax = ax.get_xlim()
+            ymin, ymax = ax.get_ylim()
+            ax.tick_params(axis='both', labelsize=tick_size)
+            ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), 
+                    label_ord, fontsize=label_size, color='k')
+
+        plt.subplots_adjust(hspace=0.4, wspace=0.4)
+        plt.savefig(f'{sat.fdir_pre_data}/modis_ipa_cloud_information.png', bbox_inches='tight')
+
         # ==================================================================================================

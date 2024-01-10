@@ -341,7 +341,7 @@ def preprocess(cfg_info):
                     pathout=fdir_data,
                     reextract=True, plot=True)
     
-    if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
+    if 1:#not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
     cdata_cld_ipa(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
@@ -360,8 +360,8 @@ def run_case_modis_650(cfg_info, preprocess_info):
     # ======================================================================
     fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
     for solver in ['IPA', '3D']:
-        # cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
-        #                 overwrite=True, case_name_tag=name_tag)
+        cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
+                        overwrite=True, case_name_tag=name_tag)
         modis_650_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_650,
                                    solver=solver, wvl=650, plot=True)
     # ======================================================================
