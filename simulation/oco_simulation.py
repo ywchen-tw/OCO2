@@ -412,7 +412,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
                                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550,
-                                            overwrite=True)
+                                            overwrite=False)
     # ===============================================================
 
     # post-processing - combine the all the calculations into one dataset
@@ -450,7 +450,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
 if __name__ == '__main__':
     
     # cfg = 'cfg/20181018_central_asia_zpt_test2.csv'
-    cfg = 'cfg/20181018_central_asia_2_test6.csv'
+    cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
