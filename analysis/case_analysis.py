@@ -170,7 +170,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_2_test6.csv'):
+def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -200,13 +200,13 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)
 
-    compare_num = 13
+    compare_num = 9
     rad_c3d_compare = f'rad_c3d_{compare_num}'
     rad_clr_compare = f'rad_clr_{compare_num}'
     slope_compare = f'slope_{compare_num}avg'
     inter_compare = f'inter_{compare_num}avg'
 
-    filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_2.h5' %case_name_tag
+    filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl_3.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
 
     alb = 0.5
@@ -226,7 +226,7 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     #     %(case_name_tag, alb, sza, aod, cot, cer, cth)
     print('filename:', filename)
     pkl_filename = '20181018_central_asia_{}_lbl_with_aod_zpt_test.pkl'
-    if not os.path.isfile(pkl_filename.format('o2a')):
+    if 1:#not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
         o2 = cld_rad_slope_calc('wco2', id_num, filename, pkl_filename, cld_location)
@@ -682,7 +682,7 @@ def weighted_cld_dist_calc(cfg_name, o1, slope_compare):
     with h5py.File(cldfile, 'r') as f:
         lon_cld = f['lon'][...]
         lat_cld = f['lat'][...]
-        cth = f[f'mod/cld/logic_cld'][...]
+        cth = f[f'mod/cld/cth_ipa'][...]
 
     cld_list = cth>0
     cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
@@ -778,7 +778,7 @@ def heatmap_xy_3(x, y, ax):
     val_mask = ~(np.isnan(value_avg) | np.isnan(value_std) | np.isinf(value_avg) | np.isinf(value_std))
     temp_r2 = 0
     cld_val = cld_list[val_mask]
-    cld_min_list = [1+0.5*i for i in range(2)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.5*i for i in range(2)] 
+    cld_min_list = [1+0.5*i for i in range(1)] if cld_val.min()<=2 else [cld_val.min().round(0)+0.5*i for i in range(1)] 
     cld_max_start = 10 if cld_val.min()<=2 else  20
     for cld_min in cld_min_list:
         for cld_max in np.arange(cld_max_start, 50, 1):
@@ -1059,7 +1059,7 @@ def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):
     c3d_np = o1.rad_c3d_5
     fp, z = 170, 114
     points = nx+1
-
+    print(f'o2a slope intercept derivation sample: lon {o1.lon2d[z, fp]}, lat {o1.lat2d[z, fp]}')
     w = 1./sls_np[z,fp,:] 
     x = c3d_np[z,fp,:]/(toa[:]*np.cos(mu))*np.pi
     x_len = len(x)

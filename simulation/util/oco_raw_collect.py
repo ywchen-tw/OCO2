@@ -211,12 +211,26 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         mcd04 = modis_04(fnames=sat0.fnames['mod_04'], extent=sat0.extent, 
                         vnames=['Deep_Blue_Spectral_Single_Scattering_Albedo_Land', ])
         AOD_lon, AOD_lat, AOD_550_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_nearest_args)
+        AOD_550_land[AOD_550_land<0] = np.nan
         _, _, Angstrom_Exponent_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['Angstrom_Exponent_land']['data'], **grid_by_dxdy_nearest_args)
         _, _, SSA_land_660 = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['SSA_land']['data'][2, :], **grid_by_dxdy_nearest_args)
 
         _, _, AOD_550_land_grid = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_linear_args)
         #_, _, aerosol_type_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_type_land']['data'], **grid_by_dxdy_nearest_args)
         #_, _, aerosol_cloud_frac_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_cloud_frac_land']['data'], **grid_by_dxdy_nearest_args)
+        print('AOD_550_land')
+        
+        print('min: ', np.nanmin(AOD_550_land), 'max: ', np.nanmax(AOD_550_land))
+        plt.clf()
+        plt.scatter(AOD_lon, AOD_lat, c=AOD_550_land, s=1)
+        plt.colorbar()
+        plt.show()
+        AOD_550_land_grid[AOD_550_land_grid<0] = np.nan
+        plt.clf()
+        plt.scatter(AOD_lon, AOD_lat, c=AOD_550_land_grid, s=1)
+        plt.colorbar()
+        plt.show()
+
 
         AOD_550_land_nan = AOD_550_land.copy()
         AOD_550_land_nan[np.isnan(AOD_550_land_nan)] = np.nan
@@ -225,8 +239,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         SSA_land_660_nan[np.isnan(SSA_land_660_nan)] = np.nan
         SSA_land_660_nan[SSA_land_660_nan<0] = np.nan
 
-        AOD_550_land_mean = np.nanmean(AOD_550_land[(AOD_550_land>=0) & (~np.isnan(AOD_550_land))])
-        Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[AOD_550_land>=0])
+        AOD_550_land_mean = np.nanmean(AOD_550_land_grid[(AOD_550_land_grid>=0) & (~np.isnan(AOD_550_land_grid))])
+        Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[AOD_550_land_grid>=0])
         SSA_land_mean = np.nanmean(SSA_land_660[(SSA_land_660>=0) & (~np.isnan(SSA_land_660))])
 
         g4['AOD_550_land'] = AOD_550_land_grid

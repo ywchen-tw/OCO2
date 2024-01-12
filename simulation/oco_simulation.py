@@ -156,6 +156,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
         ssa = SSA_land_mean # aerosol single scattering albedo
         cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
+        print(f'aod 550 nm mean:', AOD_550_land_mean)
         print(f'aod {wavelength:.2f} nm mean:', aod)
         if len(cth_mode.mode) == 0:
             z_top  = 2       # altitude of layer top in km
@@ -412,7 +413,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
                                             fdir=fdir_tmp, solver=solver, 
                                             sfc_alb_abs=sfc_alb, sza_abs=sza,
                                             cld_manual=cld_manual, cot=cot, cer=cer, cth=cth, aod550=aod550,
-                                            overwrite=False)
+                                            overwrite=True)
     # ===============================================================
 
     # post-processing - combine the all the calculations into one dataset
@@ -450,7 +451,7 @@ def run_simulation(cfg, sfc_alb=None, sza=None, cld_manual=False, cot=None, cer=
 if __name__ == '__main__':
     
     # cfg = 'cfg/20181018_central_asia_zpt_test2.csv'
-    cfg = 'cfg/20181018_central_asia_2_test6.csv'
+    cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
