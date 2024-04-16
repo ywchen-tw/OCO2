@@ -240,7 +240,7 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         SSA_land_660_nan[SSA_land_660_nan<0] = np.nan
 
         AOD_550_land_mean = np.nanmean(AOD_550_land_grid[(AOD_550_land_grid>=0) & (~np.isnan(AOD_550_land_grid))])
-        Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[AOD_550_land_grid>=0])
+        Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[(AOD_550_land_grid>=0) & (Angstrom_Exponent_land>0)])
         SSA_land_mean = np.nanmean(SSA_land_660[(SSA_land_660>=0) & (~np.isnan(SSA_land_660))])
 
         g4['AOD_550_land'] = AOD_550_land_grid

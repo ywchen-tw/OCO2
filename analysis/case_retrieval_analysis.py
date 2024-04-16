@@ -83,7 +83,8 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
     aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
                 img_dir=img_dir)
-    retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_2.h5', 'r')
+    # retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_2.h5', 'r')
+    retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_20240402.h5', 'r')
     mask = retrieval_aod_parameterization['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
@@ -199,7 +200,8 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                 fp=160, z=135,
                                 img_dir=img_dir)
     
-    retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pixel_2.h5', 'r')
+    # retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pixel_2.h5', 'r')
+    retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pbp_20240402.h5', 'r')
     mask = retrieval_aod_pixel['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
@@ -687,7 +689,7 @@ def delta_XCO2_comparison_para_pixel(cld_dist, df, df_pixel,
     for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
         # xmin, xmax = ax.get_xlim()
         # ymin, ymax = ax.get_ylim()
-        ax.set_xlabel('Weighted average cloud distance (km)', fontsize=label_size)
+        ax.set_xlabel('$\mathrm{D_e}$ (km)', fontsize=label_size)
         ax.set_ylabel('$\Delta \mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
         ax.hlines(0, xmin, xmax, linestyles='--', colors='grey')
         ax.text((xmin+(xmax-xmin)*-0.05), (ymin+(ymax-ymin)*1.05), label, fontsize=20)
@@ -740,12 +742,13 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
                 img_dir='.', label_size=16, tick_size=14, legend_size=14):
     fig, ax = plt.subplots(1, 1, figsize=(9, 6), sharex=False, )
     
-    cld_dist_threshold = 10
+    cld_dist_threshold = 15
+    true_mean = np.mean(xco2_l2[cld_dist>cld_dist_threshold])
     x = cld_dist
-    y = xco2_l2-np.mean(xco2_l2[xco2_l2>cld_dist_threshold])
+    y = xco2_l2-true_mean
 
-    print(np.mean(xco2_l2[xco2_l2>cld_dist_threshold]))
-    print(np.mean(xco2_l2[xco2_l2>cld_dist_threshold*2]))
+    print(np.mean(xco2_l2[cld_dist>cld_dist_threshold]))
+    print(np.mean(xco2_l2[cld_dist>(cld_dist_threshold*2)]))
     print(np.mean(xco2_unpert[cld_dist>cld_dist_threshold]))
     ax.hlines(0, 0, 40, linestyle='--', color='orange')
     ax.fill_between([0, 40], -1, 1, color='orange', alpha=0.3)
@@ -759,7 +762,9 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
 
 
     x = cld_dist
-    y = xco2_unpert-np.mean(xco2_l2[xco2_l2>cld_dist_threshold])
+    y = xco2_unpert-true_mean
+ 
+    print(f'true mean: {true_mean}')
     
     ax.scatter(x, y, color='r', s=25, alpha=0.75, label='Mitigated')
 
@@ -769,20 +774,20 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     xmin, xmax = -0.5, 40
     ax.set_ylim(ymin, ymax)
     ax.set_xlim(xmin, xmax)
-    ax.text((xmin+(xmax-xmin)*0.295), (ymin+(ymax-ymin)*0.68), 
-            'regional uncertainty requirement: 1 ppm', color='orange', fontsize=14)
+    ax.text((xmin+(xmax-xmin)*0.405), (ymin+(ymax-ymin)*0.72), 
+            'regional uncertainty requirement:\n                      1 ppm', color='orange', fontsize=14)
 
     
     cld_mask = cld_dist<= cld_dist_threshold
     ax_histy = ax.inset_axes([1.1, 0, 0.25, 1], sharey=ax)
     ax_histy.tick_params(axis="y", labelleft=False)
-    ax_histy.hist((xco2_l2-404)[cld_mask], bins=31, orientation='horizontal', density=True, color='black', alpha=0.75)
+    ax_histy.hist((xco2_l2-true_mean)[cld_mask], bins=31, orientation='horizontal', density=True, color='black', alpha=0.75)
 
     ax_histy.hist(y[cld_mask], bins=31, orientation='horizontal', density=True, color='r', alpha=0.75)
 
-    black_kde = sns.kdeplot(y=(xco2_l2-404)[cld_mask], color='k', bw_adjust=1.5, linewidth=3, 
+    black_kde = sns.kdeplot(y=(xco2_l2-true_mean)[cld_mask], color='k', bw_adjust=1.5, linewidth=3, 
                             ax=ax_histy, alpha=0.95)
-
+    print(f'l2 cloud dist <= {cld_dist_threshold} anomaly average: {np.nanmean((xco2_l2-true_mean)[cld_mask]):.3f} +/- {np.nanstd((xco2_l2-true_mean)[cld_mask]):.3f}')
 
     kde_curve = black_kde.lines[0]
     black_kde_x = kde_curve.get_xdata()
@@ -808,8 +813,10 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     print(fullwidthathalfmax)
 
 
-    red_kde = sns.kdeplot(y=xco2_unpert-404, color='r', bw_adjust=1.5, linewidth=3, 
+    red_kde = sns.kdeplot(y=(xco2_unpert-true_mean)[cld_mask], color='r', bw_adjust=1.5, linewidth=3, 
                         ax=ax_histy, alpha=0.95)
+
+    print(f'unperturbed cloud dist <= {cld_dist_threshold} anomaly average: {np.nanmean((xco2_unpert-true_mean)[cld_mask]):.3f} +/- {np.nanstd((xco2_unpert-true_mean)[cld_mask]):.3f}')
 
     red_kde_curve = red_kde.lines[1]
     red_kde_x = red_kde_curve.get_xdata()
@@ -827,9 +834,9 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
                 f'{fullwidthathalfmax:.2f}\n',
                 color='r', ha='center', va='center', fontsize=legend_size)
 
-    ax_histy.text(0.185, 8.75,
+    ax_histy.text(0.195, 8.75,
                 #halfmax*2,
-                f'cloud distance\n<={cld_dist_threshold} km',
+                'cloud distance\n$\mathrm{\leq}$ %s km' %cld_dist_threshold,
                 color='k', ha='center', va='center', fontsize=legend_size-4)
 
 
@@ -844,7 +851,7 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     ax_histy.fill_betweenx([-10, 10], hist_xmin, hist_xmax, color='skyblue', alpha=0.25)
 
     ax.legend(loc='center left', bbox_to_anchor=(0.39, 0.11), fontsize=legend_size)
-    ax.set_xlabel('Weighted average cloud distance (km)', fontsize=label_size)
+    ax.set_xlabel('$\mathrm{D_e}$ (km)', fontsize=label_size)
     ax.set_ylabel('$\mathrm{X_{CO2}}$ anomaly (ppm)', fontsize=label_size)
     
     for ax, label in zip([ax, ax_histy], ['(a)', '(b)']):

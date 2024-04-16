@@ -108,25 +108,25 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     lat_dom = extent_analysis[2:]
 
 
-    retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_idealized_1.h5', 'r')
-    mask = retrieval_aod_parameterization['xco2_retrieved'][...]!=-2
-    key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
-                'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
-    df = pd.DataFrame({key:retrieval_aod_parameterization[key][...] for key in key_list})
-    df['o2a_inter'] = retrieval_aod_parameterization['pert_o2'][...][:, 0]
-    df['o2a_slope'] = retrieval_aod_parameterization['pert_o2'][...][:, 1]
-    df['wco2_inter'] = retrieval_aod_parameterization['pert_wco2'][...][:, 0]
-    df['wco2_slope'] = retrieval_aod_parameterization['pert_wco2'][...][:, 1]
-    df['sco2_inter'] = retrieval_aod_parameterization['pert_sco2'][...][:, 0]
-    df['sco2_slope'] = retrieval_aod_parameterization['pert_sco2'][...][:, 1]
-    df.replace(-2, np.nan, inplace=True)
-    df.loc[df['xco2_L2_file']<1, 'xco2_L2_file'] = df.loc[df['xco2_L2_file']<1, 'xco2_L2_file']*1e6
-    #df.drop_duplicates('snd', inplace=True)
-    df['diff_xco2'] = df['xco2_retrieved']-df['xco2_L2_file']
-    cld_dist = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])
-    df['weighted_cld_dist'] = cld_dist
+    # retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_ideal2_20240402.h5', 'r')
+    # mask = retrieval_aod_parameterization['xco2_retrieved'][...]!=-2
+    # key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
+    #             'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
+    # df = pd.DataFrame({key:retrieval_aod_parameterization[key][...] for key in key_list})
+    # df['o2a_inter'] = retrieval_aod_parameterization['pert_o2'][...][:, 0]
+    # df['o2a_slope'] = retrieval_aod_parameterization['pert_o2'][...][:, 1]
+    # df['wco2_inter'] = retrieval_aod_parameterization['pert_wco2'][...][:, 0]
+    # df['wco2_slope'] = retrieval_aod_parameterization['pert_wco2'][...][:, 1]
+    # df['sco2_inter'] = retrieval_aod_parameterization['pert_sco2'][...][:, 0]
+    # df['sco2_slope'] = retrieval_aod_parameterization['pert_sco2'][...][:, 1]
+    # df.replace(-2, np.nan, inplace=True)
+    # df.loc[df['xco2_L2_file']<1, 'xco2_L2_file'] = df.loc[df['xco2_L2_file']<1, 'xco2_L2_file']*1e6
+    # #df.drop_duplicates('snd', inplace=True)
+    # df['diff_xco2'] = df['xco2_retrieved']-df['xco2_L2_file']
+    # cld_dist = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])
+    # df['weighted_cld_dist'] = cld_dist
 
-    retrieval_aod_parameterization2 = h5py.File('full-perturbed20181018_central_asia_2_test4_para_idealized_1.h5', 'r')
+    retrieval_aod_parameterization2 = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_ideal2_20240402.h5', 'r')
     mask = retrieval_aod_parameterization2['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
@@ -138,10 +138,10 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     df2['sco2_inter'] = retrieval_aod_parameterization2['pert_sco2'][...][:, 0]
     df2['sco2_slope'] = retrieval_aod_parameterization2['pert_sco2'][...][:, 1]
     df2.replace(-2, np.nan, inplace=True)
-    df2.loc[df['xco2_L2_file']<1, 'xco2_L2_file'] = df.loc[df['xco2_L2_file']<1, 'xco2_L2_file']*1e6
+    df2.loc[df2['xco2_L2_file']<1, 'xco2_L2_file'] = df2.loc[df2['xco2_L2_file']<1, 'xco2_L2_file']*1e6
     #df.drop_duplicates('snd', inplace=True)
     df2['diff_xco2'] = df2['xco2_L2_file']-df2['xco2_retrieved']
-    cld_dist2 = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])[::-1]
+    cld_dist = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])[::-1]
     df2['weighted_cld_dist'] = cld_dist
     df2[df2['diff_xco2']>0.5] = np.nan
     print(df2[df2['diff_xco2']>0])
@@ -199,7 +199,7 @@ def main(cfg_csv='20181018_central_asia_2_test4.csv'):
                         bins=np.linspace(-0.5, 95.5, 97), density=True, 
                         color='skyblue', alpha=0.5,
                         edgecolor='k', linewidth=1.0)
-        ax.set_xlabel('Weighted average cloud distance (km)', fontsize=16)
+        ax.set_xlabel('$\mathrm{D_e}$ (km)', fontsize=16)
         ax.set_ylabel('Probability density', fontsize=16)
         ax_twin = ax.twinx()
         ax_twin.errorbar(sorted(set(cld_dist)), df_gp.mean()['diff_xco2'], 

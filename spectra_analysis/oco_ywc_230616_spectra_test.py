@@ -53,6 +53,7 @@ class satellite_download:
                  extent=None,
                  fname=None,
                  fdir_out='data',
+                 fdir_pre_data='data',
                  overwrite=False,
                  quiet=False,
                  verbose=False):
@@ -112,12 +113,13 @@ class satellite_download:
         # self.fnames['mod_02'] = []
 
 
-        modis_fdir = '../simulation/data/modis'
-        # if not os.path.exists(modis_parent_fdir):
-        #     os.makedirs(modis_parent_fdir)
-        # modis_fdir = f"{modis_parent_fdir}/{self.date.strftime('%Y%m%d')}"
-        # if not os.path.exists(modis_fdir):
-        #     os.makedirs(modis_fdir)
+        # modis_fdir = '../simulation/data/modis'
+        modis_parent_fdir = '/'.join([self.fdir_out, 'modis'])
+        if not os.path.exists(modis_parent_fdir):
+            os.makedirs(modis_parent_fdir)
+        modis_fdir = f"{modis_parent_fdir}/{self.date.strftime('%Y%m%d')}"
+        if not os.path.exists(modis_fdir):
+            os.makedirs(modis_fdir)
 
         filename_tags_03 = get_filename_tag(self.date, lon, lat, satID='aqua')
         for filename_tag in filename_tags_03:
@@ -135,7 +137,8 @@ class satellite_download:
         self.fnames['oco_met'] = []
         self.fnames['oco_l1b'] = []
         self.fnames['oco_lite'] = []
-        oco_fdir = '../simulation/data/oco'
+        # oco_fdir = '../simulation/data/oco'
+        oco_fdir = '/'.join([self.fdir_out, 'oco'])
         for filename_tag in filename_tags_03:
             dtime = datetime.datetime.strptime(filename_tag, 'A%Y%j.%H%M') + datetime.timedelta()#minutes=7.0)
             fnames_std = download_oco2_https(dtime, 'OCO2_L2_Standard.10r', fdir_out=oco_fdir, run=run)
@@ -224,8 +227,8 @@ def add_solar(s_wl, s_fx, lam, ilsx, ilsy, fp=0):
 
 def cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
 
-    if os.path.isfile(f"{fdir_data}/modis_cth_oco_cld_distance_{cfg_info['cfg_name']}.npy"):
-        cloud_dist = np.load(f"{fdir_data}/modis_cth_oco_cld_distance_{cfg_info['cfg_name']}.npy")
+    if os.path.isfile(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_nearest_{cfg_info['cfg_name']}.npy"):
+        cloud_dist = np.load(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_nearest_{cfg_info['cfg_name']}.npy")
     else:
 
         lon_cld, lat_cld = cth_lon, cth_lat
@@ -240,13 +243,29 @@ def cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
         cld_position_lonlat = np.array(cld_position_lonlat)
 
         cloud_dist = np.zeros_like(lon_oco)
-        for j in range(cloud_dist.shape[1]):
-            for i in range(cloud_dist.shape[0]):
-    #             if cld_list[i, j] == 1:
-    #                 cloud_dist[i, j] = 0
+    #     for j in range(cloud_dist.shape[1]):
+    #         for i in range(cloud_dist.shape[0]):
+    # #             if cld_list[i, j] == 1:
+    # #                 cloud_dist[i, j] = 0
+    # #             else:
+    #             tmp_lon = lon_oco[i, j]
+    #             tmp_lat = lat_oco[i, j]
+    #             if np.logical_and(np.logical_and(tmp_lon >= np.min(cth_lon), tmp_lon <= np.max(cth_lon)), 
+    #                               np.logical_and(tmp_lat >= np.min(cth_lat), tmp_lat <= np.max(cth_lat))):
+    #                 min_ind = np.argmin(np.sum(np.square(cld_position_lonlat-np.array([tmp_lon, tmp_lat])), axis=1))
+    #                 #print(min_ind)
+    #                 #print(cld_position[min_ind])
+    #                 cld_x, cld_y = cld_position_lonlat[min_ind][0], cld_position_lonlat[min_ind][1]
+
+    #                 dist = geopy.distance.distance((tmp_lat, tmp_lon), (cld_y, cld_x)).km
+    #                 #print(dist)
+    #                 cloud_dist[i, j] = dist
     #             else:
-                tmp_lon = lon_oco[i, j]
-                tmp_lat = lat_oco[i, j]
+    #                 cloud_dist[i, j] = np.nan
+        for i in range(cloud_dist.shape[0]):
+
+                tmp_lon = lon_oco[i]
+                tmp_lat = lat_oco[i]
                 if np.logical_and(np.logical_and(tmp_lon >= np.min(cth_lon), tmp_lon <= np.max(cth_lon)), 
                                   np.logical_and(tmp_lat >= np.min(cth_lat), tmp_lat <= np.max(cth_lat))):
                     min_ind = np.argmin(np.sum(np.square(cld_position_lonlat-np.array([tmp_lon, tmp_lat])), axis=1))
@@ -256,18 +275,18 @@ def cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
 
                     dist = geopy.distance.distance((tmp_lat, tmp_lon), (cld_y, cld_x)).km
                     #print(dist)
-                    cloud_dist[i, j] = dist
+                    cloud_dist[i] = dist
                 else:
-                    cloud_dist[i, j] = np.nan
+                    cloud_dist[i] = np.nan
 
-        np.save(f"{fdir_data}/modis_cth_oco_cld_distance_{cfg_info['cfg_name']}.npy", cloud_dist)
+        np.save(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_nearest_{cfg_info['cfg_name']}.npy", cloud_dist)
     
     return cloud_dist
 
 def weighted_cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fdir_data):
 
-    if os.path.isfile(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy"):
-        cloud_dist = np.load(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy")
+    if os.path.isfile(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_weighted_{cfg_info['cfg_name']}.npy"):
+        cloud_dist = np.load(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_weighted_{cfg_info['cfg_name']}.npy")
     else:
         lon_cld, lat_cld = cth_lon, cth_lat
         cld_list = cth>0
@@ -283,10 +302,33 @@ def weighted_cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fd
         cloud_dist = np.zeros_like(lon_oco)
 
 
-        for j in range(cloud_dist.shape[1]):
-            for i in range(cloud_dist.shape[0]):
-                tmp_lon = lon_oco[i, j]
-                tmp_lat = lat_oco[i, j]
+        # for j in range(cloud_dist.shape[1]):
+        #     for i in range(cloud_dist.shape[0]):
+        #         tmp_lon = lon_oco[i, j]
+        #         tmp_lat = lat_oco[i, j]
+
+        #         if np.logical_and(np.logical_and(tmp_lon >= np.min(cth_lon), tmp_lon <= np.max(cth_lon)), 
+        #                           np.logical_and(tmp_lat >= np.min(cth_lat), tmp_lat <= np.max(cth_lat))):
+                    
+        #             point = np.array([tmp_lat, tmp_lon])
+
+        #             # distances = np.array([haversine(point, p, unit=Unit.KILOMETERS) for p in cld_latlon])
+        #             distances = haversine_vector(point, cld_position_latlon, unit=Unit.KILOMETERS, comb=True)
+        #             # Calculate the inverse distance weights
+                    
+        #             weights = 1 / distances**2 #np.exp(-distances)
+        #             weights[distances>100] = 0
+        #             #weights = 1 / distances                
+                    
+        #             # Calculate the weighted average distance
+        #             weighted_avg_distance = np.sum(distances * weights) / np.sum(weights)
+                    
+        #             cloud_dist[i, j] = weighted_avg_distance
+        #         else:
+        #             cloud_dist[i, j] = np.nan
+        for i in range(cloud_dist.shape[0]):
+                tmp_lon = lon_oco[i]
+                tmp_lat = lat_oco[i]
 
                 if np.logical_and(np.logical_and(tmp_lon >= np.min(cth_lon), tmp_lon <= np.max(cth_lon)), 
                                   np.logical_and(tmp_lat >= np.min(cth_lat), tmp_lat <= np.max(cth_lat))):
@@ -298,16 +340,17 @@ def weighted_cld_dist_calc(lon_oco, lat_oco, cth, cth_lon, cth_lat, cfg_info, fd
                     # Calculate the inverse distance weights
                     
                     weights = 1 / distances**2 #np.exp(-distances)
+                    weights[distances>50] = 0
                     #weights = 1 / distances                
                     
                     # Calculate the weighted average distance
                     weighted_avg_distance = np.sum(distances * weights) / np.sum(weights)
                     
-                    cloud_dist[i, j] = weighted_avg_distance
+                    cloud_dist[i] = weighted_avg_distance
                 else:
-                    cloud_dist[i, j] = np.nan
+                    cloud_dist[i] = np.nan
 
-        np.save(f"{fdir_data}/modis_cth_oco_weighted_cld_distance_{cfg_info['cfg_name']}.npy", cloud_dist) 
+        np.save(f"{fdir_data}/dist_data_modis_cth_oco_cld_distance_weighted_{cfg_info['cfg_name']}.npy", cloud_dist) 
 
     return cloud_dist
 
@@ -350,7 +393,10 @@ def preprocess(cfg_info):
     # download satellite data based on given date and region
     # ===============================================================
     fname_sat = '%s/sat.pk' % fdir_data
-    sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent,
+    sat0 = satellite_download(date=date, 
+                              fdir_out=cfg_info['path_sat_data'], 
+                              fdir_pre_data=fdir_data,
+                              extent=extent,
                               fname=fname_sat, overwrite=False)
     # ===============================================================
     if not ('l2' in cfg_info.keys()):
@@ -392,14 +438,14 @@ def plt_map_cld_dis(sat, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data
     c = frame.scatter(lon[mask], lat[mask], s=1,
                     marker='o', 
                     #c=cld_mask0_bin_cloud_int,
-                    c=cth0[:][mask],
-                    alpha=0.4)
+                    c=cth0[mask],
+                    alpha=0.4, vmin=0, vmax=10)
 
-    cbar = f.colorbar(c)
+    cbar = f.colorbar(c, extend='max')
     cbar.set_label('Cloud top height', fontsize=18)
 
     c2 = frame.scatter(snd_lon, snd_lat, s=5, c=cloud_dist, cmap='OrRd', 
-                       vmin=10, vmax=500)
+                       vmin=0, vmax=50)
     cbar2 = f.colorbar(c2, extend='max')
     cbar2.set_label('Cloud distance', fontsize=18, )
     #frame.scatter(lon_cld[cld_list>0], lat_cld[cld_list>0], s=5, color='r')
@@ -412,9 +458,61 @@ def plt_map_cld_dis(sat, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data
     frame.set_xlabel('Longitude')
     frame.set_ylabel('Latitude')
     f.tight_layout()
-    f.savefig(f'{fdir_data}/modis_cth_oco_cld_distance.png')
+    f.savefig(f'{fdir_data}/modis_cth_oco_cld_distance_nearest.png')
     # plt.show()
- 
+
+def plt_map_weight_cld_dis(sat, cth0, lon, lat, weighted_cloud_dist, snd_lon, snd_lat, fdir_data):
+    png       = [sat.fnames['mod_rgb'][0], sat.extent]
+    img = png[0]
+    wesn= png[1]
+
+
+    f,frame=plt.subplots(figsize=(12, 10))
+    img = png[0]
+    wesn= png[1]
+    img = mpl.image.imread(img)
+    frame.imshow(img,extent=wesn)
+    lon_dom = [wesn[0], wesn[1]]
+    lat_dom = [wesn[2], wesn[3]]
+    frame.set_xlim(np.min(lon_dom), np.max(lon_dom))
+    frame.set_ylim(np.min(lat_dom), np.max(lat_dom))
+    mask = cth0[:]>=0
+    c = frame.scatter(lon[mask], lat[mask], s=1,
+                    marker='o', 
+                    #c=cld_mask0_bin_cloud_int,
+                    c=cth0[mask],
+                    alpha=0.4, vmin=0, vmax=10)
+
+    cbar = f.colorbar(c, extend='max')
+    cbar.set_label('Cloud top height', fontsize=18)
+
+    c2 = frame.scatter(snd_lon, snd_lat, s=5, c=weighted_cloud_dist, cmap='OrRd', 
+                       vmin=0, vmax=50)
+    cbar2 = f.colorbar(c2, extend='max')
+    cbar2.set_label('Weighted Cloud distance', fontsize=18, )
+    #frame.scatter(lon_cld[cld_list>0], lat_cld[cld_list>0], s=5, color='r')
+    #for i in range(len(boundary_list)):
+    #    boundary = boundary_list[i]
+    #    plot_rec(np.mean(boundary[0][:2]), np.mean(boundary[0][2:]), 
+    #             0.5, lat_interval, 
+    #             frame, 'r')
+    #plt.legend(fontsize=16, facecolor='white')
+    frame.set_xlabel('Longitude')
+    frame.set_ylabel('Latitude')
+    f.tight_layout()
+    f.savefig(f'{fdir_data}/modis_cth_oco_cld_distance_weighted.png')
+    # plt.show()
+
+def hist_cld_dist(sat, cloud_dist, weighted_cloud_dist, fdir_data):
+    f, ax = plt.subplots(1, 1, figsize=(8, 6))
+    ax.hist(cloud_dist[~np.isnan(cloud_dist)], bins=100, alpha=0.5, label='Nearest')
+    ax.hist(weighted_cloud_dist[~np.isnan(weighted_cloud_dist)], bins=100, alpha=0.5, label='Weighted')
+    ax.set_xlabel('Cloud distance (km)', fontsize=18)
+    ax.set_ylabel('Frequency', fontsize=18)
+    ax.legend(fontsize=18)
+    f.tight_layout()
+    f.savefig(f'{fdir_data}/modis_cth_oco_cld_distance_hist.png')
+
 def run_case_modis_650(cfg_info):
     # define date and region to study
     # ===============================================================
@@ -429,15 +527,21 @@ def run_case_modis_650(cfg_info):
     # create data/{name_tag} directory if it does not exist
     # ======================================================================
     fdir_data = os.path.abspath(f'data/{name_tag}')
+    print(f'fdir_data: {fdir_data}')
+    # sys.exit()
     fname_sat = f'{fdir_data}/sat.pk'
-    sat0 = satellite_download(date=date, fdir_out=fdir_data, extent=extent,
+    sat0 = satellite_download(date=date, 
+                              fdir_out=cfg_info['path_sat_data'], 
+                              
+                              fdir_pre_data=fdir_data,
+                              extent=extent,
                               fname=fname_sat, overwrite=False)
     
-    oco_l1b_file = sat0.fnames['oco_l1b'][0].replace('../simulation/data/', '../sat_data/')
+    oco_l1b_file = sat0.fnames['oco_l1b'][0]#.replace('../simulation/data/', '../sat_data/')
     l1b = h5py.File(oco_l1b_file, 'r')
-    oco_l2_file = sat0.fnames['oco_std'][0].replace('../simulation/data/', '../sat_data/')
+    oco_l2_file = sat0.fnames['oco_std'][0]#.replace('../simulation/data/', '../sat_data/')
     l2 = h5py.File(oco_l2_file, 'r')
-    oco_met_file = sat0.fnames['oco_met'][0].replace('../simulation/data/', '../sat_data/')
+    oco_met_file = sat0.fnames['oco_met'][0]#.replace('../simulation/data/', '../sat_data/')
     met = h5py.File(oco_met_file, 'r')
 
     dis = l1b["InstrumentHeader/dispersion_coef_samp"][...]
@@ -498,20 +602,35 @@ def run_case_modis_650(cfg_info):
     f     = SD(sat0.fnames['mod_l2'][0].replace('../simulation/data/', '../sat_data/'), SDC.READ)
     lat0       = f.select('Latitude')
     lon0       = f.select('Longitude')
-    cth0 = f.select('cloud_top_height_1km')
+    cth0 = f.select('cloud_top_height_1km')[:]/1000
     lon, lat  = upscale_modis_lonlat(lon0[:], lat0[:], scale=5, extra_grid=True)
 
     snd_id = l1b['SoundingGeometry']['sounding_id'][...]
     snd_lon = l1b['SoundingGeometry']['sounding_longitude'][...]
     snd_lat = l1b['SoundingGeometry']['sounding_latitude'][...]
+    l2_id = l2['RetrievalHeader']['sounding_id'][...]
+    l2_co2 = l2['RetrievalResults']['xco2'][...]
+    valid_id = l2_id[l2_co2>0]
+    xco2_mask = np.isin(snd_id, valid_id)
+    loc_mask = np.logical_and(np.logical_and(snd_lon>=extent[0], snd_lon<=extent[1]),
+                              np.logical_and(snd_lat>=extent[2], snd_lat<=extent[3]))
+    snd_mask = np.logical_and(xco2_mask, loc_mask)
+    snd_lon = snd_lon[snd_mask]
+    snd_lat = snd_lat[snd_mask]
     sfc_p_met = met["Meteorology"]["surface_pressure_met"][...]
     sfc_p_met[sfc_p_met<0] = np.nan
     
     sfc_T_met = met["Meteorology"]["skin_temperature_met"][...]
 
-    cloud_dist = weighted_cld_dist_calc(snd_lon, snd_lat, cth0[:], lon, lat, cfg_info, fdir_data)
-    plt_map_cld_dis(sat0, cth0, lon, lat, cloud_dist, snd_lon, snd_lat, fdir_data)
-    # sys.exit()
+    nearest_cloud_dist = cld_dist_calc(snd_lon, snd_lat, cth0, lon, lat, cfg_info, fdir_data)
+    weighted_cloud_dist = weighted_cld_dist_calc(snd_lon, snd_lat, cth0, lon, lat, cfg_info, fdir_data)
+    large_weighted_cloud_dist = np.logical_and(np.isnan(weighted_cloud_dist), ~np.isnan(nearest_cloud_dist))
+    weighted_cloud_dist[large_weighted_cloud_dist] = nearest_cloud_dist[large_weighted_cloud_dist]
+    plt_map_cld_dis(sat0, cth0, lon, lat, nearest_cloud_dist, snd_lon, snd_lat, fdir_data)
+    plt_map_weight_cld_dis(sat0, cth0, lon, lat, weighted_cloud_dist, snd_lon, snd_lat, fdir_data)
+    hist_cld_dist(sat0, nearest_cloud_dist, weighted_cloud_dist, fdir_data)
+    sys.exit()
+    cloud_dist = weighted_cloud_dist
     o2a_rad_convert = convert_photon_unit(o2a_rad, lam[:, :, 0]*1e3)
     o2a_ref_convert = o2a_rad_convert*np.pi/(oxs*o2a_mu_r)
 
@@ -1012,10 +1131,11 @@ if __name__ == '__main__':
     #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
     #cfg = 'cfg/20161023_north_france_test.csv'
     # cfg = 'cfg/20170605_amazon.csv'
-    cfg = 'cfg/20190209_dryden.csv'
+    # cfg = 'cfg/20190209_dryden.csv'
     # cfg = 'cfg/20181018_central_asia.csv'
     # cfg = 'cfg/20190621_australia.csv'
-    # cfg = 'cfg/20151220_afric_east.csv'
+    cfg = 'cfg/20151220_afric_east.csv'
+    cfg = 'cfg/20151201_ocean_2.csv'
     print(cfg)
     run_simulation(cfg) #done
     
