@@ -1,19 +1,15 @@
 import sys
 sys.path.append('/Users/yuch8913/miniforge3/envs/er3t_env/lib/python3.8/site-packages')
 import pandas as pd
+import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import matplotlib
-import numpy as np
-from oco_post_class_ywc import OCOSIM
 from matplotlib import cm, colors
+from matplotlib import font_manager
 import seaborn as sns
 from tool_code import *
 import os, pickle 
-from matplotlib import font_manager
-import matplotlib.image as mpl_img
-from matplotlib import cm, colors
 import uncertainties.unumpy as unp
 import uncertainties as unc
 import cartopy.crs as ccrs
@@ -30,7 +26,6 @@ font_manager.fontManager.addfont(font_path)
 prop = font_manager.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = prop.get_name()
-
 
 def main(cfg_name='20181018_central_asia_2_test4.csv'):
     cfg_dir = '../simulation/cfg'
@@ -64,7 +59,6 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     lat_dom = extent_analysis[2:]
 
     png       = [img_file, wesn]
-
     title_size = 16
     label_size = 14
     legend_size = 14
@@ -123,8 +117,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     o2a_rad = oco_l1b['SoundingMeasurements/radiance_o2'][...][6195, :]
     o2a_rad_convert = convert_photon_unit(o2a_rad[0], lam[1, :]*1e3)
 
-    o2a_spectra_modified_fig(df, 90, o2a_rad_convert, lam,
-                             img_dir=img_dir)
+    o2a_spectra_modified_fig(df, 90, o2a_rad_convert, lam, img_dir=img_dir)
     
     oco_l2 = h5py.File('../sat_data/oco/oco2_L2StdND_22850a_181018_B10004r_200520201845.h5', 'r')
     oco_l2_snd = oco_l2['RetrievalHeader/sounding_id'][...]
@@ -251,8 +244,6 @@ def new_get_image(self, tile):
     img = img.convert(self.desired_tile_form)
     return img, self.tileextent(tile), 'lower'
 
-
-
 def aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
                 img_dir='.', label_size=14, tick_size=12):
     f, ax=plt.subplots(figsize=(8, 7))
@@ -283,7 +274,6 @@ def XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df,
     ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
     ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
  
-        
     mask = df['xco2_retrieved'][...]!=-2
     c = ax.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
@@ -426,7 +416,6 @@ def p_sfc_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
 def delta_XCO2_3_bands_parameterization(df,
                                        img_dir='.', label_size=14, tick_size=12):
     fig = plt.figure(figsize=(12, 14))
-
     ax11 = fig.add_axes([0.05, 0.7, 0.4, 0.2])
     ax12 = fig.add_axes([0.55, 0.7, 0.4, 0.2])
     ax21 = fig.add_axes([0.05, 0.425, 0.4, 0.2])
