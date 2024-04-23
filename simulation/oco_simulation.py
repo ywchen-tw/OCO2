@@ -159,7 +159,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         print(f'aod 550 nm mean:', AOD_550_land_mean)
         print(f'Angstrom_Exponent_land_mean: {Angstrom_Exponent_land_mean}')
         print(f'aod {wavelength:.2f} nm mean:', aod)
-        sys.exit()
         if len(cth_mode.mode) == 0:
             z_top  = 2       # altitude of layer top in km
         else:
@@ -167,11 +166,8 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
             z_top  = cth_mode.mode[0]       # altitude of layer top in km
         asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
         z_bot  = np.min(levels)         # altitude of layer bottom in km
-        
         aer_ext = aod / (z_top-z_bot) / 1000
-
         atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
-
     else:
         aod = 0
 
@@ -392,7 +388,7 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
     
-    # path for CURC
+    # path for CURC cluster
     if 'colorado.edu' in platform.uname()[1]:
         fdir_tmp = fdir_tmp.replace("/projects/yuch8913", "/scratch/alpine/yuch8913")
         path_dir(fdir_tmp)

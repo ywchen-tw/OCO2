@@ -137,9 +137,13 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
         modl1b    =  sat_tmp(data)
         if cld_manual:
-            modl1b.data['cth_2d']['data'][modl1b.data['cth_2d']['data']>0] = cth
-            modl1b.data['cot_2d']['data'][modl1b.data['cot_2d']['data']>0] = cot
-            modl1b.data['cer_2d']['data'][modl1b.data['cer_2d']['data']>0] = cer
+            cld_mask = data=f_pre_data[f'mod/cld/cth_ipa'][...]>0
+            modl1b.data['cth_2d']['data'][cld_mask] = cth
+            modl1b.data['cot_2d']['data'][cld_mask] = cot
+            modl1b.data['cer_2d']['data'][cld_mask] = cer
+            modl1b.data['cth_2d']['data'][~cld_mask] = 0
+            modl1b.data['cot_2d']['data'][~cld_mask] = 0
+            modl1b.data['cer_2d']['data'][~cld_mask] = 0
 
 
         fname_cld = '%s/cld.pk' % fdir
@@ -160,18 +164,21 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
     if cfg_info['_aerosol'] == 'TRUE' and AOD_550_land_mean>0:
         # add homogeneous 1d mcarats "atmosphere", aerosol layer
-        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1))
+        aod = AOD_550_land_mean*((wavelength/550)**(Angstrom_Exponent_land_mean*-1)) 
         ssa = SSA_land_mean # aerosol single scattering albedo
         cth_mode = stats.mode(cth0[np.logical_and(cth0>0, cth0<4)])
-        # print(f'aod {wavelength:.2f} nm mean:', aod)
-        # print('cth mode:', cth_mode.mode[0])
+        print(f'aod 550 nm mean:', AOD_550_land_mean)
+        print(f'Angstrom_Exponent_land_mean: {Angstrom_Exponent_land_mean}')
+        print(f'aod {wavelength:.2f} nm mean:', aod)
+        if len(cth_mode.mode) == 0:
+            z_top  = 2       # altitude of layer top in km
+        else:
+            print('cth mode:', cth_mode.mode[0])
+            z_top  = cth_mode.mode[0]       # altitude of layer top in km
         asy    = float(cfg_info['asy']) # aerosol asymmetry parameter
         z_bot  = np.min(levels)         # altitude of layer bottom in km
-        z_top  = cth_mode.mode[0]       # altitude of layer top in km
         aer_ext = aod / (z_top-z_bot) / 1000
-
         atm1d0.add_mca_1d_atm(ext1d=aer_ext, omg1d=ssa, apf1d=asy, z_bottom=z_bot, z_top=z_top)
-
     else:
         aod = 0
 
@@ -190,7 +197,7 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
         sza = sza_abs
         vza = sza_abs
     
-    # print('sza:', np.nanmean(sza), 'avg sfc alb:', np.nanmean(simulated_sfc_alb), )
+    print('sza:', np.nanmean(sza))
     # cpu number used
     if platform.system() in ['Windows', 'Darwin']:
         Ncpu=os.cpu_count()-1
@@ -239,8 +246,6 @@ def cal_mca_rad_oco2(date, tag, sat, zpt_file, wavelength, cfg_info,
 
 
     if solver.lower() == 'ipa':
-        # sfc0      = sfc_sat(sat_obj=mod43, fname=fname_sfc, extent=sat.extent, verbose=True, overwrite=False)
-        # sfc_2d    = mca_sfc_2d(atm_obj=atm0, sfc_obj=sfc0, fname='%s/mca_sfc_2d.bin' % fdir, overwrite=overwrite)
         sfc_2d = alb0
         cld0    = cld_sat(fname=fname_cld, overwrite=False)
         cld0.lay['extinction']['data'][...] = 0.0
@@ -418,6 +423,11 @@ def run_case_oco(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None,
     else:
         fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
     
+    # path for CURC cluster
+    if 'colorado.edu' in platform.uname()[1]:
+        fdir_tmp = fdir_tmp.replace("/projects/yuch8913", "/scratch/alpine/yuch8913")
+        path_dir(fdir_tmp)
+
     # read out wavelength information from absorption file
     # ===============================================================
     fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(int(cfg_info["nx"])+1):d}.h5'

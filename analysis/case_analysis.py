@@ -136,7 +136,6 @@ def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, sza, points=11, mode
     flt = np.where(sls_np[z,fp,:] > 1e-6)
     use = len(flt[0])
     mu = np.mean(sza)/180*np.pi
-
     if use == nwl:
         w = 1./sls_np[z,fp,:]    
         if mode == 'unperturb':
@@ -152,9 +151,8 @@ def get_slope_np(toa, sl_np, sls_np, c3d_np, clr_np, fp, z, sza, points=11, mode
     else:
         slope = np.nan
         slopestd = np.nan
-        intercept=np.nan
-        interceptstd=np.nan
-    
+        intercept = np.nan
+        interceptstd = np.nan
     return(slope, slopestd, intercept, interceptstd)
 
 def slopes_propagation(OCO_class, mode='unperturb'): 
@@ -196,9 +194,7 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     # 20190621_australia_2.csv
 
     cfg_dir = '../simulation/cfg'
-
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_csv}')
-    print(cfg_info.keys())
     if 'o2' in cfg_info.keys():
         id_num = output_h5_info(f'{cfg_dir}/{cfg_csv}', 'o2')[22:31]
     else:
