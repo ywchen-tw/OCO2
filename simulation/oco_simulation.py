@@ -459,16 +459,16 @@ if __name__ == '__main__':
     # cfg = 'cfg/20170721_australia_1.csv'
     # cfg = 'cfg/20150622_amazon.csv'
     print(cfg)
-    run_simulation(cfg)
+    # run_simulation(cfg)
 
     # cfg = 'cfg/20181018_central_asia_2_test4.csv'
     # print(cfg)
     # run_simulation(cfg)
     
-    # run_simulation(cfg, sfc_alb=0.05, sza=45, aod550=0) #done
-    # run_simulation(cfg, sfc_alb=0.1, sza=45, aod550=0) #done
-    # run_simulation(cfg, sfc_alb=0.3, sza=45, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
-    # run_simulation(cfg, sfc_alb=0.5, sza=45, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.05, sza=45, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.1, sza=45, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.3, sza=45, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
+    run_simulation(cfg, sfc_alb=0.5, sza=45, aod550=0) #done
 
     # run_simulation(cfg, sfc_alb=0.3, sza=15, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done
     # run_simulation(cfg, sfc_alb=0.3, sza=30, aod550=0) #donerun_simulation(cfg, sfc_alb=0.5, sza=45, cld_manual=True, cot=5, cer=25, cth=5, aod550=0) #done

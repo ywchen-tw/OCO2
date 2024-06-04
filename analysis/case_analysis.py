@@ -94,6 +94,7 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
         tmp2[tmp2<0] = np.nan
         tmp2[~np.isnan(tmp)] = np.nan
         tmp2[cld_position] = np.nan
+        return tmp2
 
     elif option == 'all':
         tmp3 = np.zeros_like(rad_mca)
@@ -101,6 +102,7 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
         for i in range(lams):
             tmp3[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
         tmp3[tmp3<0] = np.nan
+        return tmp3
 
     elif option == 'all_exclude_cloud':
         tmp4 = np.zeros_like(rad_mca)
@@ -109,6 +111,7 @@ def coarsening_subfunction(rad_mca, cld_position, size, option='no_cloud'):
             tmp4[:,:,i] = uniform_filter(rad_mca_mask_cld[:,:,i], size=size, mode='constant', cval=-999999)
         tmp4[tmp4<0] = np.nan
         tmp4[cld_position] = np.nan
+        return tmp4
 
     else:
         raise OSError('Invalid option!')
@@ -187,7 +190,7 @@ def cld_rad_slope_calc(band_tag, id_num, filename, pkl_filename, cld_location):
     return OCO_class
 
 
-def main(cfg_csv='20181018_central_asia_2_test6.csv'):
+def main(cfg_csv='20181018_central_asia_2_test4.csv'):
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -223,7 +226,7 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
 
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_lbl.h5' %case_name_tag
     # filename = '../simulation/data_all_20181018_{}_{}_lbl_with_aod_zpt_test.h5' 
-    filename = '../simulation/data_all_20181018_{}_{}_without_aod.h5' 
+    filename = '../simulation/data_all_20181018_{}_{}_with_aod.h5' 
 
     alb = 0.5
     sza = 45
@@ -241,7 +244,7 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     # filename = '../simulation/data/%s/data_all_20181018_{}_{}_sfc_alb_%.3f_sza_%.1f_aod550_%.3f_cot_%.1f_cer_%d_cth_%d.h5' \
     #     %(case_name_tag, alb, sza, aod, cot, cer, cth)
     print('filename:', filename)
-    pkl_filename = '20181018_central_asia_{}_without_aod.pkl'
+    pkl_filename = '20181018_central_asia_{}_with_aod.pkl'
     if not os.path.isfile(pkl_filename.format('o2a')):
         _, _, cld_location = cld_position_func(cfg_name)
         o1 = cld_rad_slope_calc('o2a', id_num, filename, pkl_filename, cld_location)
@@ -273,8 +276,6 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     # weighted_cld_vert_data = pd.read_pickle(f'{cfg_name}_weighted_cld_distance_vertical.pkl')
     # weighted_cld_dist = weighted_cld_vert_data['cld_dis']
     
-
-    #cld_dist = weighted_cld_dist
     xco2 = o1.co2
     psur = o1.psur
     snd = o1.snd
@@ -283,18 +284,14 @@ def main(cfg_csv='20181018_central_asia_2_test6.csv'):
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask_fp = np.logical_and(np.logical_and(o1.lon[xco2_valid] >= extent[0], o1.lon[xco2_valid] <= extent[1]),
                              np.logical_and(o1.lat[xco2_valid] >= extent[2], o1.lat[xco2_valid] <= extent[3]))
-
-
     f_cld_distance = interpolate.RegularGridInterpolator((np.array(weighted_cld_data['lon']).reshape(o1.lon2d.shape)[:, 0], 
                                                           np.array(weighted_cld_data['lat']).reshape(o1.lon2d.shape)[0, :]),
                                                           np.array(weighted_cld_data['cld_dis']).reshape(o1.lon2d.shape), method='nearest')
     
     points_footprint = np.column_stack((o1.lon[xco2_valid][mask_fp].flatten(), o1.lat[xco2_valid][mask_fp].flatten()))
     oco_footprint_cld_distance = f_cld_distance(points_footprint)
-    
     # oco_footprint_cld_distance = np.array([i for i in np.arange(0, 56, 1)]*3+[0, 0])[::-1]
-    print(len(points_footprint))
-    print(len(oco_footprint_cld_distance))
+    # print('check assign footprint cloud distance length is correct:', len(points_footprint)==len(oco_footprint_cld_distance))
     #""" 
     extent = [float(loc) for loc in cfg_info['subdomain']]
     mask = np.logical_and(np.logical_and(o1.lon2d >= extent[0], o1.lon2d <= extent[1]),
@@ -551,13 +548,13 @@ def slope_intercept_compare_plot(OCO_class, label_tag, file_tag, pxl_by_pxl_outp
     print('lat ind:', np.argmin(np.abs(pxl_by_pxl_output_csv['LAT'][idx]-OCO_class.lat2d[0, :])))
     ax1.scatter(pxl_by_pxl_output_csv['LON'][idx], pxl_by_pxl_output_csv['LAT'][idx], marker='^', s=30, color='k')
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
-    cbar1.set_label('$\mathrm{%s}$ slope' %(label_tag), fontsize=label_size)
+    cbar1.set_label('$\mathit{s _{%s}}$' %(label_tag), fontsize=label_size)
 
     c2 = ax2.scatter(OCO_class.lon2d[mask], OCO_class.lat2d[mask], 
                      c=getattr(OCO_class, inter_compare)[:,:,0][mask], s=10,
                      cmap='RdBu_r', vmin=-0.2, vmax=0.2)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
-    cbar2.set_label('$\mathrm{%s}$ intercept' %(label_tag), fontsize=label_size)
+    cbar2.set_label('$\mathit{i _{%s}}$' %(label_tag), fontsize=label_size)
     
     lonlat_interval = 0.1 if (lon_2d.max()-lon_2d.min())<1 else 0.2
     for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
@@ -722,9 +719,8 @@ def heatmap_xy_3(x, y, ax, tag=''):
     # cloud distance
     interval = 1/2
     start = 1
-    # Scatter plot for all data points
+    # Scatter plot for valid data points
     ax.scatter(x[x>=start], y[x>=start], s=1, color='k')
-    # Kernel density estimation
     sns.kdeplot(x=x, y=y, cmap='hot_r', n_levels=20, fill=True, ax=ax, alpha=0.65)
     # Calculate value median of each cloud level
     cld_levels = np.arange(start, 50, interval)
@@ -822,9 +818,9 @@ def fitting_3bands(cloud_dist, o1, o2, o3, rad_3d_compare, rad_clr_compare,
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.05*(ymax-ymin), label_text, fontsize=label_size, color='k')
     
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
-        ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
-        ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    save_figure(fig, f'all_band_{slope_compare.split("_")[-1]}.png', img_dir, pad=5.0)
+        ax_l.set_ylabel('$\mathit{s _{%s}}$' %(band_tag), fontsize=label_size)
+        ax_r.set_ylabel('$\mathit{i _{%s}}$' %(band_tag), fontsize=label_size)
+    save_figure(fig, f'all_band_{slope_compare.split("_")[-1]}.png', img_dir,)# pad=5.0)
     return return_list
 
 def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3, 
@@ -875,9 +871,9 @@ def fitting_3bands_with_weighted_dis(cloud_dist, o1, o2, o3,
         ax.text(xmin+0.0*(xmax-xmin), ymin+1.05*(ymax-ymin), label_text, fontsize=label_size, color='k')
     
     for ax_l, ax_r, band_tag in zip([ax11, ax21, ax31], [ax12, ax22, ax32], ['O_2-A', 'WCO_2', 'SCO_2']):
-        ax_l.set_ylabel('$\mathrm{%s}$ slope' %(band_tag), fontsize=label_size)
-        ax_r.set_ylabel('$\mathrm{%s}$ intercept' %(band_tag), fontsize=label_size)
-    save_figure(fig, f'all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', img_dir, pad=5.0)
+        ax_l.set_ylabel('$\mathit{s _{%s}}$' %(band_tag), fontsize=label_size)
+        ax_r.set_ylabel('$\mathit{i _{%s}}$' %(band_tag), fontsize=label_size)
+    save_figure(fig, f'all_band_weighted_dis_{slope_compare.split("_")[-1]}.png', img_dir,)# pad=5.0)
     return return_list, return_list_err
 
 def o2a_wvl_select_slope_derivation(cfg_info, o1, img_dir='.'):

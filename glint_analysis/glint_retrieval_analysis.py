@@ -27,15 +27,15 @@ prop = font_manager.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = prop.get_name()
 
-def main(cfg_name='20181018_central_asia_2_test4.csv'):
-    cfg_dir = '../simulation/cfg'
+def main(cfg_name='20151201_ocean_1_cal_para.csv'):
+    cfg_dir = '../glint/cfg'
     cfg_info = grab_cfg(f'{cfg_dir}/{cfg_name}')
     if 'o2' in cfg_info.keys():
         id_num = output_h5_info(f'{cfg_dir}/{cfg_name}', 'o2')[-12:-3]
     else:
         sys.exit('Error: no output file in cfg_info[o2]')
 
-    pkl_filename = '20181018_amazon_{}_lbl_with_aod.pkl'
+    pkl_filename = '20151201_ocean_1_{}.pkl' #cfg_name.replace('.csv', '_{}.pkl')
     with open(pkl_filename.format('o2a'), 'rb') as f:
         o1 = pickle.load(f)
     with open(pkl_filename.format('wco2'), 'rb') as f:
@@ -52,7 +52,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     extent_png = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
 
-    img_file = f'../simulation/data/{case_name_tag}/{cfg_info["png"]}'
+    img_file = f'../glint/data/{case_name_tag}/{cfg_info["png"]}'
     wesn = extent_png
     img = mpimg.imread(img_file)
     lon_dom = extent_analysis[:2]
@@ -67,7 +67,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     cld_data = pd.read_pickle(f'{cfg_name}_cld_distance.pkl')
     cld_dist = cld_data['cld_dis']
 
-    with h5py.File(f'../simulation/data/{case_name_tag}/pre-data.h5', 'r') as predata:
+    with h5py.File(f'../glint/data/{case_name_tag}/pre-data.h5', 'r') as predata:
         modis_aod = predata['mod/aod/AOD_550_land'][...]
         modis_lon, modis_lat = predata['lon'][...], predata['lat'][...]
     modis_aod[modis_aod<0] = np.nan
@@ -78,7 +78,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
                 img_dir=img_dir)
     # retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_2.h5', 'r')
-    retrieval_aod_parameterization = h5py.File('full-unperturbed20181018_central_asia_2_test4_para_20240402.h5', 'r')
+    retrieval_aod_parameterization = h5py.File('full-unperturbed20151201_ocean_1_cal_para_ontop_shadow.h5', 'r')
     mask = retrieval_aod_parameterization['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
@@ -189,7 +189,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     l2_co2_profile = np.array(l2_co2_profile)
     l2_xco2 = np.array(l2_xco2)
     l2_p_level = np.array(l2_p_level)
-    l2_p_sfc = np.array(l2_p_level)
+    l2_p_sfc = np.array(l2_p_sfc)
     l2_alt_level = np.array(l2_alt_level)
     l2_avg_kernel = np.array(l2_avg_kernel)
     l2_o2a_ref = np.array(l2_o2a_ref)
@@ -207,14 +207,14 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     l1b_bidir_ang = np.array(l1b_bidir_ang)
     l1b_stokes_test = np.abs(l1b_stokes[:, 0, :, 0]) + np.abs(l1b_stokes[:, 0, :, 1])
 
+    aod_before_after_parameterization(img, wesn, lon_dom, lat_dom, df, l2_aod, img_dir=img_dir)
+
     print(f'l1b_stokes shape: {l1b_stokes.shape}')
     print(f'l1b_stokes_test shape: {l1b_stokes_test.shape}')
 
     print(f'l1b_o2a shape: {l1b_o2a.shape}')
     print(f'l1b_polar_ang shape: {l1b_polar_ang.shape}')
     print(f'l2_xco2 shape: {l2_xco2.shape}')
-
-    aod_before_after_parameterization(img, wesn, lon_dom, lat_dom, df, l2_aod, img_dir=img_dir)
 
     """
     plt.close('all')
@@ -234,6 +234,16 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     print(f'max: {lam[1, 7]*1e3}')
     print(f'min: {lam[1, 151]*1e3}')
 
+    l1b_o2a_min = []
+    l1b_o2a_max = []
+    for i in range(l1b_o2a.shape[0]):
+        min, max = np.argmin(l1b_o2a[i, 0, :]), np.argmax(l1b_o2a[i, 0, :])
+        l1b_o2a_min.append(l1b_o2a[i, 0, min])
+        l1b_o2a_max.append(l1b_o2a[i, 0, max])
+    l1b_o2a_min = np.array(l1b_o2a_min)
+    l1b_o2a_max = np.array(l1b_o2a_max)
+
+    
     fig, ax = plt.subplots(figsize=(8, 6))
     c = ax.scatter(l1b_o2a[:, 0, 7], l1b_polar_ang[:, 0, 0], s=30,
                 c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r')
@@ -257,24 +267,115 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     plt.show()
     plt.close()
 
-
     fig, ax = plt.subplots(figsize=(8, 6))
-    c = ax.scatter(l1b_o2a[:, 0, 151]/l1b_o2a[:, 0, 7], l1b_polar_ang[:, 0, 0], s=30, 
-                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r')
+    c = ax.scatter(l1b_o2a_max, l1b_polar_ang[:, 0, 0], s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', edgecolors='k')
     cb = fig.colorbar(c, ax=ax)
-    ax.set_xlabel('I(757.7822 nm)/I(760.2377 nm)')
+    ax.set_xlabel('I max')
     ax.set_ylabel('Polarization angle ($^o$)')
     cb.set_label('XCO2 (ppmv)')
     fig.tight_layout()
     plt.show()
     plt.close()
 
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_min, l1b_polar_ang[:, 0, 0], s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min')
+    ax.set_ylabel('Polarization angle ($^o$)')
+    cb.set_label('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    print(f'l2_p_sfc shape: {l2_p_sfc.shape}')
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_min/l1b_o2a_max, l1b_polar_ang[:, 0, 0], s=30,
+                c=l2_p_sfc, #vmin=394, vmax=400, 
+                #cmap='RdBu_r', 
+                edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min/I max')
+    ax.set_ylabel('XCO2 (ppmv)')
+    cb.set_label('P surface')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    c = ax.scatter(l1b_o2a[:, 0, 7], l1b_polar_ang[:, 0, 0], s=30,
+    c = ax.scatter(l2_p_sfc, l2_alt_level[:, -1], s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('P_sfc')
+    ax.set_ylabel('Surface altitude (m)')
+    cb.set_label('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_min, l2_p_sfc, s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', 
+                edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min')
+    ax.set_ylabel('P_sfc')
+    cb.set_label('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_max, l2_p_sfc, s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', 
+                edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min')
+    ax.set_ylabel('P_sfc')
+    cb.set_label('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_min/l1b_o2a_max, l2_p_sfc, s=30,
+                c=l2_xco2, vmin=394, vmax=400, cmap='RdBu_r', 
+                edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min')
+    ax.set_ylabel('P_sfc')
+    cb.set_label('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_min/l1b_o2a_max, l2_xco2, s=30,
+                c=l2_p_sfc, #vmin=394, vmax=400, cmap='RdBu_r', 
+                edgecolors='k')
+    cb = fig.colorbar(c, ax=ax)
+    ax.set_xlabel('I min/I max')
+    ax.set_ylabel('XCO2 (ppmv)')
+    cb.set_label('P_sfc')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(l2_p_sfc, l2_xco2, s=30, edgecolors='k')
+    ax.set_xlabel('P_sfc')
+    ax.set_ylabel('XCO2 (ppmv)')
+    fig.tight_layout()
+    plt.show()
+    plt.close()
+
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    c = ax.scatter(l1b_o2a_max, l1b_polar_ang[:, 0, 0], s=30,
                 c=l1b_stokes_test[:, 0])
     cb = fig.colorbar(c, ax=ax)
-    ax.set_xlabel('I(757.7822 nm)')
+    ax.set_xlabel('I max')
     ax.set_ylabel('Polarization angle ($^o$)')
     cb.set_label('|m_I| + |m_Q|')
     fig.tight_layout()
@@ -283,10 +384,10 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    c = ax.scatter(l1b_o2a[:, 0, 151], l1b_polar_ang[:, 0, 0], s=30,
+    c = ax.scatter(l1b_o2a_min, l1b_polar_ang[:, 0, 0], s=30,
                 c=l1b_stokes_test[:, 0])
     cb = fig.colorbar(c, ax=ax)
-    ax.set_xlabel('I(760.2377 nm)')
+    ax.set_xlabel('I min')
     ax.set_ylabel('Polarization angle ($^o$)')
     cb.set_label('|m_I| + |m_Q|')
     fig.tight_layout()
@@ -295,10 +396,10 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    c = ax.scatter(l1b_o2a[:, 0, 7], l1b_polar_ang[:, 0, 0], s=30,
+    c = ax.scatter(l1b_o2a_max, l1b_polar_ang[:, 0, 0], s=30,
                 c=l1b_bidir_ang[:, 0, 0])
     cb = fig.colorbar(c, ax=ax)
-    ax.set_xlabel('I(757.7822 nm)')
+    ax.set_xlabel('I max')
     ax.set_ylabel('Polarization angle ($^o$)')
     cb.set_label('Bidirection angle')
     fig.tight_layout()
@@ -307,16 +408,16 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
 
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    c = ax.scatter(l1b_o2a[:, 0, 151], l1b_polar_ang[:, 0, 0], s=30,
+    c = ax.scatter(l1b_o2a_min, l1b_polar_ang[:, 0, 0], s=30,
                 c=l1b_bidir_ang[:, 0, 0])
     cb = fig.colorbar(c, ax=ax)
-    ax.set_xlabel('I(760.2377 nm)')
+    ax.set_xlabel('I min')
     ax.set_ylabel('Polarization angle ($^o$)')
     cb.set_label('Bidirection angle')
     fig.tight_layout()
     plt.show()
     plt.close()
-    """
+    #"""
     # sys.exit()
 
     cld_xco2 = pd.read_csv(f'{cfg_name}_footprint_cld_distance.csv')
@@ -332,7 +433,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     # scene_google_map(img, wesn, lon_dom, lat_dom, o1,
     #                 img_dir=img_dir)
     
-    with h5py.File(f'../simulation/data/{case_name_tag}/atm_abs_o2a_11.h5', 'r') as file:
+    with h5py.File(f'../glint/data/{case_name_tag}/atm_abs_o2a_11.h5', 'r') as file:
         wvl = file['wl_oco'][...]
         trnsx = file['trns_oco'][...]
         oco_lam = file['lamx'][...]
@@ -345,7 +446,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                 img_dir=img_dir)
     
     # retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pixel_2.h5', 'r')
-    retrieval_aod_pixel = h5py.File('full-unperturbed20181018_central_asia_2_test4_pbp_20240402.h5', 'r')
+    retrieval_aod_pixel = h5py.File('full-unperturbed20151201_ocean_1_cal_para_cld_pbp.h5', 'r')
     mask = retrieval_aod_pixel['xco2_retrieved'][...]!=-2
     key_list = ['aod', 'cpu_minutes', 'lat', 'lon', 'psur_MT_file', 'psur_retrieved',
                 'rfl1', 'rfl2', 'rfl3', 'snd', 'xco2_L2_file', 'xco2_retrieved', 'xco2_weighted_column']
@@ -431,7 +532,7 @@ def XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c = ax.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
-                    cmap='RdBu_r', vmin=394, vmax=412)
+                    cmap='RdBu_r', vmin=394, vmax=400)
     cbar = f.colorbar(c, ax=ax, extend='both')
     cbar.set_label('$\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar.ax.tick_params(labelsize=tick_size)
@@ -454,14 +555,14 @@ def XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
-                    cmap='RdBu_r', vmin=394, vmax=412)
+                    cmap='RdBu_r', vmin=394, vmax=400)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level2 $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df['xco2_retrieved'], s=30,
-                cmap='RdBu_r', vmin=394, vmax=412)
+                cmap='RdBu_r', vmin=394, vmax=400)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
@@ -496,14 +597,14 @@ def XCO2_before_after_pixel(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
-                    cmap='RdBu_r', vmin=394, vmax=412)
+                    cmap='RdBu_r', vmin=394, vmax=400)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level2 $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df['xco2_retrieved'], s=30,
-                cmap='RdBu_r', vmin=394, vmax=412)
+                cmap='RdBu_r', vmin=394, vmax=400)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
@@ -540,14 +641,14 @@ def p_sfc_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=df.psur_MT_file*10, s=30,
-                    cmap='OrRd', vmin=910, vmax=950)
+                    cmap='OrRd', vmin=990, vmax=1010)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level 2 $\mathrm{P_{sfc}}$ (hPa)', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df.psur_retrieved/100, s=30,
-                cmap='OrRd', vmin=910, vmax=950)
+                cmap='OrRd', vmin=990, vmax=1010)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified $\mathrm{P_{sfc}}$ (hPa)', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
@@ -582,21 +683,21 @@ def aod_before_after_parameterization(img, wesn, lon_dom, lat_dom, df, l2_aod,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=l2_aod, s=30,
-                    cmap='OrRd', vmin=0.1, vmax=0.4)
+                    cmap='OrRd', vmin=0.06, vmax=0.12)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level 2 AOD', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df.aod, s=30,
-                cmap='OrRd', vmin=0.1, vmax=0.4)
+                cmap='OrRd', vmin=0.06, vmax=0.12)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified AOD', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
 
     c3 = ax3.scatter(df['lon'], df['lat'],
                 c=df.aod-l2_aod, s=30,
-                cmap='RdBu_r', vmin=-0.2, vmax=0.2)
+                cmap='RdBu_r', vmin=-0.04, vmax=0.04)
     cbar3 = f.colorbar(c3, ax=ax3, extend='both')
     cbar3.set_label('$\Delta$ AOD', fontsize=label_size)
     cbar3.ax.tick_params(labelsize=tick_size)
@@ -1002,8 +1103,6 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
                         ax=ax_histy, alpha=0.95)
 
     print(f'unperturbed cloud dist <= {cld_dist_threshold} anomaly average: {np.nanmean((xco2_unpert-true_mean)[cld_mask]):.3f} +/- {np.nanstd((xco2_unpert-true_mean)[cld_mask]):.3f}')
-    
-    print(f'cloud dist <= {cld_dist_threshold} anomaly change: {np.nanmean((xco2_unpert-xco2_l2)[cld_mask]):.3f} +/- {np.nanstd((xco2_unpert- xco2_l2)[cld_mask]):.3f}')
 
     red_kde_curve = red_kde.lines[1]
     red_kde_x = red_kde_curve.get_xdata()
@@ -1021,7 +1120,7 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
                 f'{fullwidthathalfmax:.2f}\n',
                 color='r', ha='center', va='center', fontsize=legend_size)
 
-    ax_histy.text(0.195, 8.75,
+    ax_histy.text(0.305, 8.75,
                 #halfmax*2,
                 'cloud distance\n$\mathrm{\leq}$ %s km' %cld_dist_threshold,
                 color='k', ha='center', va='center', fontsize=legend_size-4)
