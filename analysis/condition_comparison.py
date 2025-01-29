@@ -37,6 +37,9 @@ plt.rcParams['font.sans-serif'] = prop.get_name()
 
 
 def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
+    # 20181018_central_asia_zpt_test2_fitting_result.txt
+    # 20181018_central_asia_2_test4_fitting_result_condition_2.csv
+    
     # '20181018_central_asia_2_test4.csv'
     # '20150622_amazon.csv'
     # '20181018_central_asia_2_test6.csv'
@@ -48,6 +51,7 @@ def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
     channel_list = ['o2a', 'wco2', 'sco2']
         
     print(df.columns)
+    # df = df[df['alb']!=0.05]
     # print(df.columns.shape)
     # print(df.shape)
     # print(df.head())
@@ -62,8 +66,8 @@ def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['alb']==0.3), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
     # var = 'aod'
     # alb high cloud
-    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
-    var = 'alb'
+    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==5, df['aod']==0.0), np.logical_and(df['cot']==5, df['cer']==25)), df['sza']==45)]
+    # var = 'alb'
     # alb low cloud
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['cth']==3, df['aod']==0.0), np.logical_and(df['cot']==1, df['cer']==12)), df['sza']==45)]
     # var = 'alb'
@@ -77,11 +81,22 @@ def main(result_csv='20181018_central_asia_zpt_test2_fitting_result.txt'):
     # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==5, df['cer']==25)), df['sza']==45)]
     # var = 'cot'
     # cot_low cloud
-    # df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
-    # var = 'cot'
+    df_select = df[np.logical_and(np.logical_and(np.logical_and(df['alb']==0.3, df['aod']==0.0), np.logical_and(df['cth']==3, df['cer']==12)), df['sza']==45)]
+    var = 'cot'
+    # df = df[df['alb']!=0.1]
+    # df = df[df['sza']!=75]
+    # # df = df[np.logical_and(df['sza']==15, df['sza']==75)]
+    # df_select = df[np.logical_and(df['sza']==30, df['aod']==0.0)]
+    # var = 'alb'
+    # df_select = df[np.logical_and(df['alb']==0.4, df['aod']==0.0)]
+    # var = 'sza'
+    # df_select = df[np.logical_and(df['alb']==0.4, df['sza']==15)]
+    # var = 'aod'
 
     print(df_select.shape)
     df_plot_o2a(df_select, var)
+    df_plot_wco2(df_select, var)
+    df_plot_sco2(df_select, var)
 
 
 def df_plot(df, var):
@@ -147,8 +162,8 @@ def df_plot_o2a(df, var):
         
         ax12.plot(cld_list, inter_line, **line_arg)
         
-        ax_xy_label(ax11, 'Weighted average cloud distance (km)', '$\mathrm{O_2-A}$ slope', label_size=label_size, tick_size=tick_size)
-        ax_xy_label(ax12, 'Weighted average cloud distance (km)', '$\mathrm{O_2-A}$ intercept', label_size=label_size, tick_size=tick_size)
+        ax_xy_label(ax11, 'Effective cloud distance (km)', '$\mathit{s_{O_2-A}}$', label_size=label_size, tick_size=tick_size)
+        ax_xy_label(ax12, 'Effective cloud distance (km)', '$\mathrm{i_{O_2-A}}$', label_size=label_size, tick_size=tick_size)
         
         ax11.set_ylim(0, 0.75)
         ax12.set_ylim(0, 0.75)
@@ -170,9 +185,126 @@ def df_plot_o2a(df, var):
     # cbar = f.colorbar(c, ax=ax, extend='both')
     # cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
     # ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    for ax, label in zip([ax11, ax12], ['(a)', '(b)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+
     fig.tight_layout()
     plt.show()
     fig.savefig(f'zpt2_o2a_{var}_compare.png', dpi=300)
+
+def df_plot_wco2(df, var):
+    fig, (ax11, ax12) = plt.subplots(1, 2, figsize=(16, 6), sharex=False)
+    fig.tight_layout(pad=5.0)
+    label_size = 20
+    tick_size = 16
+
+    cld_list = np.linspace(0, 50, 101)
+    channel_list = 'wco2'
+    for j in range(df.shape[0]):
+        print(j, df.iloc[j, :][f'slope_{channel_list}_amp'])
+        line_arg = {'linewidth': 2, 'label': df.iloc[j, :][var], }
+        slope_line = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp'], df.iloc[j, :][f'slope_{channel_list}_dec'])
+        slope_line_low = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp']-df.iloc[j, :][f'slope_{channel_list}_amp_unc'], df.iloc[j, :][f'slope_{channel_list}_dec'])#+df.iloc[j, :][f'slope_{channel_list}_dec_unc'])
+        slope_line_high = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp']+df.iloc[j, :][f'slope_{channel_list}_amp_unc'], df.iloc[j, :][f'slope_{channel_list}_dec'])#-df.iloc[j, :][f'slope_{channel_list}_dec_unc'])
+        ax11.fill_between(cld_list, slope_line_low, slope_line_high, alpha=0.15)
+        ax11.plot(cld_list, slope_line, **line_arg)
+        
+        inter_line = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp'], df.iloc[j, :][f'inter_{channel_list}_dec'])
+        inter_line_low = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp']-df.iloc[j, :][f'inter_{channel_list}_amp_unc'], df.iloc[j, :][f'inter_{channel_list}_dec']+df.iloc[j, :][f'inter_{channel_list}_dec_unc'])
+        inter_line_high = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp']+df.iloc[j, :][f'inter_{channel_list}_amp_unc'], df.iloc[j, :][f'inter_{channel_list}_dec']-df.iloc[j, :][f'inter_{channel_list}_dec_unc'])
+        ax12.fill_between(cld_list, inter_line_low, inter_line_high, alpha=0.15)
+        
+        ax12.plot(cld_list, inter_line, **line_arg)
+        
+        ax_xy_label(ax11, 'Effective cloud distance (km)', '$\mathit{s_{WCO_2}}$', label_size=label_size, tick_size=tick_size)
+        ax_xy_label(ax12, 'Effective cloud distance (km)', '$\mathit{i_{WCO_2}}$', label_size=label_size, tick_size=tick_size)
+        
+        ax11.set_ylim(0, 0.75)
+        ax12.set_ylim(0, 0.75)
+        for ax in [ax11, ax12]:
+            ax.legend(fontsize=label_size)
+            ax.tick_params(axis='both', which='major', labelsize=tick_size)
+            ax.set_xlim(0, 50)
+            
+            ax.set_xticks(np.arange(0, 41, 10))
+            ax.set_yticks(np.arange(0, 0.91, 0.1))
+            ax.hlines(0, xmin=0, xmax=50, color='k', linewidth=1, linestyle='--')
+    # ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
+    # mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
+    # print(mask.sum())
+    # c = ax.scatter(o1.lon2d, o1.lat2d, 
+    #                c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5, cmap='Reds')
+    # ax.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+    #                c='grey', s=5, cmap='Reds')
+    # cbar = f.colorbar(c, ax=ax, extend='both')
+    # cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
+    # ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    for ax, label in zip([ax11, ax12], ['(a)', '(b)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+
+    fig.tight_layout()
+    plt.show()
+    fig.savefig(f'zpt2_wco2_{var}_compare.png', dpi=300)
+
+def df_plot_sco2(df, var):
+    fig, (ax11, ax12) = plt.subplots(1, 2, figsize=(16, 6), sharex=False)
+    fig.tight_layout(pad=5.0)
+    label_size = 20
+    tick_size = 16
+
+    cld_list = np.linspace(0, 50, 101)
+    channel_list = 'sco2'
+    for j in range(df.shape[0]):
+        print(j, df.iloc[j, :][f'slope_{channel_list}_amp'])
+        line_arg = {'linewidth': 2, 'label': df.iloc[j, :][var], }
+        slope_line = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp'], df.iloc[j, :][f'slope_{channel_list}_dec'])
+        slope_line_low = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp']-df.iloc[j, :][f'slope_{channel_list}_amp_unc'], df.iloc[j, :][f'slope_{channel_list}_dec'])#+df.iloc[j, :][f'slope_{channel_list}_dec_unc'])
+        slope_line_high = exp_decay_func(cld_list, df.iloc[j, :][f'slope_{channel_list}_amp']+df.iloc[j, :][f'slope_{channel_list}_amp_unc'], df.iloc[j, :][f'slope_{channel_list}_dec'])#-df.iloc[j, :][f'slope_{channel_list}_dec_unc'])
+        ax11.fill_between(cld_list, slope_line_low, slope_line_high, alpha=0.15)
+        ax11.plot(cld_list, slope_line, **line_arg)
+        
+        inter_line = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp'], df.iloc[j, :][f'inter_{channel_list}_dec'])
+        inter_line_low = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp']-df.iloc[j, :][f'inter_{channel_list}_amp_unc'], df.iloc[j, :][f'inter_{channel_list}_dec']+df.iloc[j, :][f'inter_{channel_list}_dec_unc'])
+        inter_line_high = exp_decay_func(cld_list, df.iloc[j, :][f'inter_{channel_list}_amp']+df.iloc[j, :][f'inter_{channel_list}_amp_unc'], df.iloc[j, :][f'inter_{channel_list}_dec']-df.iloc[j, :][f'inter_{channel_list}_dec_unc'])
+        ax12.fill_between(cld_list, inter_line_low, inter_line_high, alpha=0.15)
+        
+        ax12.plot(cld_list, inter_line, **line_arg)
+        
+        ax_xy_label(ax11, 'Effective cloud distance (km)', '$\mathit{s_{SCO_2}}$', label_size=label_size, tick_size=tick_size)
+        ax_xy_label(ax12, 'Effective cloud distance (km)', '$\mathit{s_{SCO_2}}$', label_size=label_size, tick_size=tick_size)
+        
+        ax11.set_ylim(0, 0.75)
+        ax12.set_ylim(0, 0.75)
+        for ax in [ax11, ax12]:
+            ax.legend(fontsize=label_size)
+            ax.tick_params(axis='both', which='major', labelsize=tick_size)
+            ax.set_xlim(0, 50)
+            
+            ax.set_xticks(np.arange(0, 41, 10))
+            ax.set_yticks(np.arange(0, 0.91, 0.1))
+            ax.hlines(0, xmin=0, xmax=50, color='k', linewidth=1, linestyle='--')
+    # ax.hlines(lat_dom, xmin=lon_dom[0], xmax=lon_dom[1], color='k', linewidth=1)
+    # mask = np.isnan(getattr(o1, rad_c3d_compare)[:,:,-1])
+    # print(mask.sum())
+    # c = ax.scatter(o1.lon2d, o1.lat2d, 
+    #                c=getattr(o1, rad_c3d_compare)[:,:,-1], s=5, cmap='Reds')
+    # ax.scatter(o1.lon2d[mask], o1.lat2d[mask], 
+    #                c='grey', s=5, cmap='Reds')
+    # cbar = f.colorbar(c, ax=ax, extend='both')
+    # cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
+    # ax_lon_lat_label(ax, label_size=14, tick_size=12)
+    for ax, label in zip([ax11, ax12], ['(a)', '(b)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+
+    fig.tight_layout()
+    plt.show()
+    fig.savefig(f'zpt2_sco2_{var}_compare.png', dpi=300)
 
 
 def fitting_plot():

@@ -6,10 +6,8 @@ import datetime
 from scipy import interpolate
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_09a1, modis_43a3
+from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_43a3
 from er3t.util import grid_by_dxdy
-from er3t.util.oco2 import oco2_rad_nadir, oco2_std
-
 from util.oco_modis_time import cal_sat_delta_t
 from util.sfc_alb import cal_sfc_alb_2d
 import matplotlib.image as mpl_img
@@ -37,7 +35,6 @@ def sfc_alb_mask_inter(lon_alb, lat_alb, sfc_alb, lon_2d, lat_2d):
     return sfc_alb_inter
     
 
-
 def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
     """
     Purpose: Collect satellite data for OCO-2 retrieval
@@ -61,7 +58,6 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         g2 = g.create_group('cld')
         g3 = g.create_group('sfc')
         g4 = g.create_group('aod')
-
         #\--------------------------------------------------------------/#
 
         # Process MODIS RGB imagery
@@ -86,9 +82,9 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         modl1b_500m = modis_l1b(fnames=sat0.fnames['mod_02_hkm'], extent=sat0.extent)
         lon0_500m, lat0_500m = modl1b_500m.data['lon']['data'], modl1b_500m.data['lat']['data']
 
-        ref_2d_470_raw, ref_2d_555_raw = modl1b_500m.data['ref']['data'][0, ...], modl1b_500m.data['ref']['data'][1, ...]
-        ref_2d_1640_raw, rad_2d_1640_raw = modl1b_500m.data['ref']['data'][3, ...], modl1b_500m.data['rad']['data'][3, ...]
-        ref_2d_2130_raw, rad_2d_2130_raw = modl1b_500m.data['ref']['data'][4, ...], modl1b_500m.data['rad']['data'][4, ...]
+        ref_2d_470_raw, ref_2d_555_raw = modl1b_500m.data['ref']['data'][2, ...], modl1b_500m.data['ref']['data'][3, ...]
+        ref_2d_1640_raw, rad_2d_1640_raw = modl1b_500m.data['ref']['data'][5, ...], modl1b_500m.data['rad']['data'][5, ...]
+        ref_2d_2130_raw, rad_2d_2130_raw = modl1b_500m.data['ref']['data'][6, ...], modl1b_500m.data['rad']['data'][6, ...]
 
         # Create 2D grids of MODIS L1B data at 500m resolution
         lon_2d_500m, lat_2d_500m, ref_2d_470 = grid_by_dxdy(lon0_500m, lat0_500m, ref_2d_470_raw, **grid_by_dxdy_nearest_args)
@@ -103,8 +99,6 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             var = vars()[var_name]
             mask = var>=0
             points_mask = np.column_stack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten()))
-            #points_mask = np.transpose(np.vstack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten())))
-            #vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
 
             vars()[f'{var_name}_inter_linear'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
             mask = vars()[f'{var_name}_inter_linear']>=0
@@ -114,8 +108,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
         # Add MODIS L1B data to HDF groups
         g1.update({'ref_470': vars()[f'ref_2d_470_inter'], 'ref_555': vars()[f'ref_2d_555_inter'], 
-                   'ref_1640': vars()[f'ref_2d_1640_inter'], 'rad_1640': vars()[f'ref_2d_1640_inter'], 
-                   'ref_2130': vars()[f'ref_2d_2130_inter'], 'rad_2130': vars()[f'ref_2d_2130_inter']})
+                   'ref_1640': vars()[f'ref_2d_1640_inter'], 'rad_1640': vars()[f'rad_2d_1640_inter'], 
+                   'ref_2130': vars()[f'ref_2d_2130_inter'], 'rad_2130': vars()[f'rad_2d_2130_inter']})
 
         print('Message [cdata_sat_raw]: the processing of MODIS L1B radiance/reflectance at 470, 555, 1640, 2130 nm is complete.')
 
@@ -182,12 +176,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         #   band 7: 2105 - 2155 nm, index 6
 
         wavelength_list = [650, 860, 470, 555, 1240, 1640, 2130]
-        mod09 = modis_09a1(fnames=sat0.fnames['mod_09'], extent=sat0.extent)
         mod43 = modis_43a3(fnames=sat0.fnames['mcd_43'], extent=sat0.extent)
         for wv_index in range(7):
-            
-            lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_09_{wavelength_list[wv_index]:d}'] = grid_by_dxdy(mod09.data['lon']['data'], mod09.data['lat']['data'], mod09.data['ref']['data'][wv_index, :], **grid_by_dxdy_nearest_args)
-            vars()[f'sfc_09_{wavelength_list[wv_index]:d}'] = sfc_alb_mask_inter(lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_09_{wavelength_list[wv_index]:d}'], lon_2d, lat_2d)
             lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_43_{wavelength_list[wv_index]:d}'] = grid_by_dxdy(mod43.data['lon']['data'], mod43.data['lat']['data'], mod43.data['wsa']['data'][wv_index, :], **grid_by_dxdy_nearest_args)
             vars()[f'sfc_43_{wavelength_list[wv_index]:d}'] = sfc_alb_mask_inter(lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_43_{wavelength_list[wv_index]:d}'], lon_2d, lat_2d)
 
@@ -195,10 +185,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         sfc_43_wco2 = vars()[f'sfc_43_1640']
         sfc_43_sco2 = vars()[f'sfc_43_2130']
 
-
         g3.update({'lon': lon_2d_sfc, 'lat': lat_2d_sfc})
         for wavelength in wavelength_list:
-            g3['alb_09_%d' % wavelength] = vars()[f'sfc_09_{wavelength:d}']
             g3['alb_43_%d' % wavelength] = vars()[f'sfc_43_{wavelength:d}']
 
         g3.update({'alb_43_o2a': sfc_43_o2a, 'alb_43_wco2': sfc_43_wco2, 'alb_43_sco2': sfc_43_sco2})
@@ -238,7 +226,6 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
 
     #/----------------------------------------------------------------------------\#
-
     if plot:
         with h5py.File(f'{sat0.fdir_pre_data}/pre-data.h5', 'r') as f0:
             extent = f0['extent'][...]
@@ -253,7 +240,6 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             cer = f0['mod/cld/cer_l2'][...]
             cth = f0['mod/cld/cth_l2'][...]
             sfh = f0['mod/geo/sfh'][...]
-            alb09 = f0['mod/sfc/alb_09_860'][...]
             alb43 = f0['mod/sfc/alb_43_860'][...]
         # figure
         #/----------------------------------------------------------------------------\#
@@ -264,12 +250,12 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
         titles = ['RGB Imagery', f'L1B Radiance 650 nm)', f'L1B Reflectance 650 nm)', None, 
                   'Solar Zenith [°]', 'Solar Azimuth [°]', 'Viewing Zenith [°]', 'Viewing Azimuth [°]',
-                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', f'09A1 Reflectance at 860 nm',
+                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', None,
                   f'43A3 WSA at 860 nm']
 
-        data = [rgb, rad.T, ref.T, None, sza.T, saa.T, vza.T, vaa.T, cot.T, cer.T, cth.T, sfh.T, alb09.T, alb43.T]
-        vmins = [None, 0.0, 0.0, None, None, None, None, None, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        vmaxs = [None, 0.5, 1.0, None, None, None, None, None, 50.0, 30.0, 15.0, 5.0, 0.4, 0.4]
+        data = [rgb, rad.T, ref.T, None, sza.T, saa.T, vza.T, vaa.T, cot.T, cer.T, cth.T, sfh.T, None, alb43.T]
+        vmins = [None, 0.0, 0.0, None, None, None, None, None, 0.0, 0.0, 0.0, 0.0, None, 0.0]
+        vmaxs = [None, 0.5, 1.0, None, None, None, None, None, 50.0, 30.0, 15.0, 5.0, None, 0.4]
 
         for idx, (ax, title, img, vmin, vmax) in enumerate(zip(np.ravel(axes), titles, data, vmins, vmaxs)):
             if idx == 3:
@@ -292,9 +278,7 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             ax.axis('off')
 
         # save figure
-        #/--------------------------------------------------------------\#
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         _metadata = {'Computer': os.uname()[1], 'Script': os.path.abspath(__file__), 'Function':sys._getframe().f_code.co_name, 'Date':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         plt.savefig('%s/<%s>.png' % (sat0.fdir_pre_data, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
-        #\--------------------------------------------------------------/#
         #\----------------------------------------------------------------------------/#

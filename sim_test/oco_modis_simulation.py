@@ -36,6 +36,9 @@ from util.modis_raw_collect import cdata_sat_raw
 from util.oco_cloud import cdata_cld_modis_only
 from util.post_process import cdata_all
 from util.oco_modis_650 import cal_mca_rad_650, modis_650_simulation_plot
+from util.oco_modis_1640 import cal_mca_rad_1640, modis_1640_simulation_plot
+from util.oco_modis_2130 import cal_mca_rad_2130, modis_2130_simulation_plot
+
 from util.oco_util import path_dir, sat_tmp, timing, plot_mca_simulation
 from util.oco_atm_atmmod import atm_atmmod
 from haversine import Unit, haversine_vector
@@ -268,7 +271,7 @@ def preprocess(cfg_info):
     date = datetime(int(cfg_info['date'][:4]),    # year
                     int(cfg_info['date'][4:6]),   # month
                     int(cfg_info['date'][6:]))    # day
-    extent = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.15, 0.15, -0.15, 0.15])]
+    extent = [float(loc) + offset for loc, offset in zip(cfg_info['subdomain'], [-0.1, 0.1, -0.1, 0.1])]
     extent_analysis = [float(loc) for loc in cfg_info['subdomain']]
     print(f'simulation extent: {extent}')
     ref_threshold = float(cfg_info['ref_threshold'])
@@ -303,12 +306,13 @@ def preprocess(cfg_info):
     save_h5_info(cfg_info['cfg_path'], 'png', sat0.fnames['mod_rgb'][0].split('/')[-1])
     # create tmp-data/{name_tag} directory if it does not exist
     # ===============================================================
-    fdir_cot_tmp = path_dir('tmp-data/%s/cot' % ('20181018_central_asia_2_test4_20181018'))
+    fdir_cot_tmp = path_dir('tmp-data/%s/cot' % (name_tag))
     # ===============================================================
 
     # # create atmosphere based on OCO-Met and CO2_prior
     # # ===============================================================
-    zpt_file = os.path.abspath('/'.join([path_dir('/'.join(['data', '20181018_central_asia_2_test4_20181018'])), 'zpt.h5']))
+    zpt_file = path_dir('/'.join([fdir_data, 'zpt.h5']))
+    # os.path.abspath('/'.join([path_dir('/'.join(['data', '20181018_central_asia_2_test4_20181018'])), 'zpt.h5']))
     # if not os.path.isfile(zpt_file):
     #     create_oco_atm(sat=sat0, o2mix=float(cfg_info['o2mix']), output=zpt_file)
     # # ===============================================================
@@ -328,107 +332,17 @@ def preprocess(cfg_info):
     
     if not os.path.isfile(f'{fdir_data}/pre-data.h5') :
         cdata_sat_raw(sat0=sat０, dx=250, dy=250, overwrite=True, plot=True)
-    cdata_cld_modis_only(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
+        cdata_cld_modis_only(sat０, fdir_cot_tmp, zpt_file, cfg_info, plot=True)
     # ===============================================================
-    
-    # weighted_cld_dist_calc
-    #--------------------------------------
-    cfg_name = cfg_info['cfg_name']
-    if 1:#not os.path.isfile(f'{cfg_name}_weighted_cld_distance.pkl'):
-        img_file = f'../simulation/data/{name_tag}/{cfg_info["png"]}'
-        weighted_cld_dist_calc(cfg_name, img_file, extent, extent_analysis)
-    weighted_cld_data = pd.read_pickle(f'../simulation/data/{cfg_name}_modis/weighted_cld_distance.pkl')
-    weighted_cld_dist = weighted_cld_data['cld_dis']
-    hist = np.histogram(weighted_cld_dist, bins=np.linspace(0, 50, 101), density=True)
-    #--------------------------------------
+    # from er3t.util.modis import modis_l1b
+    # modl1b_500m = modis_l1b(fnames=sat0.fnames['mod_02_hkm'], extent=sat0.extent)
+    # print('wavelenght:', modl1b_500m.data['wvl']['data'])
+    # print('radiance shape', modl1b_500m.data['rad']['data'].shape)
+    # sys.exit()
 
-
-
-    
-    
     return date, extent, name_tag, fdir_data, sat0, zpt_file
 
 
-def weighted_cld_dist_calc(cfg_name, img_file, img_extent, wesn):
-    cldfile = f'../simulation/data/{cfg_name}_modis/pre-data.h5'
-    print(cldfile)
-    with h5py.File(cldfile, 'r') as f:
-        lon_cld = f['lon'][...]
-        lat_cld = f['lat'][...]
-        cth = f['mod/cld/logic_cld_3d_650'][...]
-        cth = f['mod/cld/cld_msk_3d_650'][...]
-        cth = f['mod/cld/cot_3d_650'][...]>0
-
-    cld_list = cth==1
-    cld_X, cld_Y = np.where(cld_list==1)[0], np.where(cld_list==1)[1]
-    cld_position = []
-    cld_latlon = []
-    for i in range(len(cld_X)):
-        cld_position.append(np.array([cld_X[i], cld_Y[i]]))
-        cld_latlon.append([lat_cld[cld_X[i], cld_Y[i]], lon_cld[cld_X[i], cld_Y[i]]])
-    cld_position = np.array(cld_position)
-    cld_latlon = np.array(cld_latlon)
-
-    cloud_dist = np.zeros_like(lon_cld)
-    for j in range(cloud_dist.shape[1]):
-        for i in range(cloud_dist.shape[0]):
-            if cld_list[i, j] == 1:
-                cloud_dist[i, j] = 0
-            else:
-                point = np.array([lat_cld[i, j], lon_cld[i, j]])
-                distances = haversine_vector(point, cld_latlon, unit=Unit.KILOMETERS, comb=True)
-                weights = 1 / distances**2  # Calculate the inverse distance weights
-                # Calculate the weighted average distance
-                cloud_dist[i, j] = np.sum(distances * weights) / np.sum(weights)
-    
-    lon_dom = wesn[:2]
-    lat_dom = wesn[2:]
-    select = (lon_cld>lon_dom[0]) & (lon_cld<lon_dom[1]) & (lat_cld>lat_dom[0]) & (lat_cld<lat_dom[1])
-    output = np.array([lon_cld, 
-                       lat_cld, 
-                       cloud_dist])
-    print(output.shape)
-    cld_slope_inter = pd.DataFrame(output.reshape(output.shape[0], output.shape[1]*output.shape[2]).T,
-                                   columns=['lon', 'lat', 'cld_dis', ])
-    output_name = f'../simulation/data/{cfg_name}_modis/weighted_cld_distance.pkl'
-    cld_slope_inter.to_pickle(output_name)
-
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-    from matplotlib.ticker import FixedLocator
-
-    img = mpimg.imread(img_file)
-    lon_dom = wesn[:2]
-    lat_dom = wesn[2:]
-
-    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6.75))
-
-    ax1.imshow(img, extent=img_extent)
-    ax1.set_xlim(np.min(lon_dom), np.max(lon_dom))
-    ax1.set_ylim(np.min(lat_dom), np.max(lat_dom))
-    ax1.scatter(lon_cld[cth>0], lat_cld[cth>0], s=3, color='r')
-    ax1.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
-    ax1.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
-
-    ax_lon_lat_label(ax1, label_size=14, tick_size=12)
-    
-    select = (lon_cld>lon_dom[0]) & (lon_cld<lon_dom[1]) & (lat_cld>lat_dom[0]) & (lat_cld<lat_dom[1])
-    ax2.hist(cloud_dist[(cloud_dist>0) & select], 
-             bins=np.linspace(0, 50, 51), density=True, color='r', alpha=0.5)
-    ax2.set_xlabel('Weighted average cloud distance (km)', fontsize=14)
-    ax2.set_ylabel('Probability density', fontsize=14)
-    
-    
-    for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
-        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=18, color='k')
-        
-    f.tight_layout(pad=0.5)
-    f.savefig(f'../simulation/data/{cfg_name}_modis/weighted_cld_dis_pdf.png', dpi=300)
-
-
-    return output_name 
 
 def ax_lon_lat_label(ax, label_size=14, tick_size=12):
     ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
@@ -437,7 +351,7 @@ def ax_lon_lat_label(ax, label_size=14, tick_size=12):
 
 
 @timing
-def run_case_modis_650(cfg_info, preprocess_info):
+def run_case_modis(cfg_info, preprocess_info):
     # Get information from cfg_info
     # ======================================================================
     name_tag = preprocess_info[2]
@@ -447,127 +361,53 @@ def run_case_modis_650(cfg_info, preprocess_info):
 
     # run calculations for 650 nm
     # ======================================================================
-    ref_threshold = float(cfg_info['ref_threshold'])
-    fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
+    # ref_threshold = float(cfg_info['ref_threshold'])
+    # fdir_tmp_650 = path_dir(f'tmp-data/{name_tag}/modis_650')
+    # for solver in ['IPA', '3D']:
+    #     cal_mca_rad_650(sat0, zpt_file, 650, cfg_info, fdir=fdir_tmp_650, solver=solver,
+    #                     overwrite=True, case_name_tag=name_tag)
+    #     modis_650_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_650,
+    #                                solver=solver, wvl=650, plot=True)
+    # ======================================================================
+
+    # run calculations for 1640 nm
+    # ======================================================================
+    fdir_tmp_1640 = path_dir(f'tmp-data/{name_tag}/modis_1640')
     for solver in ['IPA', '3D']:
-        cal_mca_rad_650(sat0, zpt_file, 650, fdir=fdir_tmp_650, solver=solver,
-                        overwrite=True, case_name_tag=name_tag, photons=1e7)#float(cfg_info['modis_650_N_photons']))
-        modis_650_simulation_plot(sat0, case_name_tag=name_tag, fdir=fdir_tmp_650, solver=solver, wvl=650, ref_threshold=ref_threshold, plot=True)
+        cal_mca_rad_1640(sat0, zpt_file, 1640, cfg_info, fdir=fdir_tmp_1640, solver=solver,
+                        overwrite=False, case_name_tag=name_tag)
+        modis_1640_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_1640,
+                                   solver=solver, wvl=1640, plot=True)
     # ======================================================================
 
-@timing
-def run_case(band_tag, cfg_info, preprocess_info, sfc_alb=None, sza=None):
-    # Get information from cfg_info
-    # ======================================================================
-    date      = preprocess_info[0]
-    name_tag  = preprocess_info[2]
-    fdir_data = preprocess_info[3]
-    sat0      = preprocess_info[4]
-    zpt_file  = preprocess_info[5]
-    # ======================================================================
-    if sfc_alb != None:
-        fdir_tmp = path_dir(f'tmp-data/{name_tag}_alb_{sfc_alb:.3f}_sza_{sza:.1f}/{band_tag}')
-    else:
-        fdir_tmp = path_dir(f'tmp-data/{name_tag}/{band_tag}')
-    
-    # read out wavelength information from absorption file
-    # ===============================================================
-    fname_abs = f'{fdir_data}/atm_abs_{band_tag}_{(int(cfg_info["nx"])+1):d}.h5'
-    with h5py.File(fname_abs, 'r') as f:
-        wvls = f['lamx'][...]*1000.0 # micron to nm
-    # ===============================================================
-    
-    #"""
-    # run calculations for each wavelength
-    # ===============================================================
-    Nphotons = float(cfg_info['oco_N_photons']) if sza is None else 1e8
-    for wavelength in wvls:
-        for solver in ['IPA', '3D']:
-            alb_sim, sza_sim = cal_mca_rad_oco2(date, band_tag, sat0, zpt_file, wavelength,
-                                            fname_atm_abs=fname_abs, cth=None, scale_factor=1.0, 
-                                            fdir=fdir_tmp, solver=solver, 
-                                            sfc_alb_abs=sfc_alb, sza_abs=sza,
-                                            overwrite=False, photons=Nphotons)
-    # ===============================================================
-    #"""
 
-    # post-processing - combine the all the calculations into one dataset
-    # ===============================================================
-    collect_data = cdata_all(date, band_tag, fdir_tmp, fname_abs, sat0, alb_sim, sza_sim)
-    # ===============================================================
-    
-    return collect_data
+    # run calculations for 2130 nm
+    # ======================================================================
+    # fdir_tmp_2130 = path_dir(f'tmp-data/{name_tag}/modis_2130')
+    # for solver in ['IPA', '3D']:
+    #     cal_mca_rad_2130(sat0, zpt_file, 2130, cfg_info, fdir=fdir_tmp_2130, solver=solver,
+    #                     overwrite=True, case_name_tag=name_tag)
+    #     modis_2130_simulation_plot(sat0, cfg_info, case_name_tag=name_tag, fdir=fdir_tmp_2130,
+    #                                solver=solver, wvl=2130, plot=True)
+    # ======================================================================
+
     
 
 def run_simulation(cfg, sfc_alb=None, sza=None):
     cfg_info = grab_cfg(cfg)
     preprocess_info = preprocess(cfg_info)
-    #run_case_modis_650(cfg_info, preprocess_info)
-    """
-    if 1:#not check_h5_info(cfg, 'o2'): 
-        o2_h5 = run_case('o2a', cfg_info, preprocess_info,
-                          sfc_alb=sfc_alb, sza=sza)
-        save_h5_info(cfg, 'o2', o2_h5)
-        # time.sleep(120)
-    #""" 
-    
-    """
-    if 1:#not check_h5_info(cfg, 'wco2'):
-        wco2_h5 = run_case('wco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-        save_h5_info(cfg, 'wco2', wco2_h5)
-    #"""
-    """"
-    #time.sleep(120)
-    if 1:#not check_h5_info(cfg, 'sco2'):
-        sco2_h5 = run_case('sco2', cfg_info, preprocess_info, sfc_alb=sfc_alb, sza=sza)
-        save_h5_info(cfg, 'sco2', sco2_h5)
-    #"""
+    run_case_modis(cfg_info, preprocess_info)
+
 
 if __name__ == '__main__':
     
-    #cfg = 'cfg/20181018_central_asia_2_470cloud_test3.csv'
-    cfg = 'cfg/20110328_central_asia_modis.csv'
-    # cfg = 'cfg/20151219_north_italy_470cloud_test.csv'
-    #cfg = 'cfg/20190621_australia-2-470cloud_aod.csv'
-    #cfg = 'cfg/20161023_north_france_test.csv'
-    # cfg = 'cfg/20190209_dryden_470cloud.csv'
-    # cfg = 'cfg/20170605_amazon_2.csv'
-    # cfg = 'cfg/20150622_amazon.csv'
+
+    cfg = 'cfg/20190815_pacific_modis.csv'
+
     print(cfg)
     run_simulation(cfg) #done
     
-    # cProfile.run('run_simulation(cfg)')
-
-    # run_simulation(cfg, sfc_alb=0.5, sza=45)
-    # run_simulation(cfg, sfc_alb=0.4, sza=45)
-    # run_simulation(cfg, sfc_alb=0.3, sza=45)
-    # run_simulation(cfg, sfc_alb=0.25, sza=45)
-    # run_simulation(cfg, sfc_alb=0.2, sza=45)
-    # run_simulation(cfg, sfc_alb=0.15, sza=45)
-    # run_simulation(cfg, sfc_alb=0.1, sza=45)
-    # run_simulation(cfg, sfc_alb=0.05, sza=45)
-    # run_simulation(cfg, sfc_alb=0.025, sza=45)
-
     
-    # run_simulation(cfg, sfc_alb=0.5, sza=15)
-    # run_simulation(cfg, sfc_alb=0.4, sza=15)
-    # run_simulation(cfg, sfc_alb=0.3, sza=15)
-    # run_simulation(cfg, sfc_alb=0.25, sza=15)
-    # run_simulation(cfg, sfc_alb=0.2, sza=15)
-    # run_simulation(cfg, sfc_alb=0.15, sza=15)
-    # run_simulation(cfg, sfc_alb=0.1, sza=15)
-    # run_simulation(cfg, sfc_alb=0.05, sza=15)
-    # run_simulation(cfg, sfc_alb=0.025, sza=15)
-
-    # run_simulation(cfg, sfc_alb=0.5, sza=75)
-    # run_simulation(cfg, sfc_alb=0.4, sza=75)
-    # run_simulation(cfg, sfc_alb=0.3, sza=75)
-    # run_simulation(cfg, sfc_alb=0.25, sza=75)
-    # run_simulation(cfg, sfc_alb=0.2, sza=75)
-    # run_simulation(cfg, sfc_alb=0.15, sza=75)
-    # run_simulation(cfg, sfc_alb=0.1, sza=75)
-    # run_simulation(cfg, sfc_alb=0.05, sza=75)
-    # run_simulation(cfg, sfc_alb=0.025, sza=75)
 
 
 

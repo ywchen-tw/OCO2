@@ -2,8 +2,8 @@ import os
 import sys
 import pickle
 import numpy as np
-from er3t.util.modis import download_modis_https, get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
-from er3t.util.daac import download_oco2_https
+from er3t.util.modis import get_sinusoidal_grid_tag, get_filename_tag, download_modis_rgb
+from er3t.util.daac import download_laads_https
 
 
 
@@ -88,12 +88,25 @@ class modis_download:
 
         filename_tags_03 = get_filename_tag(self.date, lon, lat, satID='aqua')
         for filename_tag in filename_tags_03:
-            fnames_l2 = download_modis_https(self.date, '61/MYD06_L2', filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
-            fnames_02_1km = download_modis_https(self.date, '61/MYD021KM', filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
-            fnames_02_hkm = download_modis_https(self.date, '61/MYD02HKM', filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
-            fnames_02 = download_modis_https(self.date, '61/MYD02QKM', filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
-            fnames_03 = download_modis_https(self.date, '61/MYD03'   , filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
-            fnames_04 = download_modis_https(self.date, '61/MYD04_L2'   , filename_tag, day_interval=1, fdir_out=modis_fdir, run=run)
+            fnames_l2 = download_laads_https(self.date, '61/MYD06_L2', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            fnames_02_1km = download_laads_https(self.date, '61/MYD021KM', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            fnames_02_hkm = download_laads_https(self.date, '61/MYD02HKM', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            fnames_02 = download_laads_https(self.date, '61/MYD02QKM', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            fnames_03 = download_laads_https(self.date, '61/MYD03', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            fnames_04 = download_laads_https(self.date, '61/MYD04_L2', filename_tag, day_interval=1, 
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
+            
             self.fnames['mod_l2'] += fnames_l2
             self.fnames['mod_02_1km'] += fnames_02_1km
             self.fnames['mod_02_hkm'] += fnames_02_hkm
@@ -101,17 +114,14 @@ class modis_download:
             self.fnames['mod_03'] += fnames_03
             self.fnames['mod_04'] += fnames_04
 
-        # MOD09A1 surface reflectance product
-        self.fnames['mod_09'] = []
-        filename_tags_09 = get_sinusoidal_grid_tag(lon, lat)
-        for filename_tag in filename_tags_09:
-            fnames_09 = download_modis_https(self.date, '61/MOD09A1', filename_tag, day_interval=8, fdir_out=modis_fdir, run=run)
-            self.fnames['mod_09'] += fnames_09
         # MOD43A3 surface reflectance product
         self.fnames['mcd_43'] = []
         filename_tags_43 = get_sinusoidal_grid_tag(lon, lat)
         for filename_tag in filename_tags_43:
-            fnames_43 = download_modis_https(self.date, '61/MCD43A3', filename_tag, day_interval=16, fdir_out=modis_fdir, run=run)
+            # fnames_43 = download_modis_https(self.date, '61/MCD43A3', filename_tag, day_interval=16, fdir_out=modis_fdir, run=run)
+            fnames_43 = download_laads_https(self.date, '61/MCD43A3', filename_tag, day_interval=8,
+                                             server='https://ladsweb.modaps.eosdis.nasa.gov',
+                                             fdir_prefix='/archive/allData',fdir_out=modis_fdir, run=run)
             self.fnames['mcd_43'] += fnames_43
 
     def dump(self, fname):

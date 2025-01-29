@@ -555,21 +555,21 @@ def XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
-                    cmap='RdBu_r', vmin=394, vmax=400)
+                    cmap='RdBu_r', vmin=394, vmax=403)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level2 $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df['xco2_retrieved'], s=30,
-                cmap='RdBu_r', vmin=394, vmax=400)
+                cmap='RdBu_r', vmin=394, vmax=403)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
 
     c3 = ax3.scatter(df['lon'], df['lat'],
                 c=df['diff_xco2'], s=30,
-                cmap='RdBu_r', vmin=-6, vmax=6)
+                cmap='RdBu_r', vmin=-3, vmax=3)
     cbar3 = f.colorbar(c3, ax=ax3, extend='both')
     cbar3.set_label('$\Delta \mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar3.ax.tick_params(labelsize=tick_size)
@@ -597,21 +597,21 @@ def XCO2_before_after_pixel(img, wesn, lon_dom, lat_dom, df,
     mask = df['xco2_retrieved'][...]!=-2
     c1 = ax1.scatter(df['lon'], df['lat'], 
                     c=df['xco2_L2_file'], s=30,
-                    cmap='RdBu_r', vmin=394, vmax=400)
+                    cmap='RdBu_r', vmin=394, vmax=403)
     cbar1 = f.colorbar(c1, ax=ax1, extend='both')
     cbar1.set_label('Level2 $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar1.ax.tick_params(labelsize=tick_size)
 
     c2 = ax2.scatter(df['lon'], df['lat'], 
                 c=df['xco2_retrieved'], s=30,
-                cmap='RdBu_r', vmin=394, vmax=400)
+                cmap='RdBu_r', vmin=394, vmax=403)
     cbar2 = f.colorbar(c2, ax=ax2, extend='both')
     cbar2.set_label('Modified $\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar2.ax.tick_params(labelsize=tick_size)
 
     c3 = ax3.scatter(df['lon'], df['lat'],
                 c=df['diff_xco2'], s=30,
-                cmap='RdBu_r', vmin=-6, vmax=6)
+                cmap='RdBu_r', vmin=-3, vmax=3)
     cbar3 = f.colorbar(c3, ax=ax3, extend='both')
     cbar3.set_label('$\Delta \mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar3.ax.tick_params(labelsize=tick_size)

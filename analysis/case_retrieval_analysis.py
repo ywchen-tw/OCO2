@@ -95,6 +95,7 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     df['diff_xco2'] = df['xco2_retrieved']-df['xco2_L2_file']
 
     XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df, img_dir=img_dir)
+    XCO2_l2_plot_2(img, wesn, lon_dom, lat_dom, df, img_dir=img_dir)
     XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
                                        img_dir=img_dir)
     print(df['psur_MT_file'].min(), df['psur_MT_file'].max())
@@ -354,9 +355,12 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
     df_pixel.loc[df_pixel['xco2_L2_file']<1, 'xco2_L2_file'] = df_pixel.loc[df_pixel['xco2_L2_file']<1, 'xco2_L2_file']*1e6
     df_pixel.drop_duplicates('snd', inplace=True)
     df_pixel['diff_xco2'] = df_pixel['xco2_retrieved']-df_pixel['xco2_L2_file']
-
+    
     print(f"mean df_pixel['diff_xco2']: {np.mean(df_pixel['diff_xco2']):.3f} +/- {np.std(df_pixel['diff_xco2']):.3f}")
     print(f"mean df['diff_xco2']: {np.mean(df['diff_xco2']):.3f} +/- {np.std(df['diff_xco2']):.3f}")
+
+    xco2_unpert_pbp = df_pixel['xco2_retrieved'][...]
+    xco2_unpert_pbp[xco2_unpert_pbp<0] = np.nan
 
     mask = cld_dist>5
     print(f"mean df_pixel['diff_xco2'] for cld_dist > 5: {np.mean(df_pixel['diff_xco2'][mask]):.3f} +/- {np.std(df_pixel['diff_xco2'][mask]):.3f}")
@@ -368,9 +372,11 @@ def main(cfg_name='20181018_central_asia_2_test4.csv'):
                                        img_dir=img_dir)
     
     xco2_spread(cld_dist, xco2_l2, xco2_unpert,
+                method='cld_parameterization',
                 img_dir=img_dir)
-    # co2_prfl_diff(co2_prf, l2_co2_profile, l2_alt_level, l2_avg_kernel,
-    #               img_dir=img_dir)
+    xco2_spread(cld_dist, xco2_l2, xco2_unpert_pbp,
+                method='pbp',
+                img_dir=img_dir)
     fp_pol_ang_compare(l1b_polar_ang, l1b_lon, l1b_lat,
                         img, wesn, lon_dom, lat_dom, 
                         tick_size=12, label_size=14, img_dir=img_dir)
@@ -414,6 +420,36 @@ def aod_550_plot(img, wesn, lon_dom, lat_dom, modis_lon, modis_lat, modis_aod,
     f.tight_layout()
     f.savefig(f'{img_dir}/MODIS_550AOD.png', dpi=300)
 
+def XCO2_l2_plot_2(img, wesn, lon_dom, lat_dom, df,
+                 img_dir='.', label_size=16, tick_size=14):
+
+    f, (ax1, ax2) =plt.subplots(1, 2, figsize=(12, 6))
+
+    for ax in (ax1, ax2):
+        ax.imshow(img, extent=wesn)
+        ax.set_xlim(np.min(lon_dom), np.max(lon_dom))
+        ax.set_ylim(np.min(lat_dom), np.max(lat_dom))
+        ax.tick_params(axis='both', labelsize=tick_size)
+        ax.set_xlabel('Longitude ($^\circ$E)', fontsize=label_size)
+        ax.set_ylabel('Latitude ($^\circ$N)', fontsize=label_size)
+        ax.xaxis.set_major_locator(FixedLocator(np.arange(-180.0, 181.0, 0.1)))
+        ax.yaxis.set_major_locator(FixedLocator(np.arange(-90.0, 91.0, 0.1)))
+ 
+    mask = df['xco2_retrieved'][...]!=-2
+    c = ax2.scatter(df['lon'], df['lat'], 
+                    c=df['xco2_L2_file'], s=30,
+                    cmap='RdBu_r', vmin=394, vmax=412)
+    cbar = f.colorbar(c, ax=ax2, extend='both')
+    cbar.set_label('$\mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
+    cbar.ax.tick_params(labelsize=tick_size)
+    for ax, label in zip([ax1, ax2], ['(a)', '(b)']):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(xmin+0.0*(xmax-xmin), ymin+1.025*(ymax-ymin), label, fontsize=label_size+4, color='k')
+
+    f.tight_layout(pad=0.2)
+    f.savefig(f'{img_dir}/MODIS_XCO2_l2_2.png', dpi=300)
+    
 def XCO2_l2_plot(img, wesn, lon_dom, lat_dom, df,
                  img_dir='.', label_size=16, tick_size=14):
 
@@ -468,7 +504,7 @@ def XCO2_before_after_parameterization(img, wesn, lon_dom, lat_dom, df,
 
     c3 = ax3.scatter(df['lon'], df['lat'],
                 c=df['diff_xco2'], s=30,
-                cmap='RdBu_r', vmin=-6, vmax=6)
+                cmap='RdBu_r', vmin=-2, vmax=2)
     cbar3 = f.colorbar(c3, ax=ax3, extend='both')
     cbar3.set_label('$\Delta \mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar3.ax.tick_params(labelsize=tick_size)
@@ -510,7 +546,7 @@ def XCO2_before_after_pixel(img, wesn, lon_dom, lat_dom, df,
 
     c3 = ax3.scatter(df['lon'], df['lat'],
                 c=df['diff_xco2'], s=30,
-                cmap='RdBu_r', vmin=-6, vmax=6)
+                cmap='RdBu_r', vmin=-2, vmax=2)
     cbar3 = f.colorbar(c3, ax=ax3, extend='both')
     cbar3.set_label('$\Delta \mathrm{X_{CO2}}$ (ppm)', fontsize=label_size)
     cbar3.ax.tick_params(labelsize=tick_size)
@@ -923,7 +959,7 @@ def co2_prfl_diff(co2_prf, l2_co2_profile, l2_alt_level, l2_avg_kernel,
     f.savefig(f'{img_dir}/co2_retrieval_profile_avg_kernel')
 
 
-def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
+def xco2_spread(cld_dist, xco2_l2, xco2_unpert, method='',
                 img_dir='.', label_size=16, tick_size=14, legend_size=14):
     fig, ax = plt.subplots(1, 1, figsize=(9, 6), sharex=False, )
     
@@ -984,6 +1020,8 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     fullwidthathalfmax = black_kde_y[rightpos] - black_kde_y[leftpos]
 
     ax_histy.vlines(halfmax, black_kde_y[leftpos], black_kde_y[rightpos], color='k', ls=':', linewidth=3)
+    ax_histy.hlines(black_kde_y[maxpos], 0, black_kde_x.max(), color='k', ls='dashdot', linewidth=3)
+    print('black pdf max:', black_kde_y[maxpos], ' ppm')
     ax_histy.text(0.2, 2.75,
                 #halfmax*2,
                 f'{fullwidthathalfmax:.2f}\n',
@@ -1015,6 +1053,8 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
     fullwidthathalfmax = red_kde_y[rightpos] - red_kde_y[leftpos]
 
     ax_histy.vlines(halfmax, red_kde_y[leftpos], red_kde_y[rightpos], color='r', ls=':', linewidth=3)
+    ax_histy.hlines(red_kde_y[maxpos], 0, red_kde_x.max(), color='r', ls='dashdot', linewidth=3)
+    print('red pdf max:', red_kde_y[maxpos], ' ppm')
     print(red_kde_y[maxpos])
     ax_histy.text(0.2, -4.05,
                 #halfmax*2,
@@ -1047,7 +1087,7 @@ def xco2_spread(cld_dist, xco2_l2, xco2_unpert,
         ax.text((xmin+(xmax-xmin)*-0.05), (ymin+(ymax-ymin)*1.05), label, fontsize=20)
     
     fig.tight_layout(pad=2.0)
-    fig.savefig(f'{img_dir}/Delta_XCO2_cloud_distance_cld_parameterization.png', dpi=300)
+    fig.savefig(f'{img_dir}/Delta_XCO2_cloud_distance_{method}.png', dpi=300)
 
 def fp_pol_ang_compare(l1b_polar_ang, l1b_lon, l1b_lat,
                         img, wesn, lon_dom, lat_dom, 

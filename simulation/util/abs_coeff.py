@@ -271,7 +271,7 @@ def oco_abs(cfg, sat, zpt_file,
             # Use the absco coefficients
             # Note that absco coefficients are cm-2 per molecule
             # and that the density profiles are in molecules per cm3
-            # so that the extinction coefficients are in cm-1 but converted to km-1
+            # so that the extinction coefficients are in cm-1 but converted to m-1
 
             ext0 = calc_ext(rdabs_gas_den, iz, absco) # For O2 or CO2
             ext1 = calc_ext(h2oden, iz, abscoh2o)     # For H2O
@@ -436,7 +436,7 @@ def oco_abs(cfg, sat, zpt_file,
     atm_temp  = tprf                  # temperature profile for layers
     unit_T    = 'K'
     solx      = np.empty((nx+1,nlg))      # solar irradiance for each of the selected OCO-2 wavelengths at full ABSCO resolution
-    unit_abs  = '/km'
+    unit_abs  = '/m'
     # reminder: wl = ABSCO resolution !
 
     extcheck = np.empty((nx+1,nlay)) # check the extinction profile

@@ -553,6 +553,12 @@ def o2a_conti_plot(o1, rad_c3d_compare,
     cbar.set_label('$\mathrm{O_2-A}$ continuum (mW m$^{-2}$ sr$^{-1}$ $\mu$m$^{-1}$)', fontsize=label_size)
     ax_lon_lat_label(ax, label_size=14, tick_size=12)
     save_figure(fig, f'o2a_conti_{rad_c3d_compare}.png', img_dir)
+    print(f'o2a non cloud continuum mean: {np.nanmean(getattr(o1, rad_c3d_compare)[:,:,-1][~mask])}')
+    print(f'o2a non cloud continuum max: {np.nanmax(getattr(o1, rad_c3d_compare)[:,:,-1][~mask])}')
+    print(f'o2a non cloud continuum min: {np.nanmin(getattr(o1, rad_c3d_compare)[:,:,-1][~mask])}')
+    mask = (getattr(o1, rad_c3d_compare)[:,:,-1]) >= 0.08
+    print(f'o2a non cloud continuum > 0.08 mean: {np.nanmean(getattr(o1, rad_c3d_compare)[:,:,-1][mask])}')
+    print(f'o2a non cloud continuum > 0.08 max: {np.nanmax(getattr(o1, rad_c3d_compare)[:,:,-1][mask])}')
 
 def slope_intercept_compare_plot(OCO_class, label_tag, file_tag,
                                 img, wesn, lon_dom, lat_dom, 
