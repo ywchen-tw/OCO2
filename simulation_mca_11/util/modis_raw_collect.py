@@ -6,9 +6,10 @@ import datetime
 from scipy import interpolate
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_43a3
+from er3t.util.modis import modis_l1b, modis_l2, modis_03, modis_04, modis_09a1, modis_43a3
 from er3t.util import grid_by_dxdy
 from er3t.util.oco2 import oco2_rad_nadir, oco2_std
+
 from util.oco_modis_time import cal_sat_delta_t
 from util.sfc_alb import cal_sfc_alb_2d
 import matplotlib.image as mpl_img
@@ -60,6 +61,7 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         g2 = g.create_group('cld')
         g3 = g.create_group('sfc')
         g4 = g.create_group('aod')
+
         #\--------------------------------------------------------------/#
 
         # Process MODIS RGB imagery
@@ -84,9 +86,9 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         modl1b_500m = modis_l1b(fnames=sat0.fnames['mod_02_hkm'], extent=sat0.extent)
         lon0_500m, lat0_500m = modl1b_500m.data['lon']['data'], modl1b_500m.data['lat']['data']
 
-        ref_2d_470_raw, ref_2d_555_raw = modl1b_500m.data['ref']['data'][2, ...], modl1b_500m.data['ref']['data'][3, ...]
-        ref_2d_1640_raw, rad_2d_1640_raw = modl1b_500m.data['ref']['data'][5, ...], modl1b_500m.data['rad']['data'][5, ...]
-        ref_2d_2130_raw, rad_2d_2130_raw = modl1b_500m.data['ref']['data'][6, ...], modl1b_500m.data['rad']['data'][6, ...]
+        ref_2d_470_raw, ref_2d_555_raw = modl1b_500m.data['ref']['data'][0, ...], modl1b_500m.data['ref']['data'][1, ...]
+        ref_2d_1640_raw, rad_2d_1640_raw = modl1b_500m.data['ref']['data'][3, ...], modl1b_500m.data['rad']['data'][3, ...]
+        ref_2d_2130_raw, rad_2d_2130_raw = modl1b_500m.data['ref']['data'][4, ...], modl1b_500m.data['rad']['data'][4, ...]
 
         # Create 2D grids of MODIS L1B data at 500m resolution
         lon_2d_500m, lat_2d_500m, ref_2d_470 = grid_by_dxdy(lon0_500m, lat0_500m, ref_2d_470_raw, **grid_by_dxdy_nearest_args)
@@ -101,6 +103,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             var = vars()[var_name]
             mask = var>=0
             points_mask = np.column_stack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten()))
+            #points_mask = np.transpose(np.vstack((lon_2d_500m[mask].flatten(), lat_2d_500m[mask].flatten())))
+            #vars()[f'{var_name}_inter'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
 
             vars()[f'{var_name}_inter_linear'] = interpolate.griddata(points_mask, var[mask].flatten(), (lon_2d, lat_2d), method='linear')
             mask = vars()[f'{var_name}_inter_linear']>=0
@@ -110,8 +114,8 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
         # Add MODIS L1B data to HDF groups
         g1.update({'ref_470': vars()[f'ref_2d_470_inter'], 'ref_555': vars()[f'ref_2d_555_inter'], 
-                   'ref_1640': vars()[f'ref_2d_1640_inter'], 'rad_1640': vars()[f'rad_2d_1640_inter'], 
-                   'ref_2130': vars()[f'ref_2d_2130_inter'], 'rad_2130': vars()[f'rad_2d_2130_inter']})
+                   'ref_1640': vars()[f'ref_2d_1640_inter'], 'rad_1640': vars()[f'ref_2d_1640_inter'], 
+                   'ref_2130': vars()[f'ref_2d_2130_inter'], 'rad_2130': vars()[f'ref_2d_2130_inter']})
 
         print('Message [cdata_sat_raw]: the processing of MODIS L1B radiance/reflectance at 470, 555, 1640, 2130 nm is complete.')
 
@@ -131,11 +135,11 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         sfh0 = sfh0/1000.0 # units: km
         sfh0[sfh0<0.0] = np.nan
 
-        _, _, sza_2d = grid_by_dxdy(lon0, lat0, sza0, **grid_by_dxdy_linear_args)
-        _, _, saa_2d = grid_by_dxdy(lon0, lat0, saa0, **grid_by_dxdy_linear_args)
-        _, _, vza_2d = grid_by_dxdy(lon0, lat0, vza0, **grid_by_dxdy_linear_args)
-        _, _, vaa_2d = grid_by_dxdy(lon0, lat0, vaa0, **grid_by_dxdy_linear_args)
-        _, _, sfh_2d = grid_by_dxdy(lon0, lat0, sfh0, **grid_by_dxdy_linear_args)
+        _, _, sza_2d = grid_by_dxdy(lon0, lat0, sza0, **grid_by_dxdy_nearest_args)
+        _, _, saa_2d = grid_by_dxdy(lon0, lat0, saa0, **grid_by_dxdy_nearest_args)
+        _, _, vza_2d = grid_by_dxdy(lon0, lat0, vza0, **grid_by_dxdy_nearest_args)
+        _, _, vaa_2d = grid_by_dxdy(lon0, lat0, vaa0, **grid_by_dxdy_nearest_args)
+        _, _, sfh_2d = grid_by_dxdy(lon0, lat0, sfh0, **grid_by_dxdy_nearest_args)
 
         g0.update({'sza': sza_2d, 'saa': saa_2d, 'vza': vza_2d, 'vaa': vaa_2d, 'sfh': sfh_2d})
 
@@ -178,8 +182,12 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         #   band 7: 2105 - 2155 nm, index 6
 
         wavelength_list = [650, 860, 470, 555, 1240, 1640, 2130]
+        mod09 = modis_09a1(fnames=sat0.fnames['mod_09'], extent=sat0.extent)
         mod43 = modis_43a3(fnames=sat0.fnames['mcd_43'], extent=sat0.extent)
         for wv_index in range(7):
+            
+            lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_09_{wavelength_list[wv_index]:d}'] = grid_by_dxdy(mod09.data['lon']['data'], mod09.data['lat']['data'], mod09.data['ref']['data'][wv_index, :], **grid_by_dxdy_nearest_args)
+            vars()[f'sfc_09_{wavelength_list[wv_index]:d}'] = sfc_alb_mask_inter(lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_09_{wavelength_list[wv_index]:d}'], lon_2d, lat_2d)
             lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_43_{wavelength_list[wv_index]:d}'] = grid_by_dxdy(mod43.data['lon']['data'], mod43.data['lat']['data'], mod43.data['wsa']['data'][wv_index, :], **grid_by_dxdy_nearest_args)
             vars()[f'sfc_43_{wavelength_list[wv_index]:d}'] = sfc_alb_mask_inter(lon_2d_sfc, lat_2d_sfc, vars()[f'sfc_43_{wavelength_list[wv_index]:d}'], lon_2d, lat_2d)
 
@@ -187,8 +195,10 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
         sfc_43_wco2 = vars()[f'sfc_43_1640']
         sfc_43_sco2 = vars()[f'sfc_43_2130']
 
+
         g3.update({'lon': lon_2d_sfc, 'lat': lat_2d_sfc})
         for wavelength in wavelength_list:
+            g3['alb_09_%d' % wavelength] = vars()[f'sfc_09_{wavelength:d}']
             g3['alb_43_%d' % wavelength] = vars()[f'sfc_43_{wavelength:d}']
 
         g3.update({'alb_43_o2a': sfc_43_o2a, 'alb_43_wco2': sfc_43_wco2, 'alb_43_sco2': sfc_43_sco2})
@@ -198,122 +208,35 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
         # aerosol
         #/--------------------------------------------------------------\#
-        mcd04 = modis_04(fnames=sat0.fnames['mod_04'], extent=sat0.extent, 
-                        vnames=['Deep_Blue_Spectral_Single_Scattering_Albedo_Land', ])
-        AOD_lon, AOD_lat, AOD_550_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_nearest_args)
-        AOD_550_land[AOD_550_land<0] = np.nan
-        _, _, Angstrom_Exponent_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['Angstrom_Exponent_land']['data'], **grid_by_dxdy_nearest_args)
-        _, _, SSA_land_660 = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['SSA_land_660']['data'], **grid_by_dxdy_nearest_args)
+        # mcd04 = modis_04(fnames=sat0.fnames['mod_04'], extent=sat0.extent, 
+        #                 vnames=['Deep_Blue_Spectral_Single_Scattering_Albedo_Land', ])
+        # AOD_lon, AOD_lat, AOD_550_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_nearest_args)
+        # _, _, Angstrom_Exponent_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['Angstrom_Exponent_land']['data'], **grid_by_dxdy_nearest_args)
+        # _, _, SSA_land_660 = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['SSA_land']['data'][2, :], **grid_by_dxdy_nearest_args)
 
-        _, _, AOD_550_land_grid = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_linear_args)
-        #_, _, aerosol_type_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_type_land']['data'], **grid_by_dxdy_nearest_args)
-        #_, _, aerosol_cloud_frac_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_cloud_frac_land']['data'], **grid_by_dxdy_nearest_args)
+        # _, _, AOD_550_land_grid = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['AOD_550_land']['data'], **grid_by_dxdy_linear_args)
+        # #_, _, aerosol_type_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_type_land']['data'], **grid_by_dxdy_nearest_args)
+        # #_, _, aerosol_cloud_frac_land = grid_by_dxdy(mcd04.data['lon']['data'], mcd04.data['lat']['data'], mcd04.data['aerosol_cloud_frac_land']['data'], **grid_by_dxdy_nearest_args)
 
-        AOD_550_land_nan = AOD_550_land.copy()
-        AOD_550_land_nan[np.isnan(AOD_550_land_nan)] = np.nan
-        AOD_550_land_nan[AOD_550_land_nan<0] = np.nan
-        SSA_land_660_nan = SSA_land_660.copy()
-        SSA_land_660_nan[np.isnan(SSA_land_660_nan)] = np.nan
-        SSA_land_660_nan[SSA_land_660_nan<0] = np.nan
+        # AOD_550_land_nan = AOD_550_land.copy()
+        # AOD_550_land_nan[np.isnan(AOD_550_land_nan)] = np.nan
+        # AOD_550_land_nan[AOD_550_land_nan<0] = np.nan
+        # SSA_land_660_nan = SSA_land_660.copy()
+        # SSA_land_660_nan[np.isnan(SSA_land_660_nan)] = np.nan
+        # SSA_land_660_nan[SSA_land_660_nan<0] = np.nan
 
-        AOD_550_land_mean = np.nanmean(AOD_550_land_grid[(AOD_550_land_grid>=0) & (~np.isnan(AOD_550_land_grid))])
-        Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[(AOD_550_land_grid>=0) & (Angstrom_Exponent_land>0)])
-        SSA_land_mean = np.nanmean(SSA_land_660[(SSA_land_660>=0) & (~np.isnan(SSA_land_660))])
+        # AOD_550_land_mean = np.nanmean(AOD_550_land[(AOD_550_land>=0) & (~np.isnan(AOD_550_land))])
+        # Angstrom_Exponent_land_mean = np.nanmean(Angstrom_Exponent_land[AOD_550_land>=0])
+        # SSA_land_mean = np.nanmean(SSA_land_660[(SSA_land_660>=0) & (~np.isnan(SSA_land_660))])
 
-        g4['AOD_550_land'] = AOD_550_land_grid
-        g4['AOD_550_land_mean'] = AOD_550_land_mean
-        g4['Angstrom_Exponent_land_mean'] = Angstrom_Exponent_land_mean
-        g4['SSA_660_land_mean'] = SSA_land_mean
+        # g4['AOD_550_land'] = AOD_550_land_grid
+        # g4['AOD_550_land_mean'] = AOD_550_land_mean
+        # g4['Angstrom_Exponent_land_mean'] = Angstrom_Exponent_land_mean
+        # g4['SSA_660_land_mean'] = SSA_land_mean
+
         #/--------------------------------------------------------------\#
 
 
-        # OCO-2 data groups in the HDF file
-        #/--------------------------------------------------------------\#
-        gg = f0.create_group('oco')
-        gg11 = gg.create_group('o2a')
-        gg12 = gg.create_group('wco2')
-        gg13 = gg.create_group('sco2')
-        gg2 = gg.create_group('geo')
-        gg3 = gg.create_group('met')
-        gg4 = gg.create_group('sfc')
-        #\--------------------------------------------------------------/#
-
-        # Read OCO-2 radiance and wavelength data
-        #/--------------------------------------------------------------\#
-        oco = oco2_rad_nadir(sat0)
-
-        wvl_o2a  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
-        wvl_wco2  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
-        wvl_sco2  = np.zeros_like(oco.rad_o2_a, dtype=np.float64)
-        for i in range(oco.rad_o2_a.shape[0]):
-            for j in range(oco.rad_o2_a.shape[1]):
-                wvl_o2a[i, j, :]  = oco.get_wvl_o2_a(j)
-                wvl_wco2[i, j, :] = oco.get_wvl_co2_weak(j)
-                wvl_sco2[i, j, :] = oco.get_wvl_co2_strong(j)
-        #\--------------------------------------------------------------/#
-
-        # OCO L1B
-        #/--------------------------------------------------------------\#
-        gg.update({'lon': oco.lon_l1b, 'lat': oco.lat_l1b, 'logic': oco.logic_l1b, 'snd_id': oco.snd_id})
-        gg11.update({'rad': oco.rad_o2_a, 'wvl': wvl_o2a})
-        gg12.update({'rad': oco.rad_co2_weak, 'wvl': wvl_wco2})
-        gg13.update({'rad': oco.rad_co2_strong, 'wvl': wvl_sco2})
-        gg2.update({'sza': oco.sza, 'saa': oco.saa, 'vza': oco.vza, 'vaa': oco.vaa})
-        print('Message [cdata_sat_raw]: the processing of OCO-2 radiance is complete.')
-        #\--------------------------------------------------------------/#
-
-        # OCO wind speed
-        #/--------------------------------------------------------------\#
-        # extract wind speed (10m wind)
-        with h5py.File(sat0.fnames['oco_met'][0], 'r') as f:
-            lon_oco_met0 = f['SoundingGeometry/sounding_longitude'][...]
-            lat_oco_met0 = f['SoundingGeometry/sounding_latitude'][...]
-            u_10m0 = f['Meteorology/windspeed_u_met'][...]
-            v_10m0 = f['Meteorology/windspeed_v_met'][...]
-            logic = (np.abs(u_10m0)<50.0) & (np.abs(v_10m0)<50.0) & \
-                    (lon_oco_met0>=sat0.extent[0]) & (lon_oco_met0<=sat0.extent[1]) & \
-                    (lat_oco_met0>=sat0.extent[2]) & (lat_oco_met0<=sat0.extent[3])
-            
-        gg3.update({'lon': lon_oco_met0[logic], 'lat': lat_oco_met0[logic], 'u_10m': u_10m0[logic], 'v_10m': v_10m0[logic]})
-        gg3.update({'delta_t': cal_sat_delta_t(sat0)})
-        print('Message [cdata_sat_raw]: the processing of OCO-2 meteorological data is complete.')
-        #\--------------------------------------------------------------/#
-
-
-        # OCO-2 surface reflectance
-        #/--------------------------------------------------------------\#
-        # process wavelength
-        band_list = ['o2a', 'wco2', 'sco2']
-        vname_dict = {'o2a':'brdf_reflectance_o2',
-                      'wco2':'brdf_reflectance_weak_co2',
-                      'sco2':'brdf_reflectance_strong_co2'}
-        for band_tag in band_list:
-            vname = vname_dict[band_tag]
-            oco = oco2_std(fnames=sat0.fnames['oco_std'], vnames=['BRDFResults/%s' % vname], extent=sat0.extent)
-
-            oco_sfc_alb = oco.data[vname]['data']
-            oco_sfc_alb[oco_sfc_alb<0.0] = 0.0
-
-            oco_lon = oco.data['lon']['data']
-            oco_lat = oco.data['lat']['data']
-            logic = (oco_sfc_alb>0.0) & (oco_lon>=sat0.extent[0]) & (oco_lon<=sat0.extent[1]) & (oco_lat>=sat0.extent[2]) & (oco_lat<=sat0.extent[3])
-            oco_lon = oco_lon[logic]
-            oco_lat = oco_lat[logic]
-            oco_sfc_alb = oco_sfc_alb[logic]
-
-            oco_sfc_alb_2d = cal_sfc_alb_2d(oco_lon, oco_lat, oco_sfc_alb, 
-                                            lon_2d, lat_2d, vars()[f'sfc_43_{band_tag}'], 
-                                            scale=True, replace=False)
-
-            gg4.update({'alb_%s' % band_tag: oco_sfc_alb, 
-                        'alb_%s_2d' % band_tag: oco_sfc_alb_2d, })
-
-
-        gg4.update({'lon': oco_lon, 'lat': oco_lat})
-        
-        print('Message [cdata_sat_raw]: the processing of OCO-2 surface reflectance is complete.')
-        #\--------------------------------------------------------------/#
-        f0.close()
     #/----------------------------------------------------------------------------\#
 
     if plot:
@@ -330,6 +253,7 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             cer = f0['mod/cld/cer_l2'][...]
             cth = f0['mod/cld/cth_l2'][...]
             sfh = f0['mod/geo/sfh'][...]
+            alb09 = f0['mod/sfc/alb_09_860'][...]
             alb43 = f0['mod/sfc/alb_43_860'][...]
         # figure
         #/----------------------------------------------------------------------------\#
@@ -340,15 +264,15 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
 
         titles = ['RGB Imagery', f'L1B Radiance 650 nm)', f'L1B Reflectance 650 nm)', None, 
                   'Solar Zenith [°]', 'Solar Azimuth [°]', 'Viewing Zenith [°]', 'Viewing Azimuth [°]',
-                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', None,
+                  'L2 COT', 'L2 CER [µm]', 'L2 CTH [km]', 'Surface Height [km]', f'09A1 Reflectance at 860 nm',
                   f'43A3 WSA at 860 nm']
 
-        data = [rgb, rad.T, ref.T, None, sza.T, saa.T, vza.T, vaa.T, cot.T, cer.T, cth.T, sfh.T, None, alb43.T]
-        vmins = [None, 0.0, 0.0, None, None, None, None, None, 0.0, 0.0, 0.0, 0.0, None, 0.0]
-        vmaxs = [None, 0.5, 1.0, None, None, None, None, None, 50.0, 30.0, 15.0, 5.0, None, 0.4]
+        data = [rgb, rad.T, ref.T, None, sza.T, saa.T, vza.T, vaa.T, cot.T, cer.T, cth.T, sfh.T, alb09.T, alb43.T]
+        vmins = [None, 0.0, 0.0, None, None, None, None, None, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        vmaxs = [None, 0.5, 1.0, None, None, None, None, None, 50.0, 30.0, 15.0, 5.0, 0.4, 0.4]
 
         for idx, (ax, title, img, vmin, vmax) in enumerate(zip(np.ravel(axes), titles, data, vmins, vmaxs)):
-            if idx == 3 or idx == 12:
+            if idx == 3:
                 ax.axis('off')
                 continue
             if idx == 0:
@@ -368,7 +292,9 @@ def cdata_sat_raw(sat0, dx, dy, overwrite=False, plot=True):
             ax.axis('off')
 
         # save figure
+        #/--------------------------------------------------------------\#
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
         _metadata = {'Computer': os.uname()[1], 'Script': os.path.abspath(__file__), 'Function':sys._getframe().f_code.co_name, 'Date':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         plt.savefig('%s/<%s>.png' % (sat0.fdir_pre_data, _metadata['Function']), bbox_inches='tight', metadata=_metadata)
+        #\--------------------------------------------------------------/#
         #\----------------------------------------------------------------------------/#

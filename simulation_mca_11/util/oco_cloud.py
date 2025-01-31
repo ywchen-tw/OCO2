@@ -340,7 +340,7 @@ def cdata_cld_ipa(sat0, fdir_cot, zpt_file, cfg_info, plot=True):
         Ncpu=os.cpu_count()-1
     else:
         Ncpu=32
-    
+
     f_mca_thick = func_ref_vs_cot(
                     cot_ipa,
                     cer0=25.0,
@@ -1330,3 +1330,6 @@ if __name__ == '__main__':
 
 
     
+
+
+

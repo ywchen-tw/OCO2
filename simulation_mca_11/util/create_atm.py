@@ -110,7 +110,7 @@ def create_oco_atm(sat=None, o2mix=0.20935, output='zpt.h5', new_h_edge=None):
         o2_layer = dry_air_layer*o2mix          # O2 number density in molec/cm3
         h2o_layer = eprf_l/(kb*tprf_l)/1e6  # H2O number density in molec/cm3
         co2_layer = dry_air_layer*co2_prf_l     # CO2 number density in molec/cm3
-        air_ml = 28.0134*(1-o2mix) + 31.999*o2mix
+        air_ml = 28.0134*(1-0.20935) + 31.999*0.20935
         o3_layer = dry_air_layer*air_ml*o3mrprf_l/47.9982     # O3 number density in molec/cm3
         h2o_vmr = h2o_layer/dry_air_layer       # H2O volume mixing ratio
         
@@ -347,7 +347,7 @@ def atm_interp(pressure, altitude, temperature,
         return pn, tn
     
     elif layer==True:
-        if not (u is None or v is None or d_o2 is None or d_co2 is None or d_h2o is None or d_o3 is None):
+        if 1:
             u_lay, v_lay = np.zeros_like(hn), np.zeros_like(hn)
             d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay = np.zeros_like(hn), np.zeros_like(hn), np.zeros_like(hn), np.zeros_like(hn)
             for i in range(len(altitude_to_interp)):
@@ -361,5 +361,5 @@ def atm_interp(pressure, altitude, temperature,
                 v_lay[i] = v[lev_index]*(1-h_ratio)+v[lev_index+1]*(h_ratio)
             
             return pn, tn, u_lay, v_lay, d_o2_lay, d_co2_lay, d_h2o_lay, d_o3_lay
-        else:
-            sys.exit("[Error] Must provide u, v, O2, CO2, H2O number densities!")
+        #except:
+        #    sys.exit("[Error] Must provide u, v, O2, CO2, H2O number densities!")
